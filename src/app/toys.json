@@ -1,4 +1,10 @@
 {
     "autoload": true,
-    "require" : ["lib/js-class", "lib/bootstrap"]
+    "require" : [
+        "lib/js-class",
+        "lib/font-awesome",
+        "lib/bootstrap",
+        "lib/knockout",
+        "lib/lodash"
+    ]
 }
