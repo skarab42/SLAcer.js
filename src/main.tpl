@@ -9,14 +9,12 @@
     </head>
     <body>
         <!-- {{ name }} ({{ codename}}) - v{{ version }} - {{ output_type }} -->
-        <div id="straw">
-            {{ view :app-main-tpl :remove }}
-        </div>
+        {{ view :app-main-tpl :remove }}
         {{ scripts }}
         {{ views }}
         <!-- Initialization -->
         <script type="text/javascript">
-
+            App.instance();
         </script>
     </body>
 </html>
