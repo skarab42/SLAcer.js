@@ -17,6 +17,10 @@ var App = JSClass({
     * @constructor
     */
     create: function() {
-        console.log('app running...')
+        console.log(App.config, App.texts);
     }
+})
+.static({
+    config: {},
+    texts : {}
 });

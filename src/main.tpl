@@ -14,6 +14,8 @@
         {{ views }}
         <!-- Initialization -->
         <script type="text/javascript">
+            App.config = {{ config }};
+            App.texts  = {{ texts }};
             App.instance();
         </script>
     </body>
