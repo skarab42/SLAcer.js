@@ -1,0 +1,5 @@
+{
+    "relpath": "font-awesome-4.5.0",
+    "styles" : ["css/font-awesome.min.css"],
+    "assets" : ["fonts/*"]
+}
