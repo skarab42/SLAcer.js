@@ -33,13 +33,12 @@ var GuiModule = ToysModule.extend(
     * @method create
     * @param  {String} name Module class name in CamelCase style.
     */
-    create: function(name)
-    {
+    create: function(name) {
         // Call parent constructor
         ToysModule.prototype.create.call(this, name);
 
         // Try to get the view model
-        this.getModel();
+        this.model = this.getModel();
     },
 
     /**
@@ -49,8 +48,7 @@ var GuiModule = ToysModule.extend(
     * @param  {GuiModel} model
     * @return {Boolean}
     */
-    isModel: function(model)
-    {
+    isModel: function(model) {
         return (model instanceof GuiModuleModel);
     },
 
@@ -61,38 +59,33 @@ var GuiModule = ToysModule.extend(
     * @param  {String} moduleName
     * @return {GuiModel|null}
     */
-    getModel: function(moduleName)
-    {
-        if (! this.model)
-        {
-            // Model class name
-            var modelClassName = (moduleName || this.name) + 'Model';
+    getModel: function(moduleName) {
+        // Model
+        var model = null;
 
-            // If the view model class exist
-            if (window[modelClassName])
-            {
-                // Create the model instance
-                this.model = new window[modelClassName](this);
+        // Model class name
+        var modelClassName = (moduleName || this.name) + 'Model';
 
-                // If not an valid GuiModule
-                if (! this.isModel(this.model))
-                {
-                    this.throwError('GuiModule.invalidModelClass',
-                    {
-                        model: modelClassName
-                    });
-                }
+        // If the view model class exist
+        if (window[modelClassName]) {
+            // Create the model instance
+            model = new window[modelClassName](this);
 
-                // Ensure the model has an callable setup method
-                if (this.model.setup && _.isFunction(this.model.setup))
-                {
-                    // Setup the model
-                    this.model.setup();
-                }
+            // If not an valid GuiModule
+            if (! this.isModel(model)) {
+                this.throwError('GuiModule.invalidModelClass', {
+                    model: modelClassName
+                });
+            }
+
+            // Ensure the model has an callable setup method
+            if (model.setup && _.isFunction(model.setup)) {
+                // Setup the model
+                model.setup();
             }
         }
 
         // Return the module instance
-        return this.model;
+        return model;
     }
 });
