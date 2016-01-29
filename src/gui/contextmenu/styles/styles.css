@@ -1,0 +1,9 @@
+.context-menu a
+{
+    padding: 5px 10px !important;
+}
+
+.context-menu .divider
+{
+    margin: 0;
+}
