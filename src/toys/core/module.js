@@ -107,7 +107,7 @@ var ToysCore = JSClass(
                 text = path;
 
                 // Print a warning message in the console
-                this.message('warn', 'Toys.undefinedTextPath',
+                this.message('warn', 'ToysKernel.undefinedTextPath',
                 {
                     path: localKey,
                     lang: lang
