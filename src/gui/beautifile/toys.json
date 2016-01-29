@@ -1,4 +1,0 @@
-{
-    "require": ["lib/bootstrap"],
-    "scripts": ["beautifile.js"]
-}
