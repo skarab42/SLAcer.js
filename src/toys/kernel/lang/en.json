@@ -1,0 +1,11 @@
+{
+	"name" : "Toys",
+
+    "undefinedTextPath": "Undefined text path : [ ${lang} ] [ ${path} ].",
+    "parseTextError"   : "${error} in [ ${text} ] from [ ${lang} ] [ ${path} ].",
+    "moduleCreated"    : "Module created [ ${module} ].",
+
+    "undefinedModule"   : "Undefined module [ ${module} ]/[ ${namespace} ].",
+    "invalidModuleClass": "Invalid module class [ ${module} ]/[ ${namespace} ], all modules must extend [ ToysModule ] class.",
+    "moduleAllreadySet" : "[ ${module} ]/[ ${namespace} ] is allready set and can not be overwrite."
+}

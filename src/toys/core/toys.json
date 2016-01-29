@@ -1,0 +1,3 @@
+{
+	"require": ["lib/js-class", "lib/lodash"]
+}
