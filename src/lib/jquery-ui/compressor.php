@@ -6,7 +6,7 @@
  *
  * @license   GPL
  * @version   1.0.0
- * @copyright 2015 Onl'Fait (http://www.onlfait.ch)
+ * @copyright 2016 Onl'Fait (http://www.onlfait.ch)
  * @author    Sébastien Mischler (skarab) <sebastien@onlfait.ch>
  * @link      https://github.com/lautr3k/Straw
  */
