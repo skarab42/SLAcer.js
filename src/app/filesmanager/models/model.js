@@ -1,8 +1,8 @@
 /**
-* @class   AppFilesManagerModel
+* @class   AppFilesmanagerModel
 * @extends GuiPanelModel
 */
-var AppFilesManagerModel = GuiPanelModel.extend(
+var AppFilesmanagerModel = GuiPanelModel.extend(
 {
     /**
     * Panel target id.
@@ -33,7 +33,21 @@ var AppFilesManagerModel = GuiPanelModel.extend(
     * @return {Mixed}
     */
     setup: function() {
+        this.color('blue');
         this.icon('files-o');
+
+        this.files = ko.observableArray();
+    },
+
+    /**
+    * Called after template is rendered.
+    *
+    * @event afterRender
+    * @param {Array}     elements
+    * @param {GuiModule} self
+    */
+    loadFile: function(elements, self) {
+
     },
 
     /**

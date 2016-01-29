@@ -1,8 +1,8 @@
 /**
-* @class   AppFilesManagerContextmenuModel
+* @class   AppFilesmanagerContextmenuModel
 * @extends GuiContextmenuModel
 */
-var AppFilesManagerContextmenuModel = GuiContextmenuModel.extend(
+var AppFilesmanagerContextmenuModel = GuiContextmenuModel.extend(
 {
     /**
     * Model setup.
@@ -15,8 +15,8 @@ var AppFilesManagerContextmenuModel = GuiContextmenuModel.extend(
     setup: function() {
         this.addItem({
             icon  : 'eraser',
-            text  : this.module.getText('clearConsole'),
-            action: function() { console.log('Clear console...') }
+            text  : 'clear',
+            action: function() { console.log('Clear...') }
         });
         this.addItem({text: 'item 1'});
         this.addItem({text: 'item 2'});

@@ -1,8 +1,8 @@
 /**
-* @class   AppFilesManager
+* @class   AppFilesmanager
 * @extends GuiPanel
 */
-var AppFilesManager = GuiPanel.extend(
+var AppFilesmanager = GuiPanel.extend(
 {
     /**
     * Setup the module.
