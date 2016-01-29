@@ -5,6 +5,26 @@
 var AppFilesManagerModel = GuiPanelModel.extend(
 {
     /**
+    * Panel target id.
+    *
+    * @protected
+    * @property target
+    * @type     {String}
+    * @default  'columnOne'
+    */
+    target: 'columnOne',
+
+    /**
+    * Panel position index.
+    *
+    * @protected
+    * @property index
+    * @type     {Integer}
+    * @default  0
+    */
+    index: 0,
+
+    /**
     * Model setup.
     *
     * Called by GuiModule, immediately after Module create().
@@ -13,8 +33,7 @@ var AppFilesManagerModel = GuiPanelModel.extend(
     * @return {Mixed}
     */
     setup: function() {
-        this.icon('terminal');
-        this.target('columnTwo');
+        this.icon('files-o');
     },
 
     /**

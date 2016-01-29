@@ -5,50 +5,6 @@
 var AppWorkspaceModel = GuiModuleModel.extend(
 {
     /**
-    * Application name.
-    *
-    * @property appName
-    * @type     {String}
-    */
-    appName: null,
-
-    /**
-    * Application codename.
-    *
-    * @property appCodeName
-    * @type     {String}
-    */
-    appCodeName: null,
-
-    /**
-    * Application version.
-    *
-    * @property appVersion
-    * @type     {String}
-    */
-    appVersion: null,
-
-    /**
-    * Observable array.
-    *
-    * @protected
-    * @method columnOne
-    * @param  {Array} [collection]
-    * @return {Array}
-    */
-    columnOne: [],
-
-    /**
-    * Observable array.
-    *
-    * @protected
-    * @method columnTwo
-    * @param  {Array} [collection]
-    * @return {Array}
-    */
-    columnTwo: [],
-
-    /**
     * Model setup.
     *
     * Called by GuiModule, immediately after Module create().
@@ -56,13 +12,41 @@ var AppWorkspaceModel = GuiModuleModel.extend(
     * @method setup
     * @return {Mixed}
     */
-    setup: function()
-    {
-        this.appName     = this.module.kernel.getConfig('name');
-        this.appCodeName = this.module.kernel.getConfig('codename');
-        this.appVersion  = this.module.kernel.getConfig('version');
+    setup: function() {
+        var self = this;
 
-        this.columnOne = ko.observableArray();
-        this.columnTwo = ko.observableArray();
+        self.appName     = self.module.kernel.getConfig('name');
+        self.appCodeName = self.module.kernel.getConfig('codename');
+        self.appVersion  = self.module.kernel.getConfig('version');
+
+        self.columnOne = ko.observableArray();
+        self.columnTwo = ko.observableArray();
+
+        // Set panels sortable
+        var $cols = $('#body .col').sortable({
+            connectWith         : '.col',
+            handle              : '.panel-heading',
+            cancel              : '.panel-heading .btn-group',
+            placeholder         : 'panel panel-placeholder',
+            forcePlaceholderSize: true,
+            opacity             : 0.9,
+
+            start: function(e, ui) {
+                // Add higlight class
+                $cols.addClass('highlight');
+            },
+
+            stop: function(e, ui) {
+                // Remove higlight class
+                $cols.removeClass('highlight');
+
+                // Get the module instance
+                var panelName   = ui.item.attr('name');
+                var panelModule = self.module.kernel.getModule(panelName);
+
+                // Trigger event in the scope of panel module
+                self.module.triggerEvent('panelMoved', ui, panelModule);
+            }
+        });
     }
 });
