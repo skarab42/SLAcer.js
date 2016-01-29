@@ -9,14 +9,15 @@
     </head>
     <body>
         <!-- {{ name }} ({{ codename}}) - v{{ version }} - {{ output_type }} -->
-        {{ view :app-main-tpl :remove }}
+        {{ view :appworkspace-main-tpl :remove }}
         {{ scripts }}
         {{ views }}
         <!-- Initialization -->
         <script type="text/javascript">
-            App.config = {{ config }};
-            App.texts  = {{ texts }};
-            App.instance();
+            ToysKernel.instance().setup({
+                config: {{ config }},
+                texts : {{ texts }},
+            }).run({{ modules }});
         </script>
     </body>
 </html>
