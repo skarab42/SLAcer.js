@@ -1,4 +1,4 @@
-<!-- Header -->
+<!-- Head -->
 <nav id="head" class="navbar navbar-inverse navbar-static-top">
     <div class="container-fluid">
         <div class="navbar-header">

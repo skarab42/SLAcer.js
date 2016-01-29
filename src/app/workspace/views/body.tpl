@@ -1,4 +1,4 @@
-<!-- App -->
+<!-- Body -->
 <div id="body" class="container-fluid">
     <!-- Two columns grid -->
     <div class="row">
