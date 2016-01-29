@@ -1,16 +1,4 @@
-<div class="input-group">
-    <input type="text" class="form-control" for="input-file" />
-    <div class="input-group-btn">
-        <button id="fileSelect" type="button" class="beautifile btn btn-default"
-                data-bind="event: { fileselect: fileSelect }"
-                data-input="input-file"
-                data-type="primary"
-                data-multiple="true">browse...</button>
-        <button data-bind="click: loadFile" type="button" class="btn btn-success">
-            <span class="fa fa-fw fa-upload"></span> load
-        </button>
-    </div>
-</div>
+<div data-bind="template: {name: 'guifileinput-main-tpl', data: fileInput, afterRender: fileInput.afterRender}"></div>
 <!-- ko if: files().length -->
 <br />
 <ul class="list-group" data-bind="foreach: { data:files, as: 'file'}">
