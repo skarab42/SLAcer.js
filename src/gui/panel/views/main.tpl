@@ -1,4 +1,4 @@
-<div data-bind="attr: { id: module.id, name: module.name }, css: css" class="panel panel-default">
+<div data-bind="attr: { id: module.id, name: module.name }, css: css, event: { contextmenu: contextMenuModel.onRightClick }" class="panel panel-default">
     <!-- Panel header -->
     <div class="panel-heading">
         <!-- Panel controls -->
@@ -33,4 +33,20 @@
             'hidden.bs.collapse': onCompressPanel,
             'shown.bs.collapse' : onExpendPanel
         }" class="panel-body collapse"></div>
+    <!-- Contextual menu -->
+    <!-- ko if: contextMenuModel -->
+    <div data-bind="template: {
+        name       : 'guicontextmenu-main-tpl',
+        data       : contextMenuModel,
+        afterRender: contextMenuModel.afterRender
+    }" class="context-menu-wrapper"></div>
+    <!-- /ko -->
+    <!-- Help modal -->
+    <!-- ko if: helpModel -->
+    <div data-bind="template: {
+        name       : 'guimodal-main-tpl',
+        data       : helpModel,
+        afterRender: helpModel.afterRender
+    }" class="help-modal-wrapper"></div>
+    <!-- /ko -->
 </div>
