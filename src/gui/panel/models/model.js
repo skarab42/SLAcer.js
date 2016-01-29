@@ -80,8 +80,12 @@ var GuiPanelModel = GuiModuleModel.extend(
 
         // Init help modal
         self.helpModel       = self.module.getModel(module.name + 'Help');
-        self.helpTarget      = '#' + module.id + 'help';
+        self.helpTarget      = '#' + module.id + '-help';
         self.helpButtonTitle = module.getText('GuiPanel.help');
+
+        // Try to create the default context menu model
+        self.contextMenuModel = self.module.getModel(module.name + 'Contextmenu');
+        self.contextMenuModel = self.contextMenuModel || self.module.getModel('GuiContextmenu');
     },
 
     /**
