@@ -36,18 +36,12 @@ var AppFilesmanagerModel = GuiPanelModel.extend(
         this.color('blue');
         this.icon('files-o');
 
-        this.files = ko.observableArray();
-    },
+        this.files     = ko.observableArray();
+        this.fileInput = this.module.getModel('GuiFileinput');
 
-    /**
-    * Called after template is rendered.
-    *
-    * @event afterRender
-    * @param {Array}     elements
-    * @param {GuiModule} self
-    */
-    loadFile: function(elements, self) {
-
+        this.fileInput.onChange = function(files) {
+            console.log(files);
+        }
     },
 
     /**
