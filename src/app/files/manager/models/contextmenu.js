@@ -1,19 +1,8 @@
 /**
-* Contextmenu model.
-*
-* @license   GPL
-* @version   1.0.0
-* @copyright 2015 Onl'Fait (http://www.onlfait.ch)
-* @author    Sébastien Mischler (skarab) <sebastien@onlfait.ch>
-* @link      https://github.com/lautr3k/Straw
-* @module    App
-*/
-
-/**
-* @class   AppConsoleContextmenuModel
+* @class   AppFilesManagerContextmenuModel
 * @extends GuiContextmenuModel
 */
-var AppConsoleContextmenuModel = GuiContextmenuModel.extend(
+var AppFilesManagerContextmenuModel = GuiContextmenuModel.extend(
 {
     /**
     * Model setup.
@@ -23,8 +12,7 @@ var AppConsoleContextmenuModel = GuiContextmenuModel.extend(
     * @method setup
     * @return {Mixed}
     */
-    setup: function()
-    {
+    setup: function() {
         this.addItem({
             icon  : 'eraser',
             text  : this.module.getText('clearConsole'),
