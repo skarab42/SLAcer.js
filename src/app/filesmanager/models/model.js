@@ -33,25 +33,23 @@ var AppFilesmanagerModel = GuiPanelModel.extend(
     * @return {Mixed}
     */
     setup: function() {
-        this.color('blue');
-        this.icon('files-o');
+        var self = this;
 
-        this.files     = ko.observableArray();
-        this.fileInput = this.module.getModel('GuiFileinput');
+        self.color('blue');
+        self.icon('files-o');
 
-        this.fileInput.onChange = function(files) {
-            console.log(files);
+        self.files      = ko.observableArray();
+        self.fileInput  = self.module.getModel('GuiFileinput');
+        self.fileSelect = function(self, event) {
+            self.onFilesSelected(event.target.files);
         }
     },
 
     /**
-    * Called after template is rendered.
+    * On file input change.
     *
-    * @event afterRender
-    * @param {Array}     elements
-    * @param {GuiModule} self
+    * @event onFilesSelected
+    * @param {GuiModule} files
     */
-    afterRender: function(elements, self) {
-
-    }
+    onFilesSelected: function(files) {}
 });

@@ -12,6 +12,12 @@ var AppFilesmanager = GuiPanel.extend(
     * @method setup
     */
     setup: function() {
+        // Files loader
+        //this.loader = new FilesLoader();
 
+        // on files selected...
+        this.model.onFilesSelected = function(files) {
+            console.log('files', files);
+        };
     }
 });
