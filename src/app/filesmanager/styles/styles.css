@@ -18,3 +18,17 @@
     cursor: inherit;
     display: block;
 }
+
+.files-list {
+    margin-top: 15px;
+    margin-bottom: 0;
+}
+
+.files-list .pull-right {
+    margin-top: 2px;
+}
+
+.progress {
+   margin: 4px 0 0 0;
+   height: 2px;
+}

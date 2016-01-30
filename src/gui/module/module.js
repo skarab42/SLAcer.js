@@ -57,9 +57,10 @@ var GuiModule = ToysModule.extend(
     *
     * @method getModel
     * @param  {String} moduleName
+    * @param  {Array}  setupParams
     * @return {GuiModel|null}
     */
-    getModel: function(moduleName) {
+    getModel: function(moduleName, setupParams) {
         // Model
         var model = null;
 
@@ -81,7 +82,7 @@ var GuiModule = ToysModule.extend(
             // Ensure the model has an callable setup method
             if (model.setup && _.isFunction(model.setup)) {
                 // Setup the model
-                model.setup();
+                model.setup.apply(model, setupParams || []);
             }
         }
 

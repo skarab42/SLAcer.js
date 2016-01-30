@@ -38,9 +38,10 @@ var AppFilesmanagerModel = GuiPanelModel.extend(
         self.color('blue');
         self.icon('files-o');
 
-        self.files      = ko.observableArray();
-        self.fileInput  = self.module.getModel('GuiFileinput');
-        self.fileSelect = function(self, event) {
+        self.files          = ko.observableArray();
+        self.fileInput      = self.module.getModel('GuiFileinput');
+        self.fileInputTitle = self.module.getText('fileInputTitle');
+        self.fileSelect     = function(self, event) {
             self.onFilesSelected(event.target.files);
         }
     },
