@@ -160,6 +160,18 @@ var ToysCore = JSClass(
     },
 
     /**
+    * Info message with translation and formatting.
+    *
+    * @method info
+    * @param  {String} text
+    * @param  {Object} [data]
+    */
+    info: function(text, data)
+    {
+        this.message('info', text, data);
+    },
+
+    /**
     * Warning message with translation and formatting.
     *
     * @method warning
