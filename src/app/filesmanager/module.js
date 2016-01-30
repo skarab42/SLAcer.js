@@ -12,12 +12,21 @@ var AppFilesmanager = GuiPanel.extend(
     * @method setup
     */
     setup: function() {
+        // self alias
+        var self = this;
+
         // Files loader
-        //this.loader = new FilesLoader();
+        self.fileLoader = new FileLoader();
+
+        self.fileLoader.onError = function(data) {
+            self.warning(data.error, { file: data.file.name });
+        };
 
         // on files selected...
-        this.model.onFilesSelected = function(files) {
-            console.log('files', files);
+        self.model.onFilesSelected = function(files) {
+            for (var i = 0; i < files.length; i++) {
+                self.fileLoader.load(files[i]);
+            }
         };
     }
 });

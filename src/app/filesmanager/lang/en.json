@@ -1,3 +1,6 @@
 {
-    "title": "Files manager"
+    "title"       : "Files manager",
+    "emptyFile"   : "Empty file [${file}]",
+    "disabledType": "Disabled file type [${file}]",
+    "unknownType" : "Unknown file type [${file}]"
 }
