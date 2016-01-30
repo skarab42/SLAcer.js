@@ -1,4 +1,9 @@
-<div data-bind="template: {name: 'guifileinput-main-tpl', data: fileInput, afterRender: fileInput.afterRender}"></div>
+<div class="btn-group">
+    <span type="button" class="file-input btn btn-default">
+        <i class="fa fa-fw fa-folder-open"></i> browse
+        <input data-bind="event: {change: fileSelect}" type="file" multiple="multiple" />
+    </span>
+</div>
 <!-- ko if: files().length -->
 <br />
 <ul class="list-group" data-bind="foreach: { data:files, as: 'file'}">
