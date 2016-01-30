@@ -126,7 +126,7 @@ var ToysCore = JSClass(
         catch (error)
         {
             // Throw custom error
-            this.error('Toys.parseTextError',
+            this.error('ToysKernel.parseTextError',
             {
                 error: error,
                 lang : lang,

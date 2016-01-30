@@ -1,13 +1,17 @@
 {
-    "title"          : "Files manager",
-    "fileInputTitle" : "add",
-    "emptyFile"      : "Empty file [${file}]",
-    "disabledType"   : "Disabled file type [${file}]",
-    "unknownType"    : "Unknown file type [${file}]",
-    "fileNotFound"   : "File not found [${file}]",
-    "fileNotReadable": "File not readable [${file}]",
-    "unknownError"   : "Unknown error [${status}] -> [${file}]",
-    "loadAborted"    : "Aborted [${status}] -> [${file}]",
-    "loadStart"      : "Start [${status}] -> [${file}]",
-    "loadEnd"        : "End [${status}] -> [${file}]"
+    "title"            : "Files manager",
+    "fileInputTitle"   : "add",
+    "emptyFile"        : "Empty file [ ${file} ]",
+    "disabledType"     : "Disabled file type [ ${file} ]",
+    "unknownType"      : "Unknown file type [ ${file} ]",
+    "fileNotFound"     : "File not found [ ${file} ]",
+    "fileNotReadable"  : "File not readable [ ${file} ]",
+    "unknownError"     : "Unknown error [ ${status} ] -> [ ${file} ]",
+    "undefinedError"   : "Undefined error: ${error}",
+    "noFacesFound"     : "No faces found [ ${status} ] -> [ ${file} ]",
+    "notEnoughVertices": "Not enough vertices to make a triangle [ ${status} ] -> [ ${file} ] [ line: ${line} ]",
+    "tooMuchVertices"  : "Too much vertices to make a triangle [ ${status} ] -> [ ${file} ] [ line: ${line} ]",
+    "loadAborted"      : "Aborted [ ${status} ] -> [ ${file} ]",
+    "loadStart"        : "Start [ ${status} ] -> [ ${file} ]",
+    "loadEnd"          : "End [ ${status} ] -> [ ${file} ]"
 }

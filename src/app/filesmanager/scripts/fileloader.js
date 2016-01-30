@@ -17,10 +17,12 @@ var FileLoader = JSClass(
     onSuccess : function(data) {},
     onError   : function(data) {},
     onAbort   : function(data) {},
+    onLoad    : function(data) {},
 
     // Status
     READ : 'read',
     PARSE: 'parse',
+    LOAD : 'load',
 
     // Errors
     ERR_EMPTY_FILE   : 'emptyFile',
@@ -107,24 +109,37 @@ var FileLoader = JSClass(
                 else if (e.data.action == 'success') {
                     self.onSuccess({
                         file  : file,
-                        status: self.PARSE,
-                        faces : e.data.faces
+                        status: self.PARSE
                     });
                 }
                 else if (e.data.action == 'error') {
                     self.onError({
                         file  : file,
                         status: self.PARSE,
-                        error : e.data.error
+                        error : e.data.message,
+                        data  : e.data.data || null
                     });
                 }
                 else if (e.data.action == 'progress') {
                     self.onProgress({
                         file   : file,
                         status : self.PARSE,
-                        percent: e.data.percent,
-                        loaded : e.data.loaded,
-                        total  : e.data.total
+                        percent: e.data.data.percent,
+                        loaded : e.data.data.loaded,
+                        total  : e.data.data.total
+                    });
+                }
+                else if (e.data.action == 'loadStart') {
+                    self.onStart({ file: file, status: self.LOAD, data: e.data.data });
+                }
+                else if (e.data.action == 'loadEnd') {
+                    self.onEnd({ file: file, status: self.LOAD, data: e.data.data });
+                }
+                else if (e.data.action == 'load') {
+                    self.onLoad({
+                        file  : file,
+                        status: self.LOAD,
+                        face  : e.data.data.face
                     });
                 }
             };

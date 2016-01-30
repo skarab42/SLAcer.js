@@ -18,6 +18,7 @@ var AppFilesmanager = GuiPanel.extend(
         // On files selected...
         self.model.onFilesSelected = function(files) {
             self.loadFiles(files);
+            self.model.fileValue('');
         };
     },
 
@@ -52,6 +53,7 @@ var AppFilesmanager = GuiPanel.extend(
 
         loader.onProgress = function(data) {
             fileModel.percent(data.percent);
+            //fileModel.progressBar(true);
         };
 
         loader.onEnd = function(data) {
@@ -59,19 +61,35 @@ var AppFilesmanager = GuiPanel.extend(
                 file  : file.name,
                 status: data.status,
             });
+            if (data.status === loader.LOAD) {
+                fileModel.status('loaded');
+                fileModel.facesCount(data.data.total);
+            } else {
+                fileModel.status('wait...');
+            }
             fileModel.progressBar(false);
+            fileModel.percent(0);
         };
 
         loader.onSuccess = function(data) {
-            fileModel.status('loaded');
+            //fileModel.status('loaded');
+        };
+
+        loader.onLoad = function(data) {
+            var face = data.face;
+
+            //console.log(face);
         };
 
         loader.onError = function(data) {
-            self.warning(data.error, {
+            self.warning(data.error, _.defaults({
                 file  : file.name,
                 status: data.status,
-            });
+            }, data.data || {}));
             fileModel.status('error');
+            setTimeout(function() {
+                self.model.files.remove(fileModel);
+            }, 3000);
         };
 
         loader.onAbort = function(data) {
