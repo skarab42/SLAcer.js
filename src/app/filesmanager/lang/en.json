@@ -1,6 +1,13 @@
 {
-    "title"       : "Files manager",
-    "emptyFile"   : "Empty file [${file}]",
-    "disabledType": "Disabled file type [${file}]",
-    "unknownType" : "Unknown file type [${file}]"
+    "title"          : "Files manager",
+    "fileInputTitle" : "add",
+    "emptyFile"      : "Empty file [${file}]",
+    "disabledType"   : "Disabled file type [${file}]",
+    "unknownType"    : "Unknown file type [${file}]",
+    "fileNotFound"   : "File not found [${file}]",
+    "fileNotReadable": "File not readable [${file}]",
+    "unknownError"   : "Unknown error [${status}] -> [${file}]",
+    "loadAborted"    : "Aborted [${status}] -> [${file}]",
+    "loadStart"      : "Start [${status}] -> [${file}]",
+    "loadEnd"        : "End [${status}] -> [${file}]"
 }
