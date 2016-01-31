@@ -63,9 +63,10 @@ var AppFilesmanagerFileModel = GuiModuleModel.extend(
             }
         });
 
-        self.onFileSelected = function(file) {};
         self.selectFile = function(self, event) {
-            self.onFileSelected(self);
+            if (! self.disable()) {
+                self.selected(! self.selected());
+            }
         }
     }
 });

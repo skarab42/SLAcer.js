@@ -43,15 +43,48 @@ var AppFilesmanagerModel = GuiPanelModel.extend(
         // file input
         self.fileInput = {
             value : ko.observable(''),
-            title : ko.observable(self.module.getText('fileInputTitle')),
+            label : ko.observable(self.module.getText('fileInputLabel')),
             change: function(self, event) {
                 self.onFileInputChange(event.target.files);
                 self.fileInput.value(''); // reset input
             }
         }
 
+        // remove button
+        self.removeButton = {
+            label: ko.observable(self.module.getText('removeButtonLabel')),
+            click: function(self, event) {
+                var files = self.getSelectedFiles();
+                var file  = null;
+                for (var i = 0; i < files.length; i++) {
+                    file = files[i];
+                    self.files.remove(file);
+                    self.onFileRemoved(file);
+                }
+            }
+        };
+
         // files list
         self.files = ko.observableArray();
+    },
+
+    /**
+    * Return all selected files.
+    *
+    * @event getSelectedFiles
+    * @return {Array}
+    */
+    getSelectedFiles: function() {
+        var removed = [];
+        var file    = null;
+        var files   = this.files();
+        for (var i = 0; i < files.length; i++) {
+            file = files[i];
+            if (file.selected()) {
+                removed.push(file);
+            }
+        }
+        return removed;
     },
 
     /**
@@ -60,5 +93,13 @@ var AppFilesmanagerModel = GuiPanelModel.extend(
     * @event onFileInputChange
     * @param {FileList} fileList
     */
-    onFileInputChange: function(fileList) {}
+    onFileInputChange: function(fileList) {},
+
+    /**
+    * Called after each file removed.
+    *
+    * @event onFilesRemoved
+    * @param {File} file
+    */
+    onFileRemoved: function(file) {}
 });

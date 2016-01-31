@@ -19,6 +19,11 @@ var AppFilesmanager = GuiPanel.extend(
         self.model.onFileInputChange = function(fileList) {
             self.loadFileList(fileList);
         };
+
+        // on file removed (from the list)
+        self.model.onFileRemoved = function(file) {
+            //console.log(file);
+        };
     },
 
     /**
@@ -45,13 +50,6 @@ var AppFilesmanager = GuiPanel.extend(
 
         // File model
         var fileModel = self.getModel('AppFilesmanagerFile', [file]);
-
-        fileModel.onFileSelected = function(selectedFile) {
-            if (fileModel.disable()) {
-                return null;
-            }
-            selectedFile.selected(! selectedFile.selected());
-        };
 
         // Add file model to DOM list
         self.model.files.push(fileModel);
@@ -92,91 +90,5 @@ var AppFilesmanager = GuiPanel.extend(
 
         // try to load the file
         loader.load();
-    },
-
-    /**
-    * Load a file.
-    *
-    * @method loadFile
-    * @param  {File} file
-    */
-    __loadFile: function(file) {
-        // self alias
-        var self = this;
-
-        // File loader
-        var loader = new FileLoader();
-
-        // File model
-        var fileModel = self.getModel('AppFilesmanagerFile', [file]);
-
-        fileModel.onFileSelected = function(selectedFile) {
-            selectedFile.selected(true);
-            console.log('pouet');
-        };
-
-        // Add file model to DOM list
-        self.model.files.push(fileModel);
-
-        // Events callbacks
-        loader.onStart = function(data) {
-            self.info('loadStart', {
-                file  : file.name,
-                status: data.status,
-            });
-            fileModel.progressBar(true);
-            fileModel.status(data.status);
-        };
-
-        loader.onProgress = function(data) {
-            fileModel.percent(data.percent);
-            //fileModel.progressBar(true);
-        };
-
-        loader.onEnd = function(data) {
-            self.info('loadEnd', {
-                file  : file.name,
-                status: data.status,
-            });
-            if (data.status === loader.LOAD) {
-                fileModel.status('loaded');
-                fileModel.facesCount(data.data.total);
-            } else {
-                fileModel.status('wait...');
-            }
-            fileModel.progressBar(false);
-            fileModel.percent(0);
-        };
-
-        loader.onSuccess = function(data) {
-            //fileModel.status('loaded');
-        };
-
-        loader.onLoad = function(data) {
-            var face = data.face;
-
-            //console.log(face);
-        };
-
-        loader.onError = function(data) {
-            self.warning(data.error, _.defaults({
-                file  : file.name,
-                status: data.status,
-            }, data.data || {}));
-            fileModel.status('error');
-            setTimeout(function() {
-                self.model.files.remove(fileModel);
-            }, 3000);
-        };
-
-        loader.onAbort = function(data) {
-            self.warning('loadAborted', {
-                file  : file.name,
-                status: data.status,
-            });
-            fileModel.status('aborted');
-        };
-
-        loader.load(file);
     }
 });

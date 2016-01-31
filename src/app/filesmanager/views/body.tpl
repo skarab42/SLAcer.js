@@ -1,9 +1,13 @@
 <div class="btn-group">
-    <span type="button" class="file-input btn btn-default">
+    <span type="button" class="file-input btn btn-success">
         <i class="fa fa-fw fa-plus"></i>
-        <span data-bind="html:fileInput.title"></span>
+        <span data-bind="html: fileInput.label"></span>
         <input data-bind="value: fileInput.value, event: { change: fileInput.change }" type="file" multiple="multiple" />
     </span>
+    <button data-bind="event: { click: removeButton.click }" type="button" class="btn btn-danger">
+        <i class="fa fa-fw fa-trash"></i>
+        <span data-bind="html: removeButton.label"></span>
+    </button>
 </div>
 <!-- ko if: files().length -->
 <ul class="files-list list-group" data-bind="foreach: { data:files, as: 'file'}">
