@@ -1,4 +1,4 @@
 {
     "autoload": true,
-    "require" : ["app/workspace", "lib/filesize"]
+    "require" : ["app/workspace", "lib/filesize", "lib/bootstrap-notify"]
 }

@@ -81,6 +81,19 @@ var AppFilesmanager = GuiPanel.extend(
                 setTimeout(function() {
                     self.model.files.remove(fileModel);
                 }, 3000);
+
+                var message = typeof data.error !== 'string'
+                    ? data.error.message
+                    : data.error;
+
+                $.notify({
+                	title: '<strong>Error</strong>',
+                	message: message
+                },
+                {
+                    type: 'danger'
+                });
+
             } else if (data.action === 'stream') {
                 fileModel.status('loaded');
             }
