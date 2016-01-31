@@ -13,9 +13,125 @@ var FileLoader = JSClass(
     // Events callbacks
     onStart   : function(data) {},
     onProgress: function(data) {},
+    onEnd     : function(data) {},
+    onFace    : function(face) {},
+
+    /**
+    * Class constructor.
+    *
+    * @constructor
+    * @param {File} file
+    */
+    create: function(file) {
+        // set file
+        this.file = file;
+
+        // file extension as type (all lowecase)
+        this.type = file.name.split('.').pop().toLowerCase();
+    },
+
+    /**
+    * Load the file.
+    *
+    * @method load
+    */
+    load: function() {
+        // self alias
+        var self = this;
+
+        // trigger start check event
+        self.onStart({ action: 'check' });
+
+        // if empty file
+        if (self.file.size == 0) {
+            return self.onEnd({ action: 'check', error: 'emptyFile' });
+        }
+
+        // if disabled or unknown type
+        if (! self.workers[self.type]) {
+            return self.onEnd({
+                action: 'check',
+                error : self.workers[self.type] === undefined
+                      ? 'unknownType'
+                      : 'disabledType'
+            });
+        }
+
+        // trigger end check event
+        self.onEnd({ action: 'check' });
+
+        // create the parser instance
+        var parser = new Worker(self.workers[self.type]);
+
+        parser.onmessage = function(e) {
+            if (e.data.type === 'start') {
+                self.onStart(e.data.data);
+            }
+            else if (e.data.type === 'progress') {
+                self.onProgress(e.data.data);
+            }
+            else if (e.data.type === 'face') {
+                self.onFace(e.data.data);
+            }
+            else if (e.data.type === 'error' || e.data.type === 'end') {
+                self.onEnd(e.data.data);
+            }
+        };
+
+        // create file reader instance
+        var reader      = new FileReader();
+        var lastPercent = 0;
+
+        reader.onprogress = function(e) {
+            if (! e.lengthComputable) {
+                return null;
+            }
+            var percent = Math.round(e.loaded / e.total * 100);
+            if (lastPercent !== percent) {
+                self.onProgress({
+                    action : 'read',
+                    total  : e.total,
+                    loaded : e.loaded,
+                    percent: percent
+                });
+            }
+            lastPercent = percent;
+        };
+
+        reader.onloadend = function(e) {
+            if (e.target.error) {
+                return self.onEnd({ action: 'read', error: e.target.error });
+            }
+            self.onEnd({ action: 'read' });
+            self.onStart({ action: 'parse' });
+            parser.postMessage(e.target.result);
+        };
+
+        // trigger start read event
+        self.onStart({ action: 'read' });
+
+        // read file contents as buffer array
+        reader.readAsArrayBuffer(self.file);
+    }
+});
+
+
+
+var _FileLoader = JSClass(
+{
+    // Files workers
+    workers: {
+        stl: 'src/app/filesmanager/workers/stl.js',
+        obj: false
+    },
+
+    // Events callbacks
+    onStatus  : function(data) {},
+    onStart   : function(data) {},
+    onProgress: function(data) {},
     onSuccess : function(data) {},
-    onAbort   : function(data) {},
     onError   : function(data) {},
+    onAbort   : function(data) {},
     onEnd     : function(data) {},
 
     /**
@@ -25,8 +141,11 @@ var FileLoader = JSClass(
     * @param {File} file
     */
     create: function(file) {
-        this.file   = file;
-        this.status = FileLoader.STATUS_NONE;
+        // set file
+        this.file = file;
+
+        // set initial status
+        this.status = FileLoader.STATUS_WAIT;
 
         // file extension as type (all lowecase)
         this.type = file.name.split('.').pop().toLowerCase();
@@ -48,17 +167,28 @@ var FileLoader = JSClass(
     },
 
     /**
+    * Change status.
+    *
+    * @method _status
+    * @param  {String} status
+    */
+    _status: function(status) {
+        this.status = FileLoader['STATUS_' + status.toUpperCase()];
+        this.onStatus(this._data());
+    },
+
+    /**
     * Notify an error.
     *
-    * @method error
+    * @method _error
     * @param  {String} errorId
     */
-    error: function(data) {
+    _error: function(data) {
         // trigger error event
         this.onError(this._data({ error: data }));
 
-        // set status to error
-        this.status = FileLoader.STATUS_ERROR;
+        // set error status
+        this._status('error');
 
         // trigger end event
         this.onEnd(this._data({ error: data }));
@@ -73,34 +203,45 @@ var FileLoader = JSClass(
         // self alias
         var self = this;
 
-        // set status to read
-        self.status = FileLoader.STATUS_CHECK;
+        // set check status
+        this._status('check');
 
         // trigger start event
         self.onStart(self._data());
 
         // if empty file
         if (self.file.size == 0) {
-            return self.error({ name: FileLoader.ERROR_EMPTY_FILE });
+            return self._error({ name: FileLoader.ERROR_EMPTY_FILE });
         }
 
         // if disabled or unknown type
         if (! self.workers[self.type]) {
-            return self.error({
+            return self._error({
                 name: self.workers[self.type] === undefined
                     ? FileLoader.ERROR_UNKNOWN_TYPE
                     : FileLoader.ERROR_DISABLED_TYPE
             });
         }
 
+        // create the parser instance
+        var parser = new Worker(self.workers[self.type]);
+
+        parser.onmessage = function(e) {
+            if (e.data.action === 'progress') {
+
+            }
+            else if (e.data.action === 'error') {
+
+            }
+            else if (e.data.action === 'error') {
+
+            }
+        };
+
+
         // create file reader instance
         var reader      = new FileReader();
         var lastPercent = 0;
-
-        reader.onabort = function(e) {
-            self.onAbort(self._data());
-            self.status = FileLoader.STATUS_ABORT;
-        };
 
         reader.onprogress = function(e) {
             if (! e.lengthComputable) {
@@ -117,11 +258,25 @@ var FileLoader = JSClass(
             lastPercent = percent;
         };
 
+        reader.onabort = function(e) {
+            self.onAbort(self._data());
+            self.status = FileLoader.STATUS_ABORT;
+        };
+
         reader.onloadend = function(e) {
             if (e.target.error && self.status !== FileLoader.STATUS_ABORT) {
-                return self.error(e.target.error);
+                return self._error(e.target.error);
             }
-            // start parsing...
+            self.status = FileLoader.STATUS_READ;
+            self.onProgress(self._data({
+                percent: 0,
+                loaded : 0,
+                total  : file.size
+            }));
+            parser.postMessage({
+                action: 'parse',
+                buffer: e.target.result
+            });
         };
 
         // set status to read
@@ -132,7 +287,7 @@ var FileLoader = JSClass(
     }
 
 }).static({
-    STATUS_NONE : 'none',
+    STATUS_WAIT : 'wait',
     STATUS_CHECK: 'check',
     STATUS_READ : 'read',
     STATUS_PARSE: 'parse',

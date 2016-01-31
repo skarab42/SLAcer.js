@@ -46,11 +46,10 @@ var AppFilesmanager = GuiPanel.extend(
         // create file loader
         var loader = new FileLoader(file);
 
-        loader.onStart    = function(data) { console.log('start', data); };
+        loader.onStart    = function(data) { console.log('start'   , data); };
         loader.onProgress = function(data) { console.log('progress', data); };
-        loader.onAbort    = function(data) { console.log('abort', data); };
-        loader.onError    = function(data) { console.log('error', data); };
-        loader.onEnd      = function(data) { console.log('end',   data); };
+        loader.onEnd      = function(data) { console.log('end'     , data); };
+        loader.onFace     = function(face) { console.log('face'    , face); };
 
         // try to load the file
         loader.load();
