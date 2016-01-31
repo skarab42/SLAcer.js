@@ -7,7 +7,7 @@
 </div>
 <!-- ko if: files().length -->
 <ul class="files-list list-group" data-bind="foreach: { data:files, as: 'file'}">
-    <li data-bind="css: file.css, event: { click: setCurrentFile }" class="list-group-item clearfix">
+    <li data-bind="css: file.css, event: { click: selectFile }" class="list-group-item clearfix">
 
         <div class="file-info">
             <span class="label label-warning">

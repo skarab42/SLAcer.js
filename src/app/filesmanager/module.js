@@ -43,13 +43,52 @@ var AppFilesmanager = GuiPanel.extend(
         // self alias
         var self = this;
 
+        // File model
+        var fileModel = self.getModel('AppFilesmanagerFile', [file]);
+
+        fileModel.onFileSelected = function(selectedFile) {
+            if (fileModel.disable()) {
+                return null;
+            }
+            selectedFile.selected(! selectedFile.selected());
+        };
+
+        // Add file model to DOM list
+        self.model.files.push(fileModel);
+
         // create file loader
         var loader = new FileLoader(file);
 
-        loader.onStart    = function(data) { console.log('start'   , data); };
-        loader.onProgress = function(data) { console.log('progress', data); };
-        loader.onEnd      = function(data) { console.log('end'     , data); };
-        loader.onFace     = function(face) { console.log('face'    , face); };
+        loader.onStart = function(data) {
+            //console.log('start', data);
+            fileModel.status(data.action);
+            fileModel.progressBar(true);
+        };
+
+        loader.onProgress = function(data) {
+            //console.log('progress', data);
+            fileModel.percent(data.percent);
+        };
+
+        loader.onEnd = function(data) {
+            //console.log('end', data);
+            fileModel.progressBar(false);
+            fileModel.percent(0);
+            if (data.error) {
+                fileModel.disable(true);
+                fileModel.status('error');
+                setTimeout(function() {
+                    self.model.files.remove(fileModel);
+                }, 3000);
+            } else if (data.action === 'stream') {
+                fileModel.status('loaded');
+            }
+            console.log(data);
+        };
+
+        loader.onFace = function(face) {
+            //console.log('face', face);
+        };
 
         // try to load the file
         loader.load();

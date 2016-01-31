@@ -239,7 +239,7 @@ function parse(input) {
 function stream(faces) {
     postMessage({ type: 'start', data: { action: 'stream' }});
 
-    var progression = new Progression('load', faces.length);
+    var progression = new Progression('stream', faces.length);
     postMessage({ type: 'progress', data: progression.info() });
 
     // stream all faces

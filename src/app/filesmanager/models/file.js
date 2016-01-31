@@ -21,8 +21,9 @@ var AppFilesmanagerFileModel = GuiModuleModel.extend(
         self.type        = ko.observable(name.pop());
         self.name        = ko.observable(name.join('.'));
         self.size        = ko.observable(filesize(file.size));
-        self.status      = ko.observable('read');
+        self.status      = ko.observable('preload');
         self.percent     = ko.observable(0);
+        self.disable     = ko.observable(false);
         self.selected    = ko.observable(false);
         self.progressBar = ko.observable(false);
         self.facesCount  = ko.observable(0);
@@ -37,12 +38,14 @@ var AppFilesmanagerFileModel = GuiModuleModel.extend(
 
         self.css = ko.computed(function() {
             var css = 'list-group-item-';
-            console.log(self.status())
+
             switch (self.status()) {
                 case 'error': css += 'danger';
                     break;
                 default: css += 'default';
             }
+
+            css += self.disable() ? ' disabled' : ' enabled';
 
             return css += (self.selected() ? ' selected' : '');
         });
@@ -61,7 +64,7 @@ var AppFilesmanagerFileModel = GuiModuleModel.extend(
         });
 
         self.onFileSelected = function(file) {};
-        self.setCurrentFile = function(self, event) {
+        self.selectFile = function(self, event) {
             self.onFileSelected(self);
         }
     }

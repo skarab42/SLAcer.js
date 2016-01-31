@@ -33,10 +33,16 @@
    height: 2px;
 }
 
-#appfilesmanager .files-list li.selected {
+#appfilesmanager .files-list li.enabled.selected {
     background-color: #eeeeee;
 }
 
-#appfilesmanager .files-list li:hover {
+#appfilesmanager .files-list li.disabled {
+    background-color: #f2dede;
+    border: 1px #EBCCD1 solid;
+    color: #A94442;
+}
+
+#appfilesmanager .files-list li.enabled:hover {
     background-color: #cccccc;
 }
