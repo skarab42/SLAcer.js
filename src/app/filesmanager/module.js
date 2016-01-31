@@ -66,6 +66,9 @@ var AppFilesmanager = GuiPanel.extend(
         loader.onProgress = function(data) {
             //console.log('progress', data);
             fileModel.percent(data.percent);
+            if (data.action === 'stream') {
+                fileModel.facesCount(data.loaded);
+            }
         };
 
         loader.onEnd = function(data) {
@@ -84,8 +87,11 @@ var AppFilesmanager = GuiPanel.extend(
             console.log(data);
         };
 
-        loader.onFace = function(face) {
-            //console.log('face', face);
+        loader.onFace = function(data) {
+            //console.log('face', data);
+            if (data.last) {
+                fileModel.facesCount(data.num);
+            }
         };
 
         // try to load the file
