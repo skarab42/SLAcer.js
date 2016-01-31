@@ -15,15 +15,26 @@ var AppFilesmanager = GuiPanel.extend(
         // self alias
         var self = this;
 
-        // On files selected...
-        self.model.onFilesSelected = function(files) {
-            self.loadFiles(files);
-            self.model.fileValue('');
+        // on file input change.
+        self.model.onFileInputChange = function(fileList) {
+            self.loadFileList(fileList);
         };
     },
 
     /**
-    * Load one file.
+    * Load an FileList.
+    *
+    * @method loadFileList
+    * @param  {FileList} files
+    */
+    loadFileList: function(fileList) {
+        for (var i = 0; i < fileList.length; i++) {
+            this.loadFile(fileList[i]);
+        }
+    },
+
+    /**
+    * Load a file.
     *
     * @method loadFile
     * @param  {File} file
@@ -32,11 +43,39 @@ var AppFilesmanager = GuiPanel.extend(
         // self alias
         var self = this;
 
+        // create file loader
+        var loader = new FileLoader(file);
+
+        loader.onStart    = function(data) { console.log('start', data); };
+        loader.onProgress = function(data) { console.log('progress', data); };
+        loader.onAbort    = function(data) { console.log('abort', data); };
+        loader.onError    = function(data) { console.log('error', data); };
+        loader.onEnd      = function(data) { console.log('end',   data); };
+
+        // try to load the file
+        loader.load();
+    },
+
+    /**
+    * Load a file.
+    *
+    * @method loadFile
+    * @param  {File} file
+    */
+    __loadFile: function(file) {
+        // self alias
+        var self = this;
+
         // File loader
         var loader = new FileLoader();
 
         // File model
         var fileModel = self.getModel('AppFilesmanagerFile', [file]);
+
+        fileModel.onFileSelected = function(selectedFile) {
+            selectedFile.selected(true);
+            console.log('pouet');
+        };
 
         // Add file model to DOM list
         self.model.files.push(fileModel);
@@ -101,17 +140,5 @@ var AppFilesmanager = GuiPanel.extend(
         };
 
         loader.load(file);
-    },
-
-    /**
-    * Load many files.
-    *
-    * @method loadFiles
-    * @param  {FileList} files
-    */
-    loadFiles: function(files) {
-        for (var i = 0; i < files.length; i++) {
-            this.loadFile(files[i]);
-        }
     }
 });

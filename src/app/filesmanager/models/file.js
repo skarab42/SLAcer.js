@@ -23,6 +23,7 @@ var AppFilesmanagerFileModel = GuiModuleModel.extend(
         self.size        = ko.observable(filesize(file.size));
         self.status      = ko.observable('read');
         self.percent     = ko.observable(0);
+        self.selected    = ko.observable(false);
         self.progressBar = ko.observable(false);
         self.facesCount  = ko.observable(0);
 
@@ -35,10 +36,15 @@ var AppFilesmanagerFileModel = GuiModuleModel.extend(
         });
 
         self.css = ko.computed(function() {
+            var css = 'list-group-item-';
+            console.log(self.status())
             switch (self.status()) {
-                case 'error': return 'list-group-item-danger';
-                default     : return 'list-group-item-default';
+                case 'error': css += 'danger';
+                    break;
+                default: css += 'default';
             }
+
+            return css += (self.selected() ? ' selected' : '');
         });
 
         self.progressPercent = ko.computed(function() {
@@ -53,5 +59,10 @@ var AppFilesmanagerFileModel = GuiModuleModel.extend(
                 default     : return 'progress-bar-danger';
             }
         });
+
+        self.onFileSelected = function(file) {};
+        self.setCurrentFile = function(self, event) {
+            self.onFileSelected(self);
+        }
     }
 });

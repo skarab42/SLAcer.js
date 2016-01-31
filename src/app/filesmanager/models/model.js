@@ -33,25 +33,32 @@ var AppFilesmanagerModel = GuiPanelModel.extend(
     * @return {Mixed}
     */
     setup: function() {
+        // self alias
         var self = this;
 
+        // panel color and icon
         self.color('blue');
         self.icon('files-o');
 
-        self.files          = ko.observableArray();
-        self.fileValue      = ko.observable('');
-        self.fileInput      = self.module.getModel('GuiFileinput');
-        self.fileInputTitle = self.module.getText('fileInputTitle');
-        self.fileSelect     = function(self, event) {
-            self.onFilesSelected(event.target.files);
+        // file input
+        self.fileInput = {
+            value : ko.observable(''),
+            title : ko.observable(self.module.getText('fileInputTitle')),
+            change: function(self, event) {
+                self.onFileInputChange(event.target.files);
+                self.fileInput.value(''); // reset input
+            }
         }
+
+        // files list
+        self.files = ko.observableArray();
     },
 
     /**
     * On file input change.
     *
-    * @event onFilesSelected
-    * @param {GuiModule} files
+    * @event onFileInputChange
+    * @param {FileList} fileList
     */
-    onFilesSelected: function(files) {}
+    onFileInputChange: function(fileList) {}
 });

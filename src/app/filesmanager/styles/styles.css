@@ -33,6 +33,10 @@
    height: 2px;
 }
 
-#appfilesmanager .files-list li:hover {
+#appfilesmanager .files-list li.selected {
     background-color: #eeeeee;
+}
+
+#appfilesmanager .files-list li:hover {
+    background-color: #cccccc;
 }

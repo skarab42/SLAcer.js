@@ -1,13 +1,13 @@
 <div class="btn-group">
     <span type="button" class="file-input btn btn-default">
         <i class="fa fa-fw fa-plus"></i>
-        <span data-bind="html:fileInputTitle"></span>
-        <input data-bind="value: fileValue, event: {change: fileSelect}" type="file" multiple="multiple" />
+        <span data-bind="html:fileInput.title"></span>
+        <input data-bind="value: fileInput.value, event: { change: fileInput.change }" type="file" multiple="multiple" />
     </span>
 </div>
 <!-- ko if: files().length -->
 <ul class="files-list list-group" data-bind="foreach: { data:files, as: 'file'}">
-    <li data-bind="css: file.css" class="list-group-item clearfix">
+    <li data-bind="css: file.css, event: { click: setCurrentFile }" class="list-group-item clearfix">
 
         <div class="file-info">
             <span class="label label-warning">
