@@ -251,6 +251,7 @@ function stream(faces) {
 
         postMessage({ type: 'face', data: {
             face: faces[i],
+            num : progression.loaded,
             last: ! progression.countdown()
         }});
     }
