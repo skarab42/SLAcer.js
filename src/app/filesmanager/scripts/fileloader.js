@@ -54,7 +54,6 @@ var FileLoader = JSClass(
 
         // if empty file
         if (self.file.size == 0) {
-            //return self.onEnd({ action: 'check', error: 'emptyFile' });
             return self._error('check', 'emptyFile');
         }
 
@@ -63,13 +62,6 @@ var FileLoader = JSClass(
             var message = self.workers[self.type] === undefined
                         ? 'unknownType' : 'disabledType';
             return self._error('check', message);
-            /*return self.onEnd({
-                action: 'check',
-                error : {
-                    message: message,
-                    data   : { file: self.file.name }
-                }
-            });*/
         }
 
         // trigger end check event
@@ -123,10 +115,6 @@ var FileLoader = JSClass(
                 return self._error('read', 'internalError', {
                     message: e.target.error.message
                 });
-                /*return self.onEnd({ action: 'read', error: {
-                    message: 'internalError',
-                    data   : { message: e.target.error.message }
-                });*/
             }
             self.onEnd({ action: 'read' });
             self.onStart({ action: 'parse' });

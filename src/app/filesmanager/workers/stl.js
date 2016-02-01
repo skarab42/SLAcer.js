@@ -185,20 +185,10 @@ function parseASCII(reader) {
                 if (faceIndex) {
                     if (faceIndex < 3) {
                         postError('parse', 'notEnoughVertices', { line: start });
-                        /*postMessage({ type: 'error', data: {
-                            action: 'parse',
-                            error : 'notEnoughVertices',
-                            data  : { line: start }
-                        }});*/
                         return false;
                     }
                     if (faceIndex > 3) {
                         postError('parse', 'tooMuchVertices', { line: start });
-                        /*postMessage({ type: 'error', data: {
-                            action: 'parse',
-                            error : 'tooMuchVertices',
-                            data  : { line: start }
-                        }});*/
                         return false;
                     }
                 }
@@ -233,20 +223,11 @@ function parse(input) {
         var faces = binary ? parseBinary(reader) : parseASCII(reader);
         if (faces !== false && faces.length === 0) {
             postError('parse', 'noFacesFound');
-            /*postMessage({ type: 'error', data: {
-                action: 'parse',
-                error : 'noFacesFound'
-            }});*/
             faces = null;
         }
     }
     catch (e) {
         postError('parse', 'internalError', { message: e.message });
-        /*postMessage({ type: 'error', data: {
-            action: 'parse',
-            error : 'internalError',
-            data  : { message: e.message }
-        }});*/
         faces = null;
     }
     faces && postMessage({ type: 'end', data: { action: 'parse' }});

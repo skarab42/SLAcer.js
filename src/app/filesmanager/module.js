@@ -78,10 +78,9 @@ var AppFilesmanager = GuiPanel.extend(
             if (data.error) {
                 fileModel.disable(true);
                 fileModel.status('error');
-                /*setTimeout(function() {
+                setTimeout(function() {
                     self.model.files.remove(fileModel);
-                }, 3000);*/
-                self.model.files.remove(fileModel);
+                }, 3000);
                 self.warning(data.error.message, data.error.data);
                 $.notify({
                     icon   : 'fa fa-fw fa-warning',
