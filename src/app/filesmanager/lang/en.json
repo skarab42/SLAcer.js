@@ -7,12 +7,12 @@
     "unknownType"      : "Unknown file type [ ${file} ]",
     "fileNotFound"     : "File not found [ ${file} ]",
     "fileNotReadable"  : "File not readable [ ${file} ]",
-    "unknownError"     : "Unknown error [ ${status} ] -> [ ${file} ]",
-    "undefinedError"   : "Undefined error: ${error}",
-    "noFacesFound"     : "No faces found [ ${status} ] -> [ ${file} ]",
-    "notEnoughVertices": "Not enough vertices to make a triangle [ ${status} ] -> [ ${file} ] [ line: ${line} ]",
-    "tooMuchVertices"  : "Too much vertices to make a triangle [ ${status} ] -> [ ${file} ] [ line: ${line} ]",
-    "loadAborted"      : "Aborted [ ${status} ] -> [ ${file} ]",
-    "loadStart"        : "Start [ ${status} ] -> [ ${file} ]",
-    "loadEnd"          : "End [ ${status} ] -> [ ${file} ]"
+    "unknownError"     : "Unknown error on ${action} [ ${file} ]",
+    "internalError"    : "Internal error: ${message} [ ${file} ]",
+    "noFacesFound"     : "No faces found on ${action} [ ${file} ]",
+    "notEnoughVertices": "Not enough vertices to make a triangle [ ${file}:${line} ]",
+    "tooMuchVertices"  : "Too much vertices to make a triangle [ ${file}:${line} ]",
+    "loadAborted"      : "Aborted ${action} [ ${file} ]",
+    "loadStart"        : "Start ${action} [ ${file} ]",
+    "loadEnd"          : "End ${action} [ ${file} ]"
 }

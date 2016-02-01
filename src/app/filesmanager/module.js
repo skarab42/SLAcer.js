@@ -78,26 +78,24 @@ var AppFilesmanager = GuiPanel.extend(
             if (data.error) {
                 fileModel.disable(true);
                 fileModel.status('error');
-                setTimeout(function() {
+                /*setTimeout(function() {
                     self.model.files.remove(fileModel);
-                }, 3000);
-
-                var message = typeof data.error !== 'string'
-                    ? data.error.message
-                    : data.error;
-
+                }, 3000);*/
+                self.model.files.remove(fileModel);
+                self.warning(data.error.message, data.error.data);
                 $.notify({
-                	title: '<strong>Error</strong>',
-                	message: message
-                },
-                {
-                    type: 'danger'
+                    icon   : 'fa fa-fw fa-warning',
+                	title  : '<strong>Oops!</strong>',
+                	message: self.getText(data.error.message, data.error.data)
+                }, {
+                    delay: 5000,
+                    type : 'danger',
+                    newest_on_top: false
                 });
-
             } else if (data.action === 'stream') {
                 fileModel.status('loaded');
             }
-            console.log(data);
+            //console.log(data);
         };
 
         loader.onFace = function(data) {

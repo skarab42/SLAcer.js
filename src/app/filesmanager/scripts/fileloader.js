@@ -31,6 +31,16 @@ var FileLoader = JSClass(
     },
 
     /**
+    * Notify an error.
+    *
+    * @method load
+    */
+    _error: function(action, message, data) {
+        var data = _.defaults({ action: action, file: this.file.name }, data || {});
+        this.onEnd({ action: action, error: { message: message, data: data } });
+    },
+
+    /**
     * Load the file.
     *
     * @method load
@@ -44,17 +54,22 @@ var FileLoader = JSClass(
 
         // if empty file
         if (self.file.size == 0) {
-            return self.onEnd({ action: 'check', error: 'emptyFile' });
+            //return self.onEnd({ action: 'check', error: 'emptyFile' });
+            return self._error('check', 'emptyFile');
         }
 
         // if disabled or unknown type
         if (! self.workers[self.type]) {
-            return self.onEnd({
+            var message = self.workers[self.type] === undefined
+                        ? 'unknownType' : 'disabledType';
+            return self._error('check', message);
+            /*return self.onEnd({
                 action: 'check',
-                error : self.workers[self.type] === undefined
-                      ? 'unknownType'
-                      : 'disabledType'
-            });
+                error : {
+                    message: message,
+                    data   : { file: self.file.name }
+                }
+            });*/
         }
 
         // trigger end check event
@@ -73,7 +88,12 @@ var FileLoader = JSClass(
             else if (e.data.type === 'face') {
                 self.onFace(e.data.data);
             }
-            else if (e.data.type === 'error' || e.data.type === 'end') {
+            else if (e.data.type === 'error') {
+                //self.onEnd(e.data.data);
+                var error = e.data.data.error;
+                self._error('read', error.message, error.data);
+            }
+            else if (e.data.type === 'end') {
                 self.onEnd(e.data.data);
             }
         };
@@ -100,7 +120,13 @@ var FileLoader = JSClass(
 
         reader.onloadend = function(e) {
             if (e.target.error) {
-                return self.onEnd({ action: 'read', error: e.target.error });
+                return self._error('read', 'internalError', {
+                    message: e.target.error.message
+                });
+                /*return self.onEnd({ action: 'read', error: {
+                    message: 'internalError',
+                    data   : { message: e.target.error.message }
+                });*/
             }
             self.onEnd({ action: 'read' });
             self.onStart({ action: 'parse' });

@@ -65,6 +65,21 @@ Progression.prototype.countdown = function() {
 
 // -----------------------------------------------------------------------------
 
+function postError(action, message, data) {
+    postMessage({
+        type: 'error',
+        data: {
+            action: action,
+            error : {
+                message: message,
+                data   : data || {}
+            }
+        }
+    });
+}
+
+// -----------------------------------------------------------------------------
+
 function parseBinary(reader) {
     var progression = new Progression('parse', reader.getUint32(80, true));
     postMessage({ type: 'progress', data: progression.info() });
@@ -169,19 +184,21 @@ function parseASCII(reader) {
             if (args[1] == 'normal') {
                 if (faceIndex) {
                     if (faceIndex < 3) {
-                        postMessage({ type: 'error', data: {
+                        postError('parse', 'notEnoughVertices', { line: start });
+                        /*postMessage({ type: 'error', data: {
                             action: 'parse',
                             error : 'notEnoughVertices',
                             data  : { line: start }
-                        }});
+                        }});*/
                         return false;
                     }
                     if (faceIndex > 3) {
-                        postMessage({ type: 'error', data: {
+                        postError('parse', 'tooMuchVertices', { line: start });
+                        /*postMessage({ type: 'error', data: {
                             action: 'parse',
                             error : 'tooMuchVertices',
                             data  : { line: start }
-                        }});
+                        }});*/
                         return false;
                     }
                 }
@@ -215,19 +232,21 @@ function parse(input) {
     try {
         var faces = binary ? parseBinary(reader) : parseASCII(reader);
         if (faces !== false && faces.length === 0) {
-            postMessage({ type: 'error', data: {
+            postError('parse', 'noFacesFound');
+            /*postMessage({ type: 'error', data: {
                 action: 'parse',
                 error : 'noFacesFound'
-            }});
+            }});*/
             faces = null;
         }
     }
     catch (e) {
-        postMessage({ type: 'error', data: {
+        postError('parse', 'internalError', { message: e.message });
+        /*postMessage({ type: 'error', data: {
             action: 'parse',
-            error : 'undefinedError',
+            error : 'internalError',
             data  : { message: e.message }
-        }});
+        }});*/
         faces = null;
     }
     faces && postMessage({ type: 'end', data: { action: 'parse' }});
