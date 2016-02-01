@@ -32,7 +32,7 @@
         event: {
             'hidden.bs.collapse': onCompressPanel,
             'shown.bs.collapse' : onExpendPanel
-        }" class="panel-body collapse"></div>
+        }" class="panel-body collapse"><i class="fa fa-cog fa-spin"></i> <span>loading...</span></div>
     <!-- Contextual menu -->
     <!-- ko if: contextMenuModel -->
     <div data-bind="template: {
