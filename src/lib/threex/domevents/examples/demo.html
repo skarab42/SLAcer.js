@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<script src='vendor/three.js/build/three.min.js'></script>
+<script src='vendor/three.js/examples/js/Projector.js'></script>
+<script src='bower_components/threex.suzanne/threex.suzanne.js'></script>
+<script src='../threex.domevents.js'></script>
+<body style='margin: 0px; background-color: #bbbbbb; overflow: hidden;'>
+<div style='position: absolute; padding-left: 10px; font-size:200%; color: white;'>
+	<strong>Received Events :</strong>
+	<div id='logs'></div>
+</div>
+<script>
+	var renderer	= new THREE.WebGLRenderer()
+	renderer.setSize( window.innerWidth, window.innerHeight )
+	document.body.appendChild( renderer.domElement )
+
+	var onRenderFcts= []
+	var scene	= new THREE.Scene()
+	var camera	= new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 1000)
+	camera.position.z = 3
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	//		set 3 point lighting						//
+	//////////////////////////////////////////////////////////////////////////////////
+
+	;(function(){
+		// add a ambient light
+		var light	= new THREE.AmbientLight( 0x020202 )
+		scene.add( light )
+		// add a light in front
+		var light	= new THREE.DirectionalLight('white', 1)
+		light.position.set(0.5, 0.5, 2)
+		scene.add( light )
+		// add a light behind
+		var light	= new THREE.DirectionalLight('white', 0.75)
+		light.position.set(-0.5, -0.5, -2)
+		scene.add( light )		
+	})()
+
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		init domEvents							//
+	//////////////////////////////////////////////////////////////////////////////////
+	
+	var domEvents	= new THREEx.DomEvents(camera, renderer.domElement)
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		comment								//
+	//////////////////////////////////////////////////////////////////////////////////
+	
+	THREEx.Suzanne.baseUrl	= 'bower_components/threex.suzanne/'
+	new THREEx.Suzanne.GeometryLoader(function onLoad(geometry){
+		// notify the geometry need to update normals
+		geometry.computeFaceNormals()
+		geometry.computeVertexNormals()
+		geometry.normalsNeedUpdate	= true
+		// create a mesh with it
+		var material	= new THREE.MeshPhongMaterial({
+			shading	: THREE.SmoothShading,
+		})
+		var mesh	= new THREE.Mesh( geometry, material )
+		mesh.scale.multiplyScalar(2)
+		// attach mesh to the scene
+		scene.add(mesh)
+
+		//////////////////////////////////////////////////////////////////////////////////
+		//		display the events log						//
+		//////////////////////////////////////////////////////////////////////////////////
+		
+		THREEx.DomEvents.eventNames.forEach(function(eventName){
+			if( eventName === 'mousemove' )	return
+			domEvents.addEventListener(mesh, eventName, function(event){
+				var domElement	= document.querySelector('#logs')
+				domElement.innerHTML	= event.type + '<br/>' + domElement.innerHTML
+			}, false)
+		})
+	})
+	
+
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		Camera Controls							//
+	//////////////////////////////////////////////////////////////////////////////////
+	var mouse	= {x : 0, y : 0}
+	document.addEventListener('mousemove', function(event){
+		mouse.x	= (event.clientX / window.innerWidth ) - 0.5
+		mouse.y	= (event.clientY / window.innerHeight) - 0.5
+	}, false)
+	onRenderFcts.push(function(delta, now){
+		camera.position.x += (mouse.x*5 - camera.position.x) * (delta*3)
+		camera.position.y += (mouse.y*5 - camera.position.y) * (delta*3)
+		camera.lookAt( scene.position )
+	})
+
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		render the scene						//
+	//////////////////////////////////////////////////////////////////////////////////
+	onRenderFcts.push(function(){
+		renderer.render( scene, camera );		
+	})
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	//		loop runner							//
+	//////////////////////////////////////////////////////////////////////////////////
+	var lastTimeMsec= null
+	requestAnimationFrame(function animate(nowMsec){
+		// keep looping
+		requestAnimationFrame( animate );
+		// measure time
+		lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
+		var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
+		lastTimeMsec	= nowMsec
+		// call each update function
+		onRenderFcts.forEach(function(onRenderFct){
+			onRenderFct(deltaMsec/1000, nowMsec/1000)
+		})
+	})
+</script></body>

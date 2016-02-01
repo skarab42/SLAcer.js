@@ -1,0 +1,7 @@
+{
+    "require": ["lib/three"],
+    "scripts": [
+        "threex.domevents.js",
+        "examples/vendor/three.js/examples/js/Projector.js"
+    ]
+}

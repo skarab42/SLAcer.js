@@ -67,6 +67,14 @@ var Viewer3d = JSClass(
         },
         axes: {
             enabled: true
+        },
+        materials: {
+            default: {
+                material: THREE.MeshLambertMaterial,
+                settings: {
+                    color: 0x0000ff
+                }
+            }
         }
     },
 
@@ -141,6 +149,9 @@ var Viewer3d = JSClass(
         this.controls.addEventListener('change', function() {
             self.render();
         });
+
+        // dom events
+        this.events = new THREEx.DomEvents(this.camera, this.canvas);
 
         // set center point
         this.setCenter();
@@ -623,5 +634,101 @@ var Viewer3d = JSClass(
     */
     render: function() {
         this.renderer.render(this.scene, this.camera);
+    },
+
+    // -------------------------------------------------------------------------
+
+    /**
+    * Return an THREE.BufferGeometry object populate with provides faces.
+    *
+    * @method createBufferGeometry
+    * @param  {Array} faces
+    */
+    createBufferGeometry: function(faces) {
+        var geometry = new THREE.BufferGeometry();
+        var vertices = new Float32Array(faces.length * 3 * 3);
+        var normals  = new Float32Array(faces.length * 3 * 3);
+        var triangle = null;
+        var vertex   = null;
+        var offset   = 0;
+        var x, y, z;
+
+        for (var i = 0; i < faces.length; i++) {
+            triangle = faces[i];
+
+            x = triangle.normals[0];
+            y = triangle.normals[1];
+            z = triangle.normals[2];
+
+            for (var j = 0; j  < triangle.vertices.length; j++) {
+                vertex = triangle.vertices[j];
+
+                normals[offset]     = x;
+                normals[offset + 1] = y;
+                normals[offset + 2] = z;
+
+                vertices[offset]     = vertex[0];
+                vertices[offset + 1] = vertex[1];
+                vertices[offset + 2] = vertex[2];
+
+                offset += 3;
+            }
+        }
+
+        geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+        geometry.addAttribute('normal'  , new THREE.BufferAttribute(normals , 3));
+
+        return geometry;
+    },
+
+    /**
+    * Return an instance from an registred material.
+    *
+    * @method getMaterial
+    * @param  {String} name
+    */
+    getMaterial: function(name) {
+        var m = this.settings.materials[name || 'default'];
+        return new m.material(m.settings);
+    },
+
+    /**
+    * Create and add a mesh from an array of faces.
+    *
+    * @method addMesh
+    * @param  {Array} faces
+    */
+    addMesh: function(faces, material) {
+        // create geometry from faces collection
+        var geometry = this.createBufferGeometry(faces);
+
+        // compute geometry
+        geometry.computeBoundingSphere();
+        geometry.computeBoundingBox();
+        geometry.center();
+
+        // set bottom of object at Z = 0
+        geometry.translate(0, 0, geometry.boundingBox.max.z);
+
+        // get material
+        var material = this.getMaterial(material);
+
+        // create the mesh object
+        var mesh = new THREE.Mesh(geometry, material);
+
+        // center mesh on build plate
+        var position = {
+            x: this.settings.buildVolume.size.x / 2,
+            y: this.settings.buildVolume.size.y / 2,
+            z: 0
+        };
+
+        // events listeners
+        this.events.addEventListener(mesh, 'click', function(event) {
+            console.log('you clicked on the mesh: ', mesh.uuid);
+        }, false)
+
+        // add element to scene
+        this.setElement(mesh.uuid, mesh, { position: position });
     }
 });

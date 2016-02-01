@@ -63,6 +63,13 @@ var AppViewer3d = GuiPanel.extend(
         self.onPanelMoved = function(module, ui) {
             self === module && self.resize();
         };
+
+        // on file loaded (from file)
+        self.onFileLoaded = function(module, data) {
+            //console.log('new file', data.file, data.faces);
+            self.viewer.addMesh(data.faces);
+            self.viewer.render();
+        };
     },
 
     /**

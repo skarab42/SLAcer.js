@@ -56,6 +56,7 @@ var AppFilesmanager = GuiPanel.extend(
 
         // create file loader
         var loader = new FileLoader(file);
+        var faces  = [];
 
         loader.onStart = function(data) {
             //console.log('start', data);
@@ -99,8 +100,10 @@ var AppFilesmanager = GuiPanel.extend(
 
         loader.onFace = function(data) {
             //console.log('face', data);
+            faces.push(data.face);
             if (data.last) {
                 fileModel.facesCount(data.num);
+                self.triggerEvent('fileLoaded', { file: file, faces: faces });
             }
         };
 
