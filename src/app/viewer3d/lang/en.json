@@ -1,3 +1,4 @@
 {
-    "title": "3D Viewer"
+    "title"               : "3D Viewer",
+    "duplicateElementName": "Element '${name}' already set; Call 'removeElement' before calling 'setElement' or  set 'replace' option to 'TRUE' when calling 'setElement'"
 }

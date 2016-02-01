@@ -1,0 +1,10 @@
+{
+    "scripts": [
+        "three.min.js",
+        "utils/stats.min.js",
+        "controls/OrbitControls.js",
+        "controls/TransformControls.js",
+        "helpers/GridHelper.js",
+        "helpers/AxesHelper.js"
+    ]
+}
