@@ -18,7 +18,7 @@ var AppViewer3d = GuiPanel.extend(
         // viewer size
         self.size = {
             width : 800,
-            height: 400
+            height: self.getLocal('height', 400)
         };
 
         // create viewer instance
@@ -40,16 +40,22 @@ var AppViewer3d = GuiPanel.extend(
             model.$viewer.resizable({
                 handles: 's',
                 resize : function(event, ui) {
+                    // update/save new height
                     self.size.height = ui.size.height;
+                    self.setLocal('height', self.size.height);
+
+                    // resize to fit parent height
                     self.viewer.resize(self.size.width, self.size.height);
                     self.viewer.render();
                 }
             });
         };
 
+        // on expand panel
         self.model.onExpendPanel = function(self, event) {
             // Call parent method
             GuiPanelModel.prototype.onExpendPanel.call(this, self, event);
+            // resize to fit parent
             self.module.resize();
         };
 
@@ -65,7 +71,10 @@ var AppViewer3d = GuiPanel.extend(
     * @method resize
     */
     resize: function() {
+        // update/save new width
         this.size.width = this.model.$viewer.width();
+
+        // resize the viewer
         this.viewer.resize(this.size.width, this.size.height);
         this.viewer.render();
     }
