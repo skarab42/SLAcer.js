@@ -13,10 +13,9 @@
 <ul class="files-list list-group" data-bind="foreach: { data:files, as: 'file'}">
     <li data-bind="css: file.css, event: { click: selectFile }" class="list-group-item clearfix">
 
-        <div class="file-info">
-            <span class="label label-warning">
-                <span data-bind="html: file.type">n/a</span>
-            </span>
+        <div class="file-info clearfix">
+            <i data-bind="visible: !file.selected()" class="fa fa-fw fa-square-o"></i>
+            <i data-bind="visible: file.selected" class="fa fa-fw fa-check-square-o"></i>
             <span data-bind="html: file.shortName, attr: { title: file.name }"></span>
 
             <span class="label label-default pull-right">
@@ -33,6 +32,9 @@
                 F : <span data-bind="html: file.facesCount">n/a</span>
             </span>
             <!-- /ko -->
+            <span class="label label-warning pull-right">
+                <span data-bind="html: file.type">n/a</span>
+            </span>
         </div>
 
         <!-- ko if: file.progressBar -->

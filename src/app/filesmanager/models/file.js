@@ -64,7 +64,7 @@ var AppFilesmanagerFileModel = GuiModuleModel.extend(
         });
 
         self.selectFile = function(self, event) {
-            if (! self.disable()) {
+            if (! self.disable() && self.status() === 'loaded') {
                 self.selected(! self.selected());
             }
         }
