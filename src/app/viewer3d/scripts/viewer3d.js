@@ -600,6 +600,23 @@ var Viewer3d = JSClass(
     // -------------------------------------------------------------------------
 
     /**
+    * Resize the scene.
+    *
+    * @method setView
+    * @param  {String} view
+    */
+    resize: function(width, height) {
+        // update camera
+        this.camera.aspect = width / height;
+        this.camera.updateProjectionMatrix();
+
+        // resize the renderer
+        this.renderer.setSize(width, height);
+    },
+
+    // -------------------------------------------------------------------------
+
+    /**
     * Render the scene.
     *
     * @method render

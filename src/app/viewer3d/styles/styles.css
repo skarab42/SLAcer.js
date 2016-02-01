@@ -1,0 +1,6 @@
+#viewer3d {
+}
+
+#viewer3d .ui-resizable-handle:hover {
+    background-color: orange;
+}
