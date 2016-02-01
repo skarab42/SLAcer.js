@@ -6,22 +6,26 @@ var Viewer3d = JSClass(
 {
     // defaults settings.
     defaults: {
+        view: 'default',
         size: {
             width : 800,
             height: 600
         },
         buildVolume: {
-            x    : 200,
-            y    : 200,
-            z    : 200,
-            color: 0xffa500,
-            alpha: 0.1
+            size: {
+                x: 200,
+                y: 200,
+                z: 200
+            },
+            enabled: true,
+            color  : 0xffa500,
+            alpha  : 0.1
         },
         camera: {
-            FOV  : 75,
-            ratio: 'auto',
-            near : 1,
-            far  : 10000
+            fov   : 75,
+            aspect: 'auto',
+            near  : 1,
+            far   : 10000
         },
         renderer: {
             antialias: true,
@@ -40,13 +44,13 @@ var Viewer3d = JSClass(
                 enabled : true,
                 color   : 0xffffff,
                 alpha   : 0.6,
-                position: 'auto' // front/top/right
+                position: 'auto' // front/top/left
             },
             directional2: {
                 enabled : true,
                 color   : 0xffffff,
                 alpha   : 0.1,
-                position: 'auto' // back/top/right
+                position: 'auto' // front/top/right
             }
         },
         floor: {
@@ -94,9 +98,9 @@ var Viewer3d = JSClass(
         var settings  = _.defaultsDeep(settings || {}, this.defaults);
         this.settings = settings;
 
-        // auto set ratio
-        if (settings.camera.ratio == 'auto') {
-            settings.camera.ratio = settings.size.width / settings.size.height;
+        // auto set aspect
+        if (settings.camera.aspect == 'auto') {
+            settings.camera.aspect = settings.size.width / settings.size.height;
         }
 
         // create scene
@@ -104,13 +108,11 @@ var Viewer3d = JSClass(
 
         // create camera
         this.camera = new THREE.PerspectiveCamera(
-            settings.camera.FOV,
-            settings.camera.ratio,
+            settings.camera.fov,
+            settings.camera.aspect,
             settings.camera.near,
             settings.camera.far
         );
-
-        this.camera.position.z = 100;
 
         // set camera orbit around Z axis
         this.camera.up = new THREE.Vector3(0, 0, 1);
@@ -154,11 +156,14 @@ var Viewer3d = JSClass(
         settings.axes.enabled        && this.setAxes();
         settings.buildVolume.enabled && this.setBuildVolume();
 
+        // set default view
+        this.setView(settings.view);
+
         // (re)render
         this.render();
     },
 
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     /**
     * Get an element from the scene.
@@ -286,9 +291,9 @@ var Viewer3d = JSClass(
 
         // update position
         center.position.set(
-            (x !== undefined) ? x : (this.settings.buildVolume.x / 2),
-            (y !== undefined) ? y : (this.settings.buildVolume.y / 2),
-            (z !== undefined) ? z : (this.settings.buildVolume.z / 2)
+            (x !== undefined) ? x : (this.settings.buildVolume.size.x / 2),
+            (y !== undefined) ? y : (this.settings.buildVolume.size.y / 2),
+            (z !== undefined) ? z : (this.settings.buildVolume.size.z / 2)
         );
     },
 
@@ -319,7 +324,7 @@ var Viewer3d = JSClass(
 
         // set position
         if (settings.position === 'auto') {
-            light.position.set(bv.x, id ? bv.y : 0, bv.z / 1.5);
+            light.position.set(id ? bv.size.x : 0, 0, bv.size.z / 1.5);
         } else {
             light.position = _.assign(light.position, settings.position)
         }
@@ -365,15 +370,15 @@ var Viewer3d = JSClass(
         // create element
         var floor = new THREE.Mesh(
             new THREE.PlaneBufferGeometry(
-                this.settings.buildVolume.x + this.settings.floor.margin,
-                this.settings.buildVolume.y + this.settings.floor.margin
+                this.settings.buildVolume.size.x + this.settings.floor.margin,
+                this.settings.buildVolume.size.y + this.settings.floor.margin
             ),
             new THREE.MeshLambertMaterial({ color: this.settings.floor.color })
         );
 
         // set position
-        floor.position.x = this.settings.buildVolume.x / 2;
-        floor.position.y = this.settings.buildVolume.y / 2;
+        floor.position.x = this.settings.buildVolume.size.x / 2;
+        floor.position.y = this.settings.buildVolume.size.y / 2;
         floor.position.z = 0;
 
         // enable shadow map
@@ -394,10 +399,10 @@ var Viewer3d = JSClass(
     setGrid: function() {
         // create element
         var grid = new THREE.GridHelper(
-            this.settings.buildVolume.x, this.settings.buildVolume.y,
-            this.settings.size1        , this.settings.size1,
-            this.settings.size2        , this.settings.size2,
-            this.settings.grid.color1  , this.settings.grid.color2
+            this.settings.buildVolume.size.x, this.settings.buildVolume.size.y,
+            this.settings.grid.size1        , this.settings.grid.size1,
+            this.settings.grid.size2        , this.settings.grid.size2,
+            this.settings.grid.color1       , this.settings.grid.color2
         );
 
         // render order
@@ -415,9 +420,9 @@ var Viewer3d = JSClass(
     setAxes: function() {
         // create and add element to scene
         var axes = new THREE.AxesHelper(
-            this.settings.buildVolume.x,
-            this.settings.buildVolume.y,
-            this.settings.buildVolume.z
+            this.settings.buildVolume.size.x,
+            this.settings.buildVolume.size.y,
+            this.settings.buildVolume.size.z
         );
 
         // render order
@@ -436,9 +441,9 @@ var Viewer3d = JSClass(
         // create element
         var buildVolume = new THREE.Mesh(
             new THREE.BoxGeometry(
-                this.settings.buildVolume.x,
-                this.settings.buildVolume.y,
-                this.settings.buildVolume.z
+                this.settings.buildVolume.size.x,
+                this.settings.buildVolume.size.y,
+                this.settings.buildVolume.size.z
             ),
             new THREE.MeshLambertMaterial({
                 transparent: true,
@@ -448,15 +453,148 @@ var Viewer3d = JSClass(
         );
 
         // set position
-        buildVolume.position.x = this.settings.buildVolume.x / 2;
-        buildVolume.position.y = this.settings.buildVolume.y / 2;
-        buildVolume.position.z = this.settings.buildVolume.z / 2;
+        buildVolume.position.x = this.settings.buildVolume.size.x / 2;
+        buildVolume.position.y = this.settings.buildVolume.size.y / 2;
+        buildVolume.position.z = this.settings.buildVolume.size.z / 2;
 
         // render order
         buildVolume.renderOrder = 4;
 
         // add element to scene
         this.setElement('buildVolume', buildVolume);
+    },
+
+    // -------------------------------------------------------------------------
+
+    /**
+    * Get the minimal distance to show an plan.
+    *
+    * @method getVisibleDistance
+    * @param  {Integer} width
+    * @param  {Integer} height
+    * @return {Integer}
+    */
+    getVisibleDistance: function(width, height) {
+        var margin = this.settings.floor.margin * 2;
+        var size   = height + margin;
+        var aspect = width / height;
+
+        // landscape or portrait orientation
+        if (this.camera.aspect < aspect) {
+            size = (width + margin) / this.camera.aspect;
+        }
+
+        return size / 2 / Math.tan(Math.PI * this.camera.fov / 360);
+    },
+
+    /**
+    * Set the camera look at center of build volume.
+    *
+    * @method lookAtCenter
+    * @param  {Boolean} update
+    */
+    lookAtCenter: function(update) {
+        // set camera target to center of build volume
+        this.controls.target  = this.getElement('center').position;
+        this.controls.target0 = this.controls.target.clone();
+
+        // update controls if requested
+        update && this.controls.update();
+    },
+
+    /**
+    * Set the view.
+    *
+    * @method setView
+    * @param  {String} view
+    */
+    setView: function(view) {
+        // reset camera position
+        this.controls.reset();
+
+        // set new position
+        var x = 0;
+        var y = 0;
+        var z = 0;
+        var w, h;
+
+        var size = this.settings.buildVolume.size;
+
+        view = view || 'default';
+
+        if (view == 'default' || view == 'front') {
+            x = size.x / 2;
+            z = size.z / 2;
+            w = size.x;
+            h = size.z;
+        }
+        else if (view == 'right') {
+            x = size.x;
+            y = size.y / 2;
+            z = size.z / 2;
+            w = size.y;
+            h = size.z;
+        }
+        else if (view == 'back') {
+            x = size.x / 2;
+            y = size.y;
+            z = size.z / 2;
+            w = size.x;
+            h = size.z;
+        }
+        else if (view == 'left') {
+            y = size.y / 2;
+            z = size.z / 2;
+            w = size.y;
+            h = size.z;
+        }
+        else if (view == 'top') {
+            x = size.x / 2;
+            y = size.y / 2;
+            z = size.z;
+            w = size.x;
+            h = size.y;
+        }
+        else if (view == 'bottom') {
+            x = size.x / 2;
+            y = size.y / 2;
+            w = size.x;
+            h = size.y;
+        }
+
+        // ensure the build volume is visible
+        var distance = this.getVisibleDistance(w, h);
+
+        if (view == 'default' || view == 'front') {
+            y = y - distance;
+        }
+        else if (view == 'right') {
+            x = x + distance;
+        }
+        else if (view == 'back') {
+            y = y + distance;
+        }
+        else if (view == 'left') {
+            x = x - distance;
+        }
+        else if (view == 'top') {
+            z = z + distance;
+        }
+        else if (view == 'bottom') {
+            z = z - distance;
+        }
+
+        // set default view
+        if (view == 'default') {
+            z = z * 2.5;
+            x = x * 2.5;
+        }
+
+        // set new camera position
+        this.camera.position.set(x, y, z);
+
+        // set the camera look at center of build volume
+        this.lookAtCenter(true);
     },
 
     // -------------------------------------------------------------------------
