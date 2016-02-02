@@ -159,7 +159,7 @@ var Viewer3d = JSClass(
         self.events = new THREEx.DomEvents(self.camera, self.canvas);
 
         // current action
-        self.keyboardActionEnabled = false;
+        self.keyboardActionEnabled = true;
         self.keyboardAction = {
             target   : 'position',
             axis     : 'x',
