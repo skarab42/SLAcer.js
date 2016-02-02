@@ -162,7 +162,7 @@ var Viewer3d = JSClass(
         self.keyboardActionEnabled = false;
         self.keyboardAction = {
             target   : 'position',
-            axis     : 'x',
+            axis     : { x: true, y: false, z: false },
             unit     : 1,
             operation: '+'
         };
@@ -185,38 +185,44 @@ var Viewer3d = JSClass(
             // set action and parameters
             if (self.keyboard.eventMatches(e, 'm')) {
                 self.keyboardAction.target = 'position';
+                self.keyboardAction.axis   = { x: true, y: false, z: false };
+                self.keyboardAction.unit   = 1;
             }
             else if (self.keyboard.eventMatches(e, 'r')) {
                 self.keyboardAction.target = 'rotation';
+                self.keyboardAction.axis   = { x: false, y: false, z: true };
+                self.keyboardAction.unit   = 1;
             }
             else if (self.keyboard.eventMatches(e, 's')) {
                 self.keyboardAction.target = 'scale';
+                self.keyboardAction.axis   = { x: true, y: true, z: true };
+                self.keyboardAction.unit   = 0.1;
             }
             else if (self.keyboard.eventMatches(e, 'x')) {
-                self.keyboardAction.axis = 'x';
+                self.keyboardAction.axis.x = ! self.keyboardAction.axis.x;
             }
             else if (self.keyboard.eventMatches(e, 'y')) {
-                self.keyboardAction.axis = 'y';
+                self.keyboardAction.axis.y = ! self.keyboardAction.axis.y;
             }
             else if (self.keyboard.eventMatches(e, 'z')) {
-                self.keyboardAction.axis = 'z';
+                self.keyboardAction.axis.z = ! self.keyboardAction.axis.z;
             }
 
             // increment/decrement on current action
-            var executeAction = false;
+            var transformSelectedMeshs = false;
 
             if (self.keyboard.eventMatches(e, 'plus')) {
                 self.keyboardAction.operation = '+';
-                executeAction = true;
+                transformSelectedMeshs = true;
             }
             else if (self.keyboard.eventMatches(e, 'minus')) {
                 self.keyboardAction.operation = '-';
-                executeAction = true;
+                transformSelectedMeshs = true;
             }
 
-            if (executeAction) {
+            if (transformSelectedMeshs) {
                 //console.log(self.keyboardAction);
-                self.executeAction(self.keyboardAction);
+                self.transformSelectedMeshs(self.keyboardAction);
                 self.render();
             }
         });
@@ -837,19 +843,28 @@ var Viewer3d = JSClass(
     // -------------------------------------------------------------------------
 
     /**
-    * Execute an action on selected meshs.
+    * Execute an transformation on selected meshs.
     *
-    * @method executeAction
+    * @method transformSelectedMeshs
     * @param  {Object} action
     */
-    executeAction: function(action) {
-        var id, mesh, oldValue, newValue;
+    transformSelectedMeshs: function(action) {
+        var id, mesh, unit, axis;
         for (id in this.selectedMeshs) {
             mesh = this.selectedMeshs[id];
-            if (action.operation == '+') {
-                mesh[action.target][action.axis] += action.unit;
-            } else if (action.operation == '-') {
-                mesh[action.target][action.axis] -= action.unit;
+            unit = action.unit;
+            if (action.target == 'rotation') {
+                unit = unit * Math.PI / 180;
+            }
+            for (axis in action.axis) {
+                if (! action.axis[axis]) {
+                    continue;
+                }
+                if (action.operation == '+') {
+                    mesh[action.target][axis] += unit;
+                } else if (action.operation == '-') {
+                    mesh[action.target][axis] -= unit;
+                }
             }
         }
     }
