@@ -1,4 +1,9 @@
 {
     "autoload": true,
-    "require" : ["app/workspace", "lib/three", "lib/threex/domevents"]
+    "require" : [
+        "app/workspace",
+        "lib/three",
+        "lib/threex/domevents",
+        "lib/threex/keyboardstate"
+    ]
 }
