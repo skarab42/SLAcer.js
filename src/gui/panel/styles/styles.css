@@ -1,28 +1,23 @@
-.panel
-{
+.panel {
     margin-bottom: 15px;
 }
 
-.panel.ui-sortable-helper
-{
+.panel.ui-sortable-helper {
     -webkit-box-shadow: 0px 0px 8px 0px rgba(50, 50, 50, 0.75);
     -moz-box-shadow:    0px 0px 8px 0px rgba(50, 50, 50, 0.75);
     box-shadow:         0px 0px 8px 0px rgba(50, 50, 50, 0.75);
 }
 
-.panel.collapsed .panel-heading
-{
+.panel.collapsed .panel-heading {
     border-bottom: 0;
 }
 
 .panel-title,
-.modal-title
-{
+.modal-title {
     text-transform: capitalize;
 }
 
-.panel-placeholder
-{
+.panel-placeholder {
     background-color: #eee;
     border: 1px #555 dotted;
 
@@ -36,64 +31,70 @@
 }
 
 .panel-default,
-.panel-default .panel-heading
-{
+.panel-default .panel-heading {
     border-color: #bbb;
 }
 
 /* gray : #ccc / #555 */
 .gray-panel,
 .gray-panel .panel-heading,
-.gray-panel .panel-heading button
-{
+.gray-panel .panel-heading button {
     border-color: #999;
 }
 
-.gray-panel .panel-heading
-{
+.gray-panel .panel-heading {
     color: #333;
     background-color: #ccc;
 }
 
-.gray-panel .panel-heading button
-{
+.gray-panel .panel-heading button {
     color: #ccc;
 }
 
 /* blue : #428bca / #357ebd */
 .blue-panel,
 .blue-panel .panel-heading,
-.blue-panel .panel-heading button
-{
+.blue-panel .panel-heading button {
     border-color: #357ebd;
 }
 
-.blue-panel .panel-heading
-{
+.blue-panel .panel-heading {
     color: #fff;
     background-color: #428bca;
 }
 
-.blue-panel .panel-heading button
-{
+.blue-panel .panel-heading button {
     color: #428bca;
 }
 
 /* orange : #f0ad4e / #de9226 */
 .orange-panel,
 .orange-panel .panel-heading,
-.orange-panel .panel-heading button
-{
+.orange-panel .panel-heading button {
     border-color: #de9226;
 }
 
-.orange-panel .panel-heading
-{
+.orange-panel .panel-heading {
     color: #fff;
     background-color: #f0ad4e;
 }
 
-.orange-panel .panel-heading button
-{
+.orange-panel .panel-heading button {
     color: #f0ad4e;
+}
+
+/* red : #d43f3a / #c7254e */
+.red-panel,
+.red-panel .panel-heading,
+.red-panel .panel-heading button {
+    border-color: #c7254e;
+}
+
+.red-panel .panel-heading {
+    color: #fff;
+    background-color: #d43f3a;
+}
+
+.red-panel .panel-heading button {
+    color: #d43f3a;
 }

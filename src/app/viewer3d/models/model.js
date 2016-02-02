@@ -34,7 +34,7 @@ var AppViewer3dModel = GuiPanelModel.extend(
     */
     setup: function() {
         this.color('orange');
-        this.icon('diamond');
+        this.icon('cube');
         this.$viewer = null;
     },
 
