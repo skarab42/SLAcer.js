@@ -4,6 +4,7 @@
         "app/workspace",
         "lib/three",
         "lib/threex/domevents",
-        "lib/threex/keyboardstate"
+        "lib/threex/keyboardstate",
+        "lib/randomcolor"
     ]
 }
