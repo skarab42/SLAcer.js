@@ -105,9 +105,12 @@ var Viewer3d = JSClass(
     * @constructor
     */
     create: function(settings) {
+        // self alias
+        var self = this;
+
         // merge user and defaults settings
-        var settings  = _.defaultsDeep(settings || {}, this.defaults);
-        this.settings = settings;
+        var settings  = _.defaultsDeep(settings || {}, self.defaults);
+        self.settings = settings;
 
         // auto set aspect
         if (settings.camera.aspect == 'auto') {
@@ -115,10 +118,10 @@ var Viewer3d = JSClass(
         }
 
         // create scene
-        this.scene = new THREE.Scene();
+        self.scene = new THREE.Scene();
 
         // create camera
-        this.camera = new THREE.PerspectiveCamera(
+        self.camera = new THREE.PerspectiveCamera(
             settings.camera.fov,
             settings.camera.aspect,
             settings.camera.near,
@@ -126,58 +129,123 @@ var Viewer3d = JSClass(
         );
 
         // set camera orbit around Z axis
-        this.camera.up = new THREE.Vector3(0, 0, 1);
+        self.camera.up = new THREE.Vector3(0, 0, 1);
 
         // create renderer
-        this.renderer = new THREE.WebGLRenderer(settings.renderer);
+        self.renderer = new THREE.WebGLRenderer(settings.renderer);
 
         // set renderer size and background color
-        this.renderer.setSize(settings.size.width, settings.size.height);
-        this.renderer.setClearColor(settings.renderer.color);
+        self.renderer.setSize(settings.size.width, settings.size.height);
+        self.renderer.setClearColor(settings.renderer.color);
 
         // enable/disable/configure shadow map
-        this.renderer.shadowMap = _.assign(
-            this.renderer.shadowMap, settings.shadowMap
+        self.renderer.shadowMap = _.assign(
+            self.renderer.shadowMap, settings.shadowMap
         );
 
         // render dom element alias
-        this.canvas = this.renderer.domElement;
-        this.canvas.addEventListener('contextmenu', function(e) {
+        self.canvas = self.renderer.domElement;
+        self.canvas.addEventListener('contextmenu', function(e) {
             e.stopPropagation();
         });
 
         // set renderer controls
-        var self = this;
-        this.controls = new THREE.OrbitControls(this.camera, this.canvas);
-        this.controls.addEventListener('change', function() {
+        self.controls = new THREE.OrbitControls(self.camera, self.canvas);
+        self.controls.addEventListener('change', function() {
             self.render();
         });
 
-        // dom events
-        this.events = new THREEx.DomEvents(this.camera, this.canvas);
+        // dom events (mouse)
+        self.events = new THREEx.DomEvents(self.camera, self.canvas);
+
+        // current action
+        self.keyboardActionEnabled = false;
+        self.keyboardAction = {
+            target   : 'position',
+            axis     : 'x',
+            unit     : 1,
+            operation: '+'
+        };
+
+        // keyboard events
+        THREEx.KeyboardState.ALIAS.plus  = 107;
+        THREEx.KeyboardState.ALIAS.minus = 109;
+        self.keyboard = new THREEx.KeyboardState();
+        self.keyboard.domElement.addEventListener('keydown', function(e) {
+            // enable/disable keyboard action
+            if (self.keyboard.eventMatches(e, 'escape')) {
+                self.keyboardActionEnabled = ! self.keyboardActionEnabled;
+            }
+
+            // if disabled...
+            if (! self.keyboardActionEnabled) {
+                return false;
+            }
+
+            // set action and parameters
+            if (self.keyboard.eventMatches(e, 'm')) {
+                self.keyboardAction.target = 'position';
+            }
+            else if (self.keyboard.eventMatches(e, 'r')) {
+                self.keyboardAction.target = 'rotation';
+            }
+            else if (self.keyboard.eventMatches(e, 's')) {
+                self.keyboardAction.target = 'scale';
+            }
+            else if (self.keyboard.eventMatches(e, 'x')) {
+                self.keyboardAction.axis = 'x';
+            }
+            else if (self.keyboard.eventMatches(e, 'y')) {
+                self.keyboardAction.axis = 'y';
+            }
+            else if (self.keyboard.eventMatches(e, 'z')) {
+                self.keyboardAction.axis = 'z';
+            }
+
+            // increment/decrement on current action
+            var executeAction = false;
+
+            if (self.keyboard.eventMatches(e, 'plus')) {
+                self.keyboardAction.operation = '+';
+                executeAction = true;
+            }
+            else if (self.keyboard.eventMatches(e, 'minus')) {
+                self.keyboardAction.operation = '-';
+                executeAction = true;
+            }
+
+            if (executeAction) {
+                //console.log(self.keyboardAction);
+                self.executeAction(self.keyboardAction);
+                self.render();
+            }
+        });
 
         // set center point
-        this.setCenter();
+        self.setCenter();
 
         // add the light's
-        settings.lights.ambient.enabled      && this.setAmbientLight();
-        settings.lights.directional1.enabled && this.setDirectionalLight(1);
-        settings.lights.directional2.enabled && this.setDirectionalLight(2);
+        settings.lights.ambient.enabled      && self.setAmbientLight();
+        settings.lights.directional1.enabled && self.setDirectionalLight(1);
+        settings.lights.directional2.enabled && self.setDirectionalLight(2);
 
         // set others built in elements
-        settings.floor.enabled       && this.setFloor();
-        settings.grid.enabled        && this.setGrid();
-        settings.axes.enabled        && this.setAxes();
-        settings.buildVolume.enabled && this.setBuildVolume();
+        settings.floor.enabled       && self.setFloor();
+        settings.grid.enabled        && self.setGrid();
+        settings.axes.enabled        && self.setAxes();
+        settings.buildVolume.enabled && self.setBuildVolume();
 
         // set default view
-        this.setView(settings.view);
+        self.setView(settings.view);
 
         // set starting z-index (renderOrder for meshs)
-        this.zIndex = 10;
+        self.zIndex = 10;
+
+        // selected meshs collection indexed by uuid
+        self.selectedMeshs = {};
 
         // (re)render
-        this.render();
+        self.render();
     },
 
     // -------------------------------------------------------------------------
@@ -742,19 +810,47 @@ var Viewer3d = JSClass(
 
         // events listeners
         self.events.addEventListener(mesh, 'dblclick', function(event) {
-            console.log('you clicked on the mesh: ', mesh.uuid);
+            //console.log('you clicked on the mesh: ', mesh.uuid);
             mesh.selected = ! mesh.selected; // toggle selection
             mesh.material.color.setHex(
                 mesh.selected ? self.settings.colors.selected : color
             );
-            mesh.renderOrder = self.zIndex++;
+            if (mesh.selected) {
+                self.selectedMeshs[mesh.uuid] = mesh;
+                mesh.material.color.setHex(self.settings.colors.selected);
+            } else {
+                self.selectedMeshs[mesh.uuid] = null;
+                delete self.selectedMeshs[mesh.uuid];
+                mesh.material.color.setHex(color);
+            }
+            mesh.renderOrder = self.zIndex++; // force on top
             self.render();
-        }, false)
+        }, false);
 
         // set element to center of build plate
         self.setElement(mesh.uuid, mesh, { position: {
             x: self.settings.buildVolume.size.x / 2,
             y: self.settings.buildVolume.size.y / 2
         }});
+    },
+
+    // -------------------------------------------------------------------------
+
+    /**
+    * Execute an action on selected meshs.
+    *
+    * @method executeAction
+    * @param  {Object} action
+    */
+    executeAction: function(action) {
+        var id, mesh, oldValue, newValue;
+        for (id in this.selectedMeshs) {
+            mesh = this.selectedMeshs[id];
+            if (action.operation == '+') {
+                mesh[action.target][action.axis] += action.unit;
+            } else if (action.operation == '-') {
+                mesh[action.target][action.axis] -= action.unit;
+            }
+        }
     }
 });
