@@ -230,20 +230,20 @@ var Viewer3d = JSClass(
             }
 
             // increment/decrement on current action
-            var transformSelectedMeshs = false;
+            var transformSelectedMeshes = false;
 
             if (self.keyboard.eventMatches(e, 'right') || self.keyboard.eventMatches(e, 'up') || self.keyboard.eventMatches(e, 'pageup')) {
                 self.keyboardAction.operation = '+';
-                transformSelectedMeshs = true;
+                transformSelectedMeshes = true;
             }
             else if (self.keyboard.eventMatches(e, 'left') || self.keyboard.eventMatches(e, 'down') || self.keyboard.eventMatches(e, 'pagedown')) {
                 self.keyboardAction.operation = '-';
-                transformSelectedMeshs = true;
+                transformSelectedMeshes = true;
             }
 
-            if (transformSelectedMeshs) {
+            if (transformSelectedMeshes) {
                 //console.log(self.keyboardAction);
-                self.transformSelectedMeshs(self.keyboardAction);
+                self.transformSelectedMeshes(self.keyboardAction);
                 self.render();
             }
         });
@@ -265,11 +265,11 @@ var Viewer3d = JSClass(
         // set default view
         self.setView(settings.view);
 
-        // set starting z-index (renderOrder for meshs)
+        // set starting z-index (renderOrder for meshes)
         self.zIndex = 10;
 
-        // selected meshs collection indexed by uuid
-        self.selectedMeshs = {};
+        // selected meshes collection indexed by uuid
+        self.selectedMeshes = {};
 
         // (re)render
         self.render();
@@ -502,7 +502,7 @@ var Viewer3d = JSClass(
         // double click on floor to unselect all object
         var self = this;
         this.events.addEventListener(floor, 'dblclick', function(event) {
-            self.unselectAllMeshs();
+            self.unselectAllMeshes();
             self.render();
         });
 
@@ -873,11 +873,11 @@ var Viewer3d = JSClass(
     setMeshSelected: function(mesh, selected) {
         var selected  = selected === undefined ? true : selected;
         if (selected) {
-            this.selectedMeshs[mesh.uuid] = mesh;
+            this.selectedMeshes[mesh.uuid] = mesh;
             mesh.material.color.setHex(this.settings.colors.selected);
         } else {
-            this.selectedMeshs[mesh.uuid] = null;
-            delete this.selectedMeshs[mesh.uuid];
+            this.selectedMeshes[mesh.uuid] = null;
+            delete this.selectedMeshes[mesh.uuid];
             mesh.material.color.setHex(mesh.material.originalColor);
         }
         mesh.selected    = !! selected;
@@ -887,24 +887,24 @@ var Viewer3d = JSClass(
     /**
     * Unselect all object.
     *
-    * @method unselectAllMeshs
+    * @method unselectAllMeshes
     */
-    unselectAllMeshs: function() {
-        for (var id in this.selectedMeshs) {
-            this.setMeshSelected(this.selectedMeshs[id], false);
+    unselectAllMeshes: function() {
+        for (var id in this.selectedMeshes) {
+            this.setMeshSelected(this.selectedMeshes[id], false);
         }
     },
 
     /**
-    * Execute an transformation on selected meshs.
+    * Execute an transformation on selected meshes.
     *
-    * @method transformSelectedMeshs
+    * @method transformSelectedMeshes
     * @param  {Object} action
     */
-    transformSelectedMeshs: function(action) {
+    transformSelectedMeshes: function(action) {
         var id, mesh, unit, axis;
-        for (id in this.selectedMeshs) {
-            mesh = this.selectedMeshs[id];
+        for (id in this.selectedMeshes) {
+            mesh = this.selectedMeshes[id];
             unit = action.unit;
             if (action.target == 'rotation') {
                 unit = unit * Math.PI / 180;
