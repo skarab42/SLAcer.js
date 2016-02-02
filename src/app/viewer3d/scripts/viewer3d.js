@@ -72,7 +72,7 @@ var Viewer3d = JSClass(
             default: {
                 material: THREE.MeshLambertMaterial,
                 settings: {
-                    color: 0x0000ff
+                    color: 'random'
                 }
             }
         },
@@ -162,19 +162,37 @@ var Viewer3d = JSClass(
         self.keyboardActionEnabled = false;
         self.keyboardAction = {
             target   : 'position',
-            axis     : { x: true, y: false, z: false },
+            axis     : 'x',
             unit     : 1,
             operation: '+'
         };
 
+        // public callback
+        self.onKeyboardActionEnabled  = function(action) {};
+        self.onKeyboardActionDisabled = function(action) {};
+        self.onKeyboardActionChange   = function(action) {};
+
         // keyboard events
-        THREEx.KeyboardState.ALIAS.plus  = 107;
-        THREEx.KeyboardState.ALIAS.minus = 109;
+        THREEx.KeyboardState.ALIAS.plus     = 107;
+        THREEx.KeyboardState.ALIAS.minus    = 109;
+        THREEx.KeyboardState.ALIAS.left     = 100;
+    	THREEx.KeyboardState.ALIAS.right    = 102;
+    	THREEx.KeyboardState.ALIAS.up       = 104;
+    	THREEx.KeyboardState.ALIAS.down     = 98;
+    	THREEx.KeyboardState.ALIAS.pageup   = 105;
+    	THREEx.KeyboardState.ALIAS.pagedown = 99;
         self.keyboard = new THREEx.KeyboardState();
         self.keyboard.domElement.addEventListener('keydown', function(e) {
             // enable/disable keyboard action
             if (self.keyboard.eventMatches(e, 'escape')) {
-                self.keyboardActionEnabled = ! self.keyboardActionEnabled;
+                if (self.keyboardActionEnabled) {
+                    self.keyboardActionEnabled = false;
+                    self.onKeyboardActionDisabled(self.keyboardAction);
+                }
+                else {
+                    self.keyboardActionEnabled = true;
+                    self.onKeyboardActionEnabled(self.keyboardAction);
+                }
             }
 
             // if disabled...
@@ -185,37 +203,40 @@ var Viewer3d = JSClass(
             // set action and parameters
             if (self.keyboard.eventMatches(e, 'm')) {
                 self.keyboardAction.target = 'position';
-                self.keyboardAction.axis   = { x: true, y: false, z: false };
                 self.keyboardAction.unit   = 1;
+                self.onKeyboardActionChange(self.keyboardAction);
             }
             else if (self.keyboard.eventMatches(e, 'r')) {
                 self.keyboardAction.target = 'rotation';
-                self.keyboardAction.axis   = { x: false, y: false, z: true };
                 self.keyboardAction.unit   = 1;
+                self.onKeyboardActionChange(self.keyboardAction);
             }
             else if (self.keyboard.eventMatches(e, 's')) {
                 self.keyboardAction.target = 'scale';
-                self.keyboardAction.axis   = { x: true, y: true, z: true };
                 self.keyboardAction.unit   = 0.1;
+                self.onKeyboardActionChange(self.keyboardAction);
             }
-            else if (self.keyboard.eventMatches(e, 'x')) {
-                self.keyboardAction.axis.x = ! self.keyboardAction.axis.x;
+            else if (self.keyboard.eventMatches(e, 'left') || self.keyboard.eventMatches(e, 'right')) {
+                self.keyboardAction.axis = 'x';
+                self.onKeyboardActionChange(self.keyboardAction);
             }
-            else if (self.keyboard.eventMatches(e, 'y')) {
-                self.keyboardAction.axis.y = ! self.keyboardAction.axis.y;
+            else if (self.keyboard.eventMatches(e, 'up') || self.keyboard.eventMatches(e, 'down')) {
+                self.keyboardAction.axis = 'y';
+                self.onKeyboardActionChange(self.keyboardAction);
             }
-            else if (self.keyboard.eventMatches(e, 'z')) {
-                self.keyboardAction.axis.z = ! self.keyboardAction.axis.z;
+            else if (self.keyboard.eventMatches(e, 'pageup') || self.keyboard.eventMatches(e, 'pagedown')) {
+                self.keyboardAction.axis = 'z';
+                self.onKeyboardActionChange(self.keyboardAction);
             }
 
             // increment/decrement on current action
             var transformSelectedMeshs = false;
 
-            if (self.keyboard.eventMatches(e, 'plus')) {
+            if (self.keyboard.eventMatches(e, 'right') || self.keyboard.eventMatches(e, 'up') || self.keyboard.eventMatches(e, 'pageup')) {
                 self.keyboardAction.operation = '+';
                 transformSelectedMeshs = true;
             }
-            else if (self.keyboard.eventMatches(e, 'minus')) {
+            else if (self.keyboard.eventMatches(e, 'left') || self.keyboard.eventMatches(e, 'down') || self.keyboard.eventMatches(e, 'pagedown')) {
                 self.keyboardAction.operation = '-';
                 transformSelectedMeshs = true;
             }
@@ -768,8 +789,11 @@ var Viewer3d = JSClass(
     * @param  {String} name
     */
     getMaterial: function(name) {
-        var m = this.settings.materials[name || 'default'];
-        return new m.material(m.settings);
+        var config = this.settings.materials[name || 'default'];
+        if (config.settings.color == 'random') {
+            config.settings.color = randomColor();
+        }
+        return new config.material(config.settings);
     },
 
     /**
@@ -818,9 +842,6 @@ var Viewer3d = JSClass(
         self.events.addEventListener(mesh, 'dblclick', function(event) {
             //console.log('you clicked on the mesh: ', mesh.uuid);
             mesh.selected = ! mesh.selected; // toggle selection
-            mesh.material.color.setHex(
-                mesh.selected ? self.settings.colors.selected : color
-            );
             if (mesh.selected) {
                 self.selectedMeshs[mesh.uuid] = mesh;
                 mesh.material.color.setHex(self.settings.colors.selected);
@@ -856,15 +877,10 @@ var Viewer3d = JSClass(
             if (action.target == 'rotation') {
                 unit = unit * Math.PI / 180;
             }
-            for (axis in action.axis) {
-                if (! action.axis[axis]) {
-                    continue;
-                }
-                if (action.operation == '+') {
-                    mesh[action.target][axis] += unit;
-                } else if (action.operation == '-') {
-                    mesh[action.target][axis] -= unit;
-                }
+            if (action.operation == '+') {
+                mesh[action.target][action.axis] += unit;
+            } else if (action.operation == '-') {
+                mesh[action.target][action.axis] -= unit;
             }
         }
     }
