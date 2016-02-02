@@ -499,6 +499,13 @@ var Viewer3d = JSClass(
         // render order
         floor.renderOrder = 1;
 
+        // double click on floor to unselect all object
+        var self = this;
+        this.events.addEventListener(floor, 'dblclick', function(event) {
+            self.unselectAllMeshs();
+            self.render();
+        });
+
         // add element to scene
         this.setElement('floor', floor);
     },
@@ -839,19 +846,13 @@ var Viewer3d = JSClass(
         // add some properties
         mesh.selected = false;
 
+        // backup original color
+        mesh.material.originalColor = mesh.material.color.getHex();
+
         // events listeners
         self.events.addEventListener(mesh, 'dblclick', function(event) {
             //console.log('you clicked on the mesh: ', mesh.uuid);
-            mesh.selected = ! mesh.selected; // toggle selection
-            if (mesh.selected) {
-                self.selectedMeshs[mesh.uuid] = mesh;
-                mesh.material.color.setHex(self.settings.colors.selected);
-            } else {
-                self.selectedMeshs[mesh.uuid] = null;
-                delete self.selectedMeshs[mesh.uuid];
-                mesh.material.color.setHex(color);
-            }
-            mesh.renderOrder = self.zIndex++; // force on top
+            self.setMeshSelected(mesh, ! mesh.selected);
             self.render();
         }, false);
 
@@ -863,6 +864,36 @@ var Viewer3d = JSClass(
     },
 
     // -------------------------------------------------------------------------
+
+    /**
+    * Unselect all object.
+    *
+    * @method toggleMeshSelection
+    */
+    setMeshSelected: function(mesh, selected) {
+        var selected  = selected === undefined ? true : selected;
+        if (selected) {
+            this.selectedMeshs[mesh.uuid] = mesh;
+            mesh.material.color.setHex(this.settings.colors.selected);
+        } else {
+            this.selectedMeshs[mesh.uuid] = null;
+            delete this.selectedMeshs[mesh.uuid];
+            mesh.material.color.setHex(mesh.material.originalColor);
+        }
+        mesh.selected    = !! selected;
+        mesh.renderOrder = this.zIndex++; // force on top
+    },
+
+    /**
+    * Unselect all object.
+    *
+    * @method unselectAllMeshs
+    */
+    unselectAllMeshs: function() {
+        for (var id in this.selectedMeshs) {
+            this.setMeshSelected(this.selectedMeshs[id], false);
+        }
+    },
 
     /**
     * Execute an transformation on selected meshs.
