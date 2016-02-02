@@ -75,6 +75,9 @@ var Viewer3d = JSClass(
                     color: 0x0000ff
                 }
             }
+        },
+        colors: {
+            selected: 0xff0000
         }
     },
 
@@ -721,12 +724,22 @@ var Viewer3d = JSClass(
     * @param  {Array} faces
     */
     addMesh: function(faces, material) {
+        // self alias
+        var self = this;
+
         // create the mesh object
-        var mesh = this.createMesh(faces, material);
+        var mesh  = this.createMesh(faces, material);
+        var color = mesh.material.color.getHex();
+
+        // add some properties
+        mesh.selected = false;
 
         // events listeners
         this.events.addEventListener(mesh, 'click', function(event) {
             console.log('you clicked on the mesh: ', mesh.uuid);
+            mesh.selected = ! mesh.selected; // toggle selection
+            mesh.material.color.setHex(mesh.selected ? self.settings.colors.selected : color);
+            self.render();
         }, false)
 
         // set element to center of build plate
