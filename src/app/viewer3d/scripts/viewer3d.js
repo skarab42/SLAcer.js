@@ -173,6 +173,9 @@ var Viewer3d = JSClass(
         // set default view
         this.setView(settings.view);
 
+        // set starting z-index (renderOrder for meshs)
+        this.zIndex = 10;
+
         // (re)render
         this.render();
     },
@@ -728,24 +731,30 @@ var Viewer3d = JSClass(
         var self = this;
 
         // create the mesh object
-        var mesh  = this.createMesh(faces, material);
+        var mesh  = self.createMesh(faces, material);
         var color = mesh.material.color.getHex();
+
+        // increment z-index
+        mesh.renderOrder = self.zIndex++;
 
         // add some properties
         mesh.selected = false;
 
         // events listeners
-        this.events.addEventListener(mesh, 'click', function(event) {
+        self.events.addEventListener(mesh, 'dblclick', function(event) {
             console.log('you clicked on the mesh: ', mesh.uuid);
             mesh.selected = ! mesh.selected; // toggle selection
-            mesh.material.color.setHex(mesh.selected ? self.settings.colors.selected : color);
+            mesh.material.color.setHex(
+                mesh.selected ? self.settings.colors.selected : color
+            );
+            mesh.renderOrder = self.zIndex++;
             self.render();
         }, false)
 
         // set element to center of build plate
-        this.setElement(mesh.uuid, mesh, { position: {
-            x: this.settings.buildVolume.size.x / 2,
-            y: this.settings.buildVolume.size.y / 2
+        self.setElement(mesh.uuid, mesh, { position: {
+            x: self.settings.buildVolume.size.x / 2,
+            y: self.settings.buildVolume.size.y / 2
         }});
     }
 });
