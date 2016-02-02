@@ -639,7 +639,7 @@ var Viewer3d = JSClass(
     // -------------------------------------------------------------------------
 
     /**
-    * Return an THREE.BufferGeometry object populate with provides faces.
+    * Create and return an THREE.BufferGeometry object from faces collection.
     *
     * @method createBufferGeometry
     * @param  {Array} faces
@@ -693,12 +693,12 @@ var Viewer3d = JSClass(
     },
 
     /**
-    * Create and add a mesh from an array of faces.
+    * Create a mesh from an array of faces.
     *
     * @method addMesh
     * @param  {Array} faces
     */
-    addMesh: function(faces, material) {
+    createMesh: function(faces, material) {
         // create geometry from faces collection
         var geometry = this.createBufferGeometry(faces);
 
@@ -710,25 +710,29 @@ var Viewer3d = JSClass(
         // set bottom of object at Z = 0
         geometry.translate(0, 0, geometry.boundingBox.max.z);
 
-        // get material
-        var material = this.getMaterial(material);
+        // create and return the mesh object
+        return new THREE.Mesh(geometry, this.getMaterial(material));
+    },
 
+    /**
+    * Create and add a mesh from an array of faces.
+    *
+    * @method addMesh
+    * @param  {Array} faces
+    */
+    addMesh: function(faces, material) {
         // create the mesh object
-        var mesh = new THREE.Mesh(geometry, material);
-
-        // center mesh on build plate
-        var position = {
-            x: this.settings.buildVolume.size.x / 2,
-            y: this.settings.buildVolume.size.y / 2,
-            z: 0
-        };
+        var mesh = this.createMesh(faces, material);
 
         // events listeners
         this.events.addEventListener(mesh, 'click', function(event) {
             console.log('you clicked on the mesh: ', mesh.uuid);
         }, false)
 
-        // add element to scene
-        this.setElement(mesh.uuid, mesh, { position: position });
+        // set element to center of build plate
+        this.setElement(mesh.uuid, mesh, { position: {
+            x: this.settings.buildVolume.size.x / 2,
+            y: this.settings.buildVolume.size.y / 2
+        }});
     }
 });
