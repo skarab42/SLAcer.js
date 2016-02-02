@@ -790,10 +790,11 @@ var Viewer3d = JSClass(
     */
     getMaterial: function(name) {
         var config = this.settings.materials[name || 'default'];
-        if (config.settings.color == 'random') {
-            config.settings.color = randomColor();
+        var settings = _.defaults({}, config.settings);
+        if (settings.color == 'random') {
+            settings.color = randomColor();
         }
-        return new config.material(config.settings);
+        return new config.material(settings);
     },
 
     /**
