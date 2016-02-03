@@ -5,7 +5,7 @@
             <span data-bind="html: view.title"></span>
             <!-- /ko -->
             <!-- ko if: view.icon -->
-            <i class="fa fa-cube"></i>
+            <i data-bind="css: view.icon"></i>
             <!-- /ko -->
         </button>
     </div>

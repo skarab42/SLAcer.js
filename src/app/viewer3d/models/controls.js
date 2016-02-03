@@ -16,7 +16,7 @@ var AppViewer3dControlsModel = GuiModuleModel.extend(
         var self = this;
 
         self.views = [
-            { name: 'default', title: self.module.getText('reset') , icon: 'fa fa-cube' },
+            { name: 'default', title: self.module.getText('reset') , icon: 'fa fa-eye' },
             { name: 'front'  , title: self.module.getText('front') , icon: null },
             { name: 'left'   , title: self.module.getText('left')  , icon: null },
             { name: 'right'  , title: self.module.getText('right') , icon: null},
