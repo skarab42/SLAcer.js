@@ -299,6 +299,10 @@ var Viewer3d = JSClass(
 
         // if set, remove it
         if (element) {
+            if (name == 'floor') {
+                this.events.removeEventListener(element, 'dblclick', true);
+            }
+
             this.scene.remove(element);
             element.geometry.dispose();
             element.material.dispose();
