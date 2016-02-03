@@ -70,9 +70,9 @@ var AppBuildvolumeModel = GuiPanelModel.extend(
         // on size change
         self.sizeChange = function(self, event) {
             self.onSizeChange({
-                x: self.$sizeX.val(),
-                y: self.$sizeY.val(),
-                z: self.$sizeZ.val(),
+                x: parseInt(self.$sizeX.val()),
+                y: parseInt(self.$sizeY.val()),
+                z: parseInt(self.$sizeZ.val()),
             });
         };
 

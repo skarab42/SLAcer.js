@@ -325,7 +325,7 @@ var Viewer3d = JSClass(
         // if already defined
         if (this.getElement(name)) {
             if (! options.replace) {
-                return self.warning('duplicateElementName', [name]);
+                return console.error('duplicateElementName', name);
             }
             this.removeElement(name);
         }
@@ -478,7 +478,7 @@ var Viewer3d = JSClass(
     *
     * @method setFloor
     */
-    setFloor: function() {
+    setFloor: function(replace) {
         // create element
         var floor = new THREE.Mesh(
             new THREE.PlaneBufferGeometry(
@@ -507,7 +507,7 @@ var Viewer3d = JSClass(
         });
 
         // add element to scene
-        this.setElement('floor', floor);
+        this.setElement('floor', floor, { replace: replace });
     },
 
     /**
@@ -515,7 +515,7 @@ var Viewer3d = JSClass(
     *
     * @method setGrid
     */
-    setGrid: function() {
+    setGrid: function(replace) {
         // create element
         var grid = new THREE.GridHelper(
             this.settings.buildVolume.size.x, this.settings.buildVolume.size.y,
@@ -528,7 +528,7 @@ var Viewer3d = JSClass(
         grid.renderOrder = 2;
 
         // add element to scene
-        this.setElement('grid', grid);
+        this.setElement('grid', grid, { replace: replace });
     },
 
     /**
@@ -536,7 +536,7 @@ var Viewer3d = JSClass(
     *
     * @method setAxes
     */
-    setAxes: function() {
+    setAxes: function(replace) {
         // create and add element to scene
         var axes = new THREE.AxesHelper(
             this.settings.buildVolume.size.x,
@@ -548,7 +548,7 @@ var Viewer3d = JSClass(
         axes.renderOrder = 3;
 
         // add element to scene
-        this.setElement('axes', axes);
+        this.setElement('axes', axes, { replace: replace });
     },
 
     /**
@@ -556,7 +556,7 @@ var Viewer3d = JSClass(
     *
     * @method setBuildVolume
     */
-    setBuildVolume: function() {
+    setBuildVolume: function(replace) {
         // create element
         var buildVolume = new THREE.Mesh(
             new THREE.BoxGeometry(
@@ -580,7 +580,29 @@ var Viewer3d = JSClass(
         buildVolume.renderOrder = 4;
 
         // add element to scene
-        this.setElement('buildVolume', buildVolume);
+        this.setElement('buildVolume', buildVolume, { replace: replace });
+    },
+
+    // -------------------------------------------------------------------------
+
+    /**
+    * resize the build volume.
+    *
+    * @method resizeBuildVolume
+    * @param  {Object} size
+    */
+    resizeBuildVolume: function(size) {
+        this.settings.buildVolume.size.x = size.x;
+        this.settings.buildVolume.size.y = size.y;
+        this.settings.buildVolume.size.z = size.z;
+
+        this.getElement('floor')       && this.setFloor(true);
+        this.getElement('grid')        && this.setGrid(true);
+        this.getElement('axes')        && this.setAxes(true);
+        this.getElement('buildVolume') && this.setBuildVolume(true);
+
+        this.setCenter();
+        this.lookAtCenter();
     },
 
     // -------------------------------------------------------------------------
