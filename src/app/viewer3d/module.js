@@ -89,5 +89,25 @@ var AppViewer3d = GuiPanel.extend(
         // resize the viewer
         this.viewer.resize(this.size.width, this.size.height);
         this.viewer.render();
+    },
+
+    /**
+    * Called when build volume must be resized.
+    *
+    * @method onBuildVolumeSizeChange
+    */
+    onBuildVolumeSizeChange: function(module, size) {
+        console.log(size);
+    },
+
+    /**
+    * Called when an build element bust be toggled...
+    *
+    * @method onBuildVolumeToggleElement
+    */
+    onBuildVolumeToggleElement: function(module, name) {
+        name = name === 'box' ? 'buildVolume' : name;
+        this.viewer.toggleElement(name);
+        this.viewer.render();
     }
 });

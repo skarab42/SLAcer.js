@@ -51,7 +51,7 @@ var AppBuildvolumeModel = GuiPanelModel.extend(
         self.texts = {
             floor: self.module.getText('floor'),
             grid : self.module.getText('grid'),
-            axis : self.module.getText('axis'),
+            axes : self.module.getText('axes'),
             box  : self.module.getText('box')
         };
 

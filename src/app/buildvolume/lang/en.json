@@ -2,6 +2,6 @@
     "title": "Build volume",
     "floor": "floor",
     "grid" : "grid",
-    "axis" : "axis",
+    "axes" : "axes",
     "box"  : "box"
 }

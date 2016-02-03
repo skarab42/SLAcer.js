@@ -17,12 +17,12 @@ var AppBuildvolume = GuiPanel.extend(
 
         // on size change
         self.model.onSizeChange = function(size) {
-            console.log(size);
+            self.triggerEvent('buildVolumeSizeChange', size);
         };
 
         // toggle element
         self.model.onToggleElement = function(name) {
-            console.log(name);
+            self.triggerEvent('buildVolumeToggleElement', name);
         };
     }
 });
