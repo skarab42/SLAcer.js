@@ -22,7 +22,12 @@ var AppViewer3d = GuiPanel.extend(
         };
 
         // create viewer instance
-        self.viewer = new Viewer3d({ size: self.size });
+        self.viewer = new Viewer3d({
+            size: self.size,
+            buildVolume: {
+                size: this.getLocal('size')
+            }
+         });
 
         // one view is rendered
         self.model.afterRender = function(elements, model) {
@@ -97,6 +102,7 @@ var AppViewer3d = GuiPanel.extend(
     * @method onBuildVolumeSizeChange
     */
     onBuildVolumeSizeChange: function(module, size) {
+        this.setLocal('size', size);
         this.viewer.resizeBuildVolume(size);
         this.viewer.setView('default');
         this.viewer.render();
