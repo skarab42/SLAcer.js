@@ -98,6 +98,7 @@ var AppViewer3d = GuiPanel.extend(
     */
     onBuildVolumeSizeChange: function(module, size) {
         this.viewer.resizeBuildVolume(size);
+        this.viewer.setView('default');
         this.viewer.render();
     },
 
