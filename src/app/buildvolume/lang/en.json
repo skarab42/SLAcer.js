@@ -1,0 +1,7 @@
+{
+    "title": "Build volume",
+    "floor": "floor",
+    "grid" : "grid",
+    "axis" : "axis",
+    "box"  : "box"
+}
