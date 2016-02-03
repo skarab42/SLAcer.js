@@ -1,4 +1,12 @@
 {
-    "title"               : "3D Viewer",
+    "title" : "3D Viewer",
+    "reset" : "Reset",
+    "front" : "Front",
+    "back"  : "Back",
+    "top"   : "Top",
+    "bottom": "Bottom",
+    "left"  : "Left",
+    "right" : "Right",
+
     "duplicateElementName": "Element '${name}' already set; Call 'removeElement' before calling 'setElement' or  set 'replace' option to 'TRUE' when calling 'setElement'"
 }

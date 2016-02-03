@@ -70,6 +70,11 @@ var AppViewer3d = GuiPanel.extend(
             self.viewer.addMesh(data.faces);
             self.viewer.render();
         };
+
+        // on view selected
+        self.model.controls.onViewSelected = function(name) {
+            self.viewer.setView(name);
+        };
     },
 
     /**
