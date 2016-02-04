@@ -30,10 +30,10 @@
                 <i class="fa fa-eye"></i>
             </span>
             <div class="input-group-btn">
-                <button data-bind="html: texts.floor, event: { click: toggleElement }" class="btn btn-default" type="submit" value="floor">floor</button>
-                <button data-bind="html: texts.grid, event: { click: toggleElement }" class="btn btn-default" type="submit" value="grid">grid</button>
-                <button data-bind="html: texts.axes, event: { click: toggleElement }" class="btn btn-default" type="submit" value="axes">axes</button>
-                <button data-bind="html: texts.box, event: { click: toggleElement }" class="btn btn-default" type="submit" value="box">box</button>
+                <button data-bind="html: texts.floor, event: { click: toggleElement }" class="btn btn-default active" type="submit" value="floor">floor</button>
+                <button data-bind="html: texts.grid, event: { click: toggleElement }" class="btn btn-default active" type="submit" value="grid">grid</button>
+                <button data-bind="html: texts.axes, event: { click: toggleElement }" class="btn btn-default active" type="submit" value="axes">axes</button>
+                <button data-bind="html: texts.box, event: { click: toggleElement }" class="btn btn-default active" type="submit" value="box">box</button>
             </div>
         </div>
     </div>
