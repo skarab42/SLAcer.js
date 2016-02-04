@@ -41,11 +41,11 @@ var AppBuildvolumeModel = GuiPanelModel.extend(
         self.icon('cube');
 
         // size
-        self.size = self.module.getLocal('AppViewer3d.size', {
+        self.size = self.module.getLocal('size', {
             x: ko.observable(200),
             y: ko.observable(200),
             z: ko.observable(200)
-        });
+        }, 'AppViewer3d');
 
         // texts
         self.texts = {
