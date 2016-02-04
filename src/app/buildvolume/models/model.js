@@ -78,6 +78,7 @@ var AppBuildvolumeModel = GuiPanelModel.extend(
 
         // toggle element
         self.toggleElement = function(self, event) {
+            $(event.target).toggleClass('active');
             self.onToggleElement(event.target.value);
         };
     }
