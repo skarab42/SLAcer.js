@@ -3,21 +3,21 @@
     <div class="col-lg-4">
         <div class="input-group">
             <span class="input-group-addon">X</span>
-            <input data-bind="value: size.x, event: { change: sizeChange }" type="number" class="form-control" />
+            <input data-bind="value: size.x, event: { change: sizeChange }" type="number" class="form-control" min="5" max="1000" step="1" />
         </div>
     </div>
 
     <div class="col-lg-4">
         <div class="input-group">
             <span class="input-group-addon">Y</span>
-            <input data-bind="value: size.y, event: { change: sizeChange }" type="number" class="form-control" />
+            <input data-bind="value: size.y, event: { change: sizeChange }" type="number" class="form-control" min="5" max="1000" step="1" />
         </div>
     </div>
 
     <div class="col-lg-4">
         <div class="input-group">
             <span class="input-group-addon">Z</span>
-            <input data-bind="value: size.z, event: { change: sizeChange }" type="number" class="form-control" />
+            <input data-bind="value: size.z, event: { change: sizeChange }" type="number" class="form-control" min="5" max="1000" step="1" />
         </div>
     </div>
 </div>
