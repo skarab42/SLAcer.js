@@ -853,6 +853,80 @@ var Viewer3d = JSClass(
     },
 
     /**
+    * Group connected faces.
+    *
+    * --> Naive implementation by a big noob <--
+    *
+    * @method groupFaces
+    * @param  {Array} faces
+    */
+    groupFaces: function(faces, material) {
+        // current face
+        var face;
+
+        // groups of faces
+        var faces_groups = [];
+
+        // groups of vertex
+        var vertex_groups = [];
+
+        // return a vertex hash
+        function vertexHash(vertex) {
+            return vertex.join('|');
+        }
+
+        // return group containin
+        function findHashGroups() {
+            var groups = [];
+            for (var i = 0; i < vertex_groups.length; i++) {
+                if (vertex_groups[i][h1] || vertex_groups[i][h2] || vertex_groups[i][h3]) {
+                    groups.push(i);
+                }
+            }
+            return _.uniq(groups);
+        }
+
+        // return group containin
+        function pushFaceInGroup() {
+            faces_groups[groupId]  || (faces_groups[groupId]  = []);
+            vertex_groups[groupId] || (vertex_groups[groupId] = []);
+            faces_groups[groupId].push(face);
+            vertex_groups[groupId][h1] = true;
+            vertex_groups[groupId][h2] = true;
+            vertex_groups[groupId][h3] = true;
+        }
+
+        var h1, h2, h3, g;
+        var groupId = -1;
+
+        // for each face
+        for (var i = 0; i < faces.length; i++) {
+            // current face
+            face = faces[i];
+
+            // vertex hashs
+            h1 = vertexHash(face.vertices[0]);
+            h2 = vertexHash(face.vertices[1]);
+            h3 = vertexHash(face.vertices[2]);
+
+            g = findHashGroups();
+
+            if (! g.length) {
+                groupId++;
+            }
+            else if (g.length == 1) {
+                groupId = g[0];
+            }
+
+            pushFaceInGroup();
+
+            console.log(g);
+        }
+
+        return faces_groups;
+    },
+
+    /**
     * Create and add a mesh from an array of faces.
     *
     * @method addMesh
@@ -861,6 +935,10 @@ var Viewer3d = JSClass(
     addMesh: function(faces, material) {
         // self alias
         var self = this;
+
+        var objects = self.groupFaces(faces);
+
+        console.log(objects);
 
         // create the mesh object
         var mesh  = self.createMesh(faces, material);
