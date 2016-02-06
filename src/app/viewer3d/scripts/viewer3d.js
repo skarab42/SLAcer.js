@@ -875,18 +875,20 @@ var Viewer3d = JSClass(
     * @method createMesh
     * @param  {Array} faces
     */
-    createMesh: function(faces, material) {
+    createMesh: function(faces, material, center) {
         // create geometry from faces collection
         //var geometry = this.createBufferGeometry(faces);
         var geometry = this.createGeometry(faces);
 
+        var center = center === false ? false : true;
+
         // compute geometry
         geometry.computeBoundingSphere();
         geometry.computeBoundingBox();
-        geometry.center();
+        center && geometry.center();
 
         // set bottom of object at Z = 0
-        geometry.translate(0, 0, geometry.boundingBox.max.z);
+        center && geometry.translate(0, 0, geometry.boundingBox.max.z);
 
         // create and return the mesh object
         return new THREE.Mesh(geometry, this.getMaterial(material));
@@ -1033,7 +1035,7 @@ var Viewer3d = JSClass(
                 });
             }
             this.selectedMeshes[uuid] = null;
-            this.addMesh(mesh.name + ' [' + gid + ']', faces);
+            this.addMesh(mesh.name + ' [' + gid + ']', faces, null, false);
         }
         this.removeMesh(uuid);
         groups = null;
@@ -1090,12 +1092,12 @@ var Viewer3d = JSClass(
     * @method addMesh
     * @param  {Array} faces
     */
-    addMesh: function(name, faces, material) {
+    addMesh: function(name, faces, material, center) {
         // self alias
         var self = this;
 
         // create the mesh object
-        var mesh  = self.createMesh(faces, material);
+        var mesh  = self.createMesh(faces, material, center);
         var color = mesh.material.color.getHex();
 
         // increment z-index
@@ -1111,7 +1113,6 @@ var Viewer3d = JSClass(
 
         // events listeners
         self.events.addEventListener(mesh, 'dblclick', function(event) {
-            //console.log('you clicked on the mesh: ', mesh.uuid);
             self.setMeshSelected(mesh, ! mesh.selected);
             self.render();
         }, false);
