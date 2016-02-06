@@ -29,6 +29,11 @@ var AppViewer3d = GuiPanel.extend(
             }
          });
 
+         // on mesh added to viewer
+         self.viewer.onMeshAdded = function(mesh) {
+             self.triggerEvent('meshAdded', { mesh: mesh });
+         };
+
         // one view is rendered
         self.model.afterRender = function(elements, model) {
             // set model viewer wrapper element
@@ -64,18 +69,6 @@ var AppViewer3d = GuiPanel.extend(
             self.module.resize();
         };
 
-        // on panel moved, resize to fit his wrapper
-        self.onPanelMoved = function(module, ui) {
-            self === module && self.resize();
-        };
-
-        // on file loaded (from file)
-        self.onFileLoaded = function(module, data) {
-            //console.log('new file', data.file, data.faces);
-            self.viewer.addMesh(data.faces);
-            self.viewer.render();
-        };
-
         // on view selected
         self.model.controls.onViewSelected = function(name) {
             self.viewer.setView(name);
@@ -93,6 +86,27 @@ var AppViewer3d = GuiPanel.extend(
 
         // resize the viewer
         this.viewer.resize(this.size.width, this.size.height);
+        this.viewer.render();
+    },
+
+    /**
+    * Called when a panel is moved.
+    *
+    * @method onPanelMoved
+    */
+    onPanelMoved: function(module, ui) {
+        // if this panel moved, resize viewer to fit his wrapper
+        this === module && this.resize();
+    },
+
+    /**
+    * Called when a file is loaded.
+    *
+    * @method onFileLoaded
+    */
+    onFileLoaded: function(module, data) {
+        //console.log('new file', data.file, data.faces);
+        this.viewer.addMesh(data.faces);
         this.viewer.render();
     },
 
