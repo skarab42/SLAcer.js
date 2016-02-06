@@ -1004,7 +1004,7 @@ var Viewer3d = JSClass(
         var groups   = this.groupFaces(mesh.geometry.faces, vertices);
 
         // no group found
-        if (! groups.length) {
+        if (groups.length < 2) {
             return null;
         }
 
@@ -1032,6 +1032,7 @@ var Viewer3d = JSClass(
                     ]
                 });
             }
+            this.selectedMeshes[uuid] = null;
             this.addMesh(mesh.name + ' [' + gid + ']', faces);
         }
         this.removeMesh(uuid);
@@ -1044,6 +1045,10 @@ var Viewer3d = JSClass(
     * @method removeMesh
     */
     removeMesh: function(uuid) {
+        var mesh = this.getElement(uuid);
+        this.events.removeEventListener(mesh, 'dblclick', true);
+        this.selectedMeshes[uuid] = null;
+        delete this.selectedMeshes[uuid];
         this.removeElement(uuid);
         this.onMeshRemoved(uuid);
     },

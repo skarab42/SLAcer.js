@@ -66,7 +66,7 @@ var AppMeshesmanager = GuiPanel.extend(
     onMeshSelected: function(module, data) {
         if (module !== this) {
             var meshModel = this.model.getMeshByUuid(data.mesh.uuid);
-            meshModel.selected(data.selected);
+            meshModel && meshModel.selected(data.selected);
         }
     }
 });
