@@ -34,6 +34,13 @@ var AppViewer3d = GuiPanel.extend(
              self.triggerEvent('meshAdded', { mesh: mesh });
          };
 
+         self.viewer.onMeshSelected = function(mesh, selected) {
+             self.triggerEvent('meshSelected', {
+                 mesh    : mesh,
+                 selected: selected
+             });
+         };
+
         // one view is rendered
         self.model.afterRender = function(elements, model) {
             // set model viewer wrapper element
@@ -97,6 +104,18 @@ var AppViewer3d = GuiPanel.extend(
     onPanelMoved: function(module, ui) {
         // if this panel moved, resize viewer to fit his wrapper
         this === module && this.resize();
+    },
+
+    /**
+    * Called when a mesh is selected.
+    *
+    * @method onFileLoaded
+    */
+    onMeshSelected: function(module, data) {
+        if (module !== this) {
+            this.viewer.setMeshSelected(data.mesh, data.selected);
+            this.viewer.render();
+        }
     },
 
     /**

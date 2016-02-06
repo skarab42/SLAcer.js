@@ -24,6 +24,33 @@ var AppMeshesmanager = GuiPanel.extend(
     * @param  {Object}     data
     */
     onMeshAdded: function(module, data) {
-        console.log(data.mesh.uuid);
+        // self alias
+        var self = this;
+
+        // Mesh model
+        var meshModel = self.getModel('AppMeshesmanagerMesh', [ data.mesh ]);
+
+        // on mesh selected
+        meshModel.onMeshSelected = function(selected) {
+            self.triggerEvent('meshSelected', {
+                mesh    : data.mesh,
+                selected: selected
+            });
+        };
+
+        // Add mesh model to DOM list
+        self.model.meshes.push(meshModel);
+    },
+
+    /**
+    * Called when a mesh is selected.
+    *
+    * @method onFileLoaded
+    */
+    onMeshSelected: function(module, data) {
+        if (module !== this) {
+            var meshModel = this.model.getMeshByUuid(data.mesh.uuid);
+            meshModel.selected(data.selected);
+        }
     }
 });

@@ -42,5 +42,16 @@ var AppMeshesmanagerModel = GuiPanelModel.extend(
 
         // meshes list
         self.meshes = ko.observableArray();
+    },
+
+    /**
+    * Return a mesh model by uid.
+    *
+    * @method getMeshByUuid
+    * @param  {String} uuid
+    * @return {AppMeshesmanagerMeshModel}
+    */
+    getMeshByUuid: function(uuid) {
+        return _.find(this.meshes(), function(o) { return o.uuid === uuid; });
     }
 });

@@ -100,7 +100,8 @@ var Viewer3d = JSClass(
     ],
 
     // public events
-    onMeshAdded: function(mesh) {},
+    onMeshAdded   : function(mesh) {},
+    onMeshSelected: function(mesh, selected) {},
 
     /**
     * Class constructor.
@@ -967,8 +968,8 @@ var Viewer3d = JSClass(
         // self alias
         var self = this;
 
-        var objects = self.groupFaces(faces);
-        console.log(objects);
+        //var objects = self.groupFaces(faces);
+        //console.log(objects);
 
         // create the mesh object
         var mesh  = self.createMesh(faces, material);
@@ -1019,6 +1020,10 @@ var Viewer3d = JSClass(
         }
         mesh.selected    = !! selected;
         mesh.renderOrder = this.zIndex++; // force on top
+
+
+        // public event
+        this.onMeshSelected(mesh, selected);
     },
 
     /**
