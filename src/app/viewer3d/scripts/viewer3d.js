@@ -101,6 +101,7 @@ var Viewer3d = JSClass(
 
     // public events
     onMeshAdded   : function(mesh) {},
+    onMeshRemoved : function(uuid) {},
     onMeshSelected: function(mesh, selected) {},
 
     /**
@@ -777,6 +778,40 @@ var Viewer3d = JSClass(
     // -------------------------------------------------------------------------
 
     /**
+    * Create and return an THREE.Geometry object from faces collection.
+    *
+    * @method createGeometry
+    * @param  {Array} faces
+    */
+    createGeometry: function(faces) {
+        var geometry = new THREE.Geometry();
+        var triangle = null;
+        var normals  = null;
+        var vertices = null;
+        var vertex   = null;
+        var length   = null;
+
+        for (var i = 0; i < faces.length; i++) {
+
+            triangle = faces[i];
+            vertices  = triangle.vertices;
+
+            for (var j = 0; j < vertices.length; j++) {
+                vertex = vertices[j];
+                geometry.vertices.push(new THREE.Vector3(vertex[0], vertex[1], vertex[2]));
+            }
+
+            length  = geometry.vertices.length;
+            normals = triangle.normals;
+            normals = new THREE.Vector3(normals[0], normals[1], normals[2]);
+
+            geometry.faces.push(new THREE.Face3(length - 3, length - 2, length - 1, normals));
+        }
+
+        return geometry;
+    },
+
+    /**
     * Create and return an THREE.BufferGeometry object from faces collection.
     *
     * @method createBufferGeometry
@@ -842,7 +877,8 @@ var Viewer3d = JSClass(
     */
     createMesh: function(faces, material) {
         // create geometry from faces collection
-        var geometry = this.createBufferGeometry(faces);
+        //var geometry = this.createBufferGeometry(faces);
+        var geometry = this.createGeometry(faces);
 
         // compute geometry
         geometry.computeBoundingSphere();
@@ -863,11 +899,10 @@ var Viewer3d = JSClass(
     *
     * @method groupFaces
     * @param  {Array} faces
+    * @param  {Array} vertices
+    * @return {Array}
     */
-    groupFaces: function(faces) {
-        // current face
-        var face;
-
+    groupFaces: function(faces, vertices) {
         // groups of faces
         var faces_groups = [];
 
@@ -876,7 +911,7 @@ var Viewer3d = JSClass(
 
         // return a vertex hash
         function vertexHash(vertex) {
-            return vertex.join('|');
+            return vertex.x + '|' + vertex.y + '|' + vertex.z;
         }
 
         // return group ids
@@ -902,7 +937,7 @@ var Viewer3d = JSClass(
             faces_groups[id].push(face);
         }
 
-        var h1, h2, h3, g, gid;
+        var face, h1, h2, h3, g;
         var groupId = -1;
 
         // for each face
@@ -911,9 +946,9 @@ var Viewer3d = JSClass(
             face = faces[i];
 
             // vertex hashs
-            h1 = vertexHash(face.vertices[0]);
-            h2 = vertexHash(face.vertices[1]);
-            h3 = vertexHash(face.vertices[2]);
+            h1 = vertexHash(vertices[face.a]);
+            h2 = vertexHash(vertices[face.b]);
+            h3 = vertexHash(vertices[face.c]);
 
             // find owner groups
             g = findHashGroups();
@@ -959,6 +994,72 @@ var Viewer3d = JSClass(
     },
 
     /**
+    * Split mesh.
+    *
+    * @method splitMeshe
+    */
+    splitMesh: function(uuid) {
+        var mesh     = this.getElement(uuid);
+        var vertices = mesh.geometry.vertices;
+        var groups   = this.groupFaces(mesh.geometry.faces, vertices);
+
+        // no group found
+        if (! groups.length) {
+            return null;
+        }
+
+        // current group
+        var group, face, v1, v2, v3, faces;
+
+        for (var gid = 0; gid < groups.length; gid++) {
+            group = groups[gid];
+            faces = [];
+            for (var i = 0; i < group.length; i++) {
+                face = group[i];
+                v1   = vertices[face.a];
+                v2   = vertices[face.b];
+                v3   = vertices[face.c];
+                faces.push({
+                    normals: [
+                        face.normal.x,
+                        face.normal.y,
+                        face.normal.z
+                    ],
+                    vertices: [
+                        [v1.x, v1.y, v1.z],
+                        [v2.x, v2.y, v2.z],
+                        [v3.x, v3.y, v3.z]
+                    ]
+                });
+            }
+            this.addMesh(mesh.name + ' [' + gid + ']', faces);
+        }
+        this.removeMesh(uuid);
+        groups = null;
+    },
+
+    /**
+    * Remove  mesh.
+    *
+    * @method removeMesh
+    */
+    removeMesh: function(uuid) {
+        this.removeElement(uuid);
+        this.onMeshRemoved(uuid);
+    },
+
+    /**
+    * Split all selected meshes.
+    *
+    * @method splitSelectedMeshes
+    */
+    splitSelectedMeshes: function() {
+        for (var uuid in this.selectedMeshes) {
+            this.splitMesh(uuid);
+        }
+    },
+
+    /**
     * Create and add a mesh from an array of faces.
     *
     * @method addMesh
@@ -967,9 +1068,6 @@ var Viewer3d = JSClass(
     addMesh: function(name, faces, material) {
         // self alias
         var self = this;
-
-        //var objects = self.groupFaces(faces);
-        //console.log(objects);
 
         // create the mesh object
         var mesh  = self.createMesh(faces, material);

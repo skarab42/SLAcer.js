@@ -42,6 +42,28 @@ var AppMeshesmanagerModel = GuiPanelModel.extend(
 
         // meshes list
         self.meshes = ko.observableArray();
+
+        self.splitMesh = function() {};
+
+        // split button
+        self.splitButton = {
+            label: ko.observable(self.module.getText('splitButtonLabel')),
+            click: function(self, event) {
+                self.splitMesh();
+            }
+        };
+    },
+
+    /**
+    * Return a mesh model by uid.
+    *
+    * @method getMeshByUuid
+    * @param  {String} uuid
+    * @return {AppMeshesmanagerMeshModel}
+    */
+    removeMeshByUuid: function(uuid) {
+        var meshModel = this.getMeshByUuid(uuid);
+        meshModel && this.meshes.remove(meshModel);
     },
 
     /**

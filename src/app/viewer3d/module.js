@@ -41,6 +41,12 @@ var AppViewer3d = GuiPanel.extend(
              });
          };
 
+         self.viewer.onMeshRemoved = function(uuid) {
+             self.triggerEvent('meshRemoved', {
+                 uuid: uuid
+             });
+         };
+
         // one view is rendered
         self.model.afterRender = function(elements, model) {
             // set model viewer wrapper element
@@ -116,6 +122,16 @@ var AppViewer3d = GuiPanel.extend(
             this.viewer.setMeshSelected(data.mesh, data.selected);
             this.viewer.render();
         }
+    },
+
+    /**
+    * Called when all selected meshes must be plisted.
+    *
+    * @method onFileLoaded
+    */
+    onSplitSelectedMeshes: function(module, data) {
+        this.viewer.splitSelectedMeshes();
+        this.viewer.render();
     },
 
     /**

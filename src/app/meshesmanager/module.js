@@ -14,6 +14,22 @@ var AppMeshesmanager = GuiPanel.extend(
     setup: function() {
         // self alias
         var self = this;
+
+        // on split button click
+        self.model.splitMesh = function() {
+            self.triggerEvent('splitSelectedMeshes');
+        };
+    },
+
+    /**
+    * Called when a mesh is removed from viewer.
+    *
+    * @method onMeshRemoved
+    * @param  {ToysModule} module
+    * @param  {Object}     data
+    */
+    onMeshRemoved: function(module, data) {
+        this.model.removeMeshByUuid(data.uuid);
     },
 
     /**
