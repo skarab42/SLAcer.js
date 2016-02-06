@@ -17,10 +17,11 @@ var AppMeshesmanagerMeshModel = GuiModuleModel.extend(
 
         var shortNameLimit = 30;
 
-        self.uuid     = mesh.uuid;
-        self.name     = ko.observable(mesh.name.length ? mesh.name : mesh.uuid);
-        self.disable  = ko.observable(false);
-        self.selected = ko.observable(false);
+        self.uuid       = mesh.uuid;
+        self.name       = ko.observable(mesh.name.length ? mesh.name : mesh.uuid);
+        self.disable    = ko.observable(false);
+        self.selected   = ko.observable(false);
+        self.facesCount = ko.observable(mesh.facesCount);
 
         self.shortName = ko.computed(function() {
             var name  = self.name();

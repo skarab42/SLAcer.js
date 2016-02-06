@@ -837,7 +837,7 @@ var Viewer3d = JSClass(
     /**
     * Create a mesh from an array of faces.
     *
-    * @method addMesh
+    * @method createMesh
     * @param  {Array} faces
     */
     createMesh: function(faces, material) {
@@ -964,7 +964,7 @@ var Viewer3d = JSClass(
     * @method addMesh
     * @param  {Array} faces
     */
-    addMesh: function(faces, material) {
+    addMesh: function(name, faces, material) {
         // self alias
         var self = this;
 
@@ -979,7 +979,9 @@ var Viewer3d = JSClass(
         mesh.renderOrder = self.zIndex++;
 
         // add some properties
+        mesh.facesCount = faces.length;
         mesh.selected = false;
+        mesh.name = name;
 
         // backup original color
         mesh.material.originalColor = mesh.material.color.getHex();

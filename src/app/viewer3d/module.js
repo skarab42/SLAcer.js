@@ -125,7 +125,7 @@ var AppViewer3d = GuiPanel.extend(
     */
     onFileLoaded: function(module, data) {
         //console.log('new file', data.file, data.faces);
-        this.viewer.addMesh(data.faces);
+        this.viewer.addMesh(data.model.name(), data.faces);
         this.viewer.render();
     },
 

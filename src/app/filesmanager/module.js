@@ -103,7 +103,11 @@ var AppFilesmanager = GuiPanel.extend(
             faces.push(data.face);
             if (data.last) {
                 fileModel.facesCount(data.num);
-                self.triggerEvent('fileLoaded', { file: file, faces: faces });
+                self.triggerEvent('fileLoaded', {
+                    file: file,
+                    model: fileModel,
+                    faces: faces
+                });
             }
         };
 
