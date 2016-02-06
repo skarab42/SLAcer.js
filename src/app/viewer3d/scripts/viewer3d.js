@@ -511,7 +511,11 @@ var Viewer3d = JSClass(
         // double click on floor to unselect all object
         var self = this;
         this.events.addEventListener(floor, 'dblclick', function(event) {
-            self.unselectAllMeshes();
+            if (Object.keys(self.selectedMeshes).length > 0) {
+                self.unselectAllMeshes();
+            } else {
+                self.selectAllMeshes();
+            }
             self.render();
         });
 
@@ -1072,7 +1076,12 @@ var Viewer3d = JSClass(
     * @method dropMesh
     */
     dropMesh: function(uuid) {
-        this.getElement(uuid).position.z = 0;
+        var mesh = this.getElement(uuid);
+        var move = mesh.geometry.center();
+        mesh.geometry.translate(0, 0, mesh.geometry.boundingBox.max.z);
+        mesh.position.x -= move.x;
+        mesh.position.y -= move.y;
+        mesh.position.z = 0;
     },
 
     /**
@@ -1160,6 +1169,18 @@ var Viewer3d = JSClass(
     unselectAllMeshes: function() {
         for (var id in this.selectedMeshes) {
             this.setMeshSelected(this.selectedMeshes[id], false);
+        }
+    },
+
+    /**
+    * Unselect all object.
+    *
+    * @method unselectAllMeshes
+    */
+    selectAllMeshes: function() {
+        for (var id in this.elements) {
+            var mesh = this.elements[id];
+            mesh.name.length && this.setMeshSelected(mesh, true);
         }
     },
 
