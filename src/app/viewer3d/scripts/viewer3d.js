@@ -99,6 +99,9 @@ var Viewer3d = JSClass(
         'buildVolume'
     ],
 
+    // public events
+    onMeshAdded: function(mesh) {},
+
     /**
     * Class constructor.
     *
@@ -992,6 +995,9 @@ var Viewer3d = JSClass(
             x: self.settings.buildVolume.size.x / 2,
             y: self.settings.buildVolume.size.y / 2
         }});
+
+        // call public callback
+        self.onMeshAdded(mesh);
     },
 
     // -------------------------------------------------------------------------
