@@ -860,14 +860,14 @@ var Viewer3d = JSClass(
     * @method groupFaces
     * @param  {Array} faces
     */
-    groupFaces: function(faces, material) {
+    groupFaces: function(faces) {
         // current face
         var face;
 
         // groups of faces
         var faces_groups = [];
 
-        // groups of vertex
+        // groups of vertex hashs
         var vertex_groups = [];
 
         // return a vertex hash
@@ -875,28 +875,30 @@ var Viewer3d = JSClass(
             return vertex.join('|');
         }
 
-        // return group containin
+        // return group ids
         function findHashGroups() {
             var groups = [];
             for (var i = 0; i < vertex_groups.length; i++) {
-                if (vertex_groups[i][h1] || vertex_groups[i][h2] || vertex_groups[i][h3]) {
+                if (vertex_groups[i][h1]
+                ||  vertex_groups[i][h2]
+                ||  vertex_groups[i][h3]) {
                     groups.push(i);
                 }
             }
             return _.uniq(groups);
         }
 
-        // return group containin
-        function pushFaceInGroup() {
-            faces_groups[groupId]  || (faces_groups[groupId]  = []);
-            vertex_groups[groupId] || (vertex_groups[groupId] = []);
-            faces_groups[groupId].push(face);
-            vertex_groups[groupId][h1] = true;
-            vertex_groups[groupId][h2] = true;
-            vertex_groups[groupId][h3] = true;
+        // push the face in group id
+        function pushFaceInGroup(id) {
+            vertex_groups[id] || (vertex_groups[id] = []);
+            faces_groups[id]  || (faces_groups[id]  = []);
+            vertex_groups[id][h1] = true;
+            vertex_groups[id][h2] = true;
+            vertex_groups[id][h3] = true;
+            faces_groups[id].push(face);
         }
 
-        var h1, h2, h3, g;
+        var h1, h2, h3, g, gid;
         var groupId = -1;
 
         // for each face
@@ -909,20 +911,46 @@ var Viewer3d = JSClass(
             h2 = vertexHash(face.vertices[1]);
             h3 = vertexHash(face.vertices[2]);
 
+            // find owner groups
             g = findHashGroups();
 
+            // no group found
             if (! g.length) {
+                // increment group id
                 groupId++;
+
+                // add face to group
+                pushFaceInGroup(groupId);
             }
+
+            // only in one group
             else if (g.length == 1) {
-                groupId = g[0];
+                // add face to group
+                pushFaceInGroup(g[0]);
             }
 
-            pushFaceInGroup();
+            // share two group
+            else if (g.length == 2) {
+                // add face to first group
+                pushFaceInGroup(g[0]);
 
-            console.log(g);
+                // merge the two group
+                faces_groups[g[0]]  = faces_groups[g[0]].concat(faces_groups[g[1]]);
+                vertex_groups[g[0]] = _.merge(vertex_groups[g[0]], vertex_groups[g[1]]);
+
+                // reset the second group
+                faces_groups[g[1]]  = [];
+                vertex_groups[g[1]] = [];
+            }
         }
 
+        // reset vertex group
+        vertex_groups = null;
+
+        // remove empty group
+        faces_groups = _.filter(faces_groups, function(o) { return o.length; });
+
+        // return grouped faces
         return faces_groups;
     },
 
@@ -937,7 +965,6 @@ var Viewer3d = JSClass(
         var self = this;
 
         var objects = self.groupFaces(faces);
-
         console.log(objects);
 
         // create the mesh object
