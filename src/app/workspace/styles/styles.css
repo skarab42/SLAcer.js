@@ -149,6 +149,20 @@ body
   }
 }
 
+.files-list {
+    margin-top: 15px;
+    margin-bottom: 0;
+}
+
+.files-list .pull-right {
+    margin-top: 2px;
+}
+
+ .files-list .progress {
+   margin: 4px 0 0 0;
+   height: 2px;
+}
+
 .files-list li {
     padding: 10px;
 }

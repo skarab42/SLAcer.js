@@ -18,17 +18,3 @@
     cursor: inherit;
     display: block;
 }
-
-#appfilesmanager .files-list {
-    margin-top: 15px;
-    margin-bottom: 0;
-}
-
-#appfilesmanager .files-list .pull-right {
-    margin-top: 2px;
-}
-
-#appfilesmanager .progress {
-   margin: 4px 0 0 0;
-   height: 2px;
-}
