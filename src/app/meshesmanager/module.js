@@ -19,6 +19,11 @@ var AppMeshesmanager = GuiPanel.extend(
         self.model.splitMesh = function() {
             self.triggerEvent('splitSelectedMeshes');
         };
+
+        // on drop button click
+        self.model.dropMesh = function() {
+            self.triggerEvent('dropSelectedMeshes');
+        };
     },
 
     /**

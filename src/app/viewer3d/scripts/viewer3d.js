@@ -1065,6 +1065,26 @@ var Viewer3d = JSClass(
     },
 
     /**
+    * Drop mesh.
+    *
+    * @method dropMesh
+    */
+    dropMesh: function(uuid) {
+        this.getElement(uuid).position.z = 0;
+    },
+
+    /**
+    * Drop all selected meshes.
+    *
+    * @method splitSelectedMeshes
+    */
+    dropSelectedMeshes: function() {
+        for (var uuid in this.selectedMeshes) {
+            this.dropMesh(uuid);
+        }
+    },
+
+    /**
     * Create and add a mesh from an array of faces.
     *
     * @method addMesh

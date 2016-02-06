@@ -44,12 +44,21 @@ var AppMeshesmanagerModel = GuiPanelModel.extend(
         self.meshes = ko.observableArray();
 
         self.splitMesh = function() {};
+        self.dropMesh = function() {};
 
         // split button
         self.splitButton = {
             label: ko.observable(self.module.getText('splitButtonLabel')),
             click: function(self, event) {
                 self.splitMesh();
+            }
+        };
+
+        // drop button
+        self.dropButton = {
+            label: ko.observable(self.module.getText('dropButtonLabel')),
+            click: function(self, event) {
+                self.dropMesh();
             }
         };
     },

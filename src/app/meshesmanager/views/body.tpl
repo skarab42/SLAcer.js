@@ -3,6 +3,10 @@
         <i class="fa fa-fw fa-scissors"></i>
         <span data-bind="html: splitButton.label"></span>
     </button>
+    <button data-bind="event: { click: dropButton.click }" type="button" class="btn btn-info">
+        <i class="fa fa-fw fa-tint"></i>
+        <span data-bind="html: dropButton.label"></span>
+    </button>
 </div>
 <!-- ko if: meshes().length -->
 <ul class="files-list list-group" data-bind="foreach: { data:meshes, as: 'mesh'}">

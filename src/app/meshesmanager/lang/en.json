@@ -1,4 +1,6 @@
 {
     "title": "Meshes manager",
-    "splitButtonLabel": "Split"
+    
+    "splitButtonLabel": "split",
+    "dropButtonLabel" : "drop"
 }

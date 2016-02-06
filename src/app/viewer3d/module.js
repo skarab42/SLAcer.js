@@ -127,10 +127,20 @@ var AppViewer3d = GuiPanel.extend(
     /**
     * Called when all selected meshes must be plisted.
     *
-    * @method onFileLoaded
+    * @method onSplitSelectedMeshes
     */
     onSplitSelectedMeshes: function(module, data) {
         this.viewer.splitSelectedMeshes();
+        this.viewer.render();
+    },
+
+    /**
+    * Called when all selected meshes must droped.
+    *
+    * @method onDropSelectedMeshes
+    */
+    onDropSelectedMeshes: function(module, data) {
+        this.viewer.dropSelectedMeshes();
         this.viewer.render();
     },
 
