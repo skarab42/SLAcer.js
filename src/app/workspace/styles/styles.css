@@ -148,3 +148,25 @@ body
     background-position: -100px -100px;
   }
 }
+
+.files-list li {
+    padding: 10px;
+}
+
+.files-list li.enabled {
+    cursor: pointer;
+}
+
+.files-list li.enabled.selected {
+    background-color: #eeeeee;
+}
+
+.files-list li.enabled:hover {
+    background-color: #cccccc;
+}
+
+.files-list li.disabled {
+    background-color: #f2dede;
+    border: 1px #EBCCD1 solid;
+    color: #A94442;
+}
