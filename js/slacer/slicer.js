@@ -85,102 +85,12 @@ var SLAcer = SLAcer || {};
         return inside;
     };
 
-    /*function clipPolygons(polygons) {
-        // clipped polygon collection
-        var clippedPolygons = [];
-        var nodes = [];
-
-        var i, il, point, y, yl, node;
-
-        // first pass: extract parents and childs poylgons
-        for (i = 0, il = polygons.length; i < il; i++) {
-            // only check for first point in polygon
-            point = polygons[i][0];
-            // for each poylgons
-            for (y = 0, yl = il; y < yl; y++) {
-                // do not check self intersection
-                if (i == y) continue;
-                // check if point in poylgon
-                nodes[i] || (nodes[i] = { parents: [], children: [] });
-                nodes[y] || (nodes[y] = { parents: [], children: [] });
-                if (pointInPolygon(point, polygons[y])) {
-                    // push parent and child
-                    nodes[i].parents.push(y);
-                    nodes[y].children.push(i);
-                }
-            }
-        }
-
-        //console.log(nodes);
-
-        // second pass: filter nodes
-        function removeNode(index) {
-            // node to remove
-            var n = nodes[index];
-
-            // variables
-            var i, il, d;
-
-            // remove children node reference in parents node
-            for (i = 0, il = n.parents.length; i < il; i++) {
-                d = nodes[n.parents[i]].children;
-                delete d[d.indexOf(index)];
-            }
-
-            // remove parents node reference in children node
-            for (i = 0, il = n.children.length; i < il; i++) {
-                d = nodes[n.children[i]].parents;
-                delete d[d.indexOf(index)];
-            }
-
-            // remove node from collection
-            delete nodes[index];
-        }
-
-        function filterNodes() {
-            for (i = 0; i < nodes.length; i++) {
-                node = nodes[i];
-                // single node without holes
-                !node && console.log(i, nodes[i]);
-                if (!node.parents.length && !node.children.length) {
-                    clippedPolygons.push({
-                        polygon: polygons[i],
-                        holes  : null
-                    });
-                    delete nodes[i];
-                    break;
-                }
-                // single node with one hole
-                if (!node.parents.length && node.children.length == 1) {
-                    clippedPolygons.push({
-                        polygon: polygons[i],
-                        holes  : polygons[node.children[0]]
-                    });
-                    removeNode(i);
-                    break;
-                }
-            }
-        }
-
-        var limit = 100000;
-        while (nodes.length) {
-            if(limit < 1) break;
-            filterNodes();
-            limit--;
-        }
-
-        console.log(clippedPolygons);
-
-        // return clipped poylgons if found
-        return clippedPolygons;
-    }*/
-
     function makeNodes(polygons) {
         // nodes collection
-        var nodes = [];
+        var nodes = {};
 
         // variables
-        var i, il, point, y, yl, node;
+        var i, il, point, y, yl;
 
         // for each polygon extract parents and childs poylgons
         for (i = 0, il = polygons.length; i < il; i++) {
@@ -191,13 +101,15 @@ var SLAcer = SLAcer || {};
                 // do not check self intersection
                 if (i == y) continue;
                 // create default node
-                nodes[i] || (nodes[i] = { parents: [], children: [] });
-                nodes[y] || (nodes[y] = { parents: [], children: [] });
+                nodes[i] || (nodes[i] = { parents: [], isHole: false });
+                nodes[y] || (nodes[y] = { parents: [], isHole: false });
                 // check if point in poylgon
                 if (pointInPolygon(point, polygons[y])) {
                     // push parent and child
                     nodes[i].parents.push(y);
-                    nodes[y].children.push(i);
+                    // odd parents number ==> hole
+                    nodes[i].isHole = !! (nodes[i].parents.length % 2);
+                    nodes[y].isHole = !! (nodes[y].parents.length % 2);
                 }
             }
         }
@@ -206,20 +118,45 @@ var SLAcer = SLAcer || {};
         return nodes;
     }
 
+    function filterNodes(polygons, nodes, clippedPolygons) {
+        // variables
+        var key, node, i, il, parentKey;
+
+        // make base collection
+        for (key in nodes) {
+            node = nodes[key];
+            if (! node.isHole) {
+                clippedPolygons[key] = {
+                    polygon: polygons[key],
+                    holes  : []
+                };
+            }
+        }
+
+        // push holes
+        for (key in nodes) {
+            node = nodes[key];
+            if (node.isHole) {
+                for (i = 0, il = node.parents.length; i < il; i++) {
+                    parentKey = node.parents[i];
+                    if ((il - 1) == nodes[parentKey].parents.length) {
+                        clippedPolygons[parentKey].holes.push(polygons[key]);
+                    }
+                }
+            }
+        }
+    }
+
     function clipPolygons(polygons) {
         // clipped polygon collection
-        var clippedPolygons = [];
+        var clippedPolygons = {};
 
         // make the nodes collection
         var nodes = makeNodes(polygons);
         console.log('nodes:', nodes);
 
-        var limit = 100000;
-        while (nodes.length) {
-            if(limit < 1) break;
-            //filterNodes();
-            limit--;
-        }
+        // filtered nodes collection
+        filterNodes(polygons, nodes, clippedPolygons);
 
         // return clipped poylgons if found
         console.log('clippedPolygons', clippedPolygons);
@@ -256,7 +193,7 @@ var SLAcer = SLAcer || {};
             shapes.push(new THREE.Mesh(
                 new THREE.ShapeGeometry(shape),
                 new THREE.MeshBasicMaterial({
-                    color: 0xffff00, side: THREE.DoubleSide
+                    color: ((1<<24)*Math.random()|0), side: THREE.DoubleSide
                 })
             ));
         }
