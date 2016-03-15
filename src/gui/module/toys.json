@@ -1,9 +1,0 @@
-{
-	"require": [
-        "toys",
-        "lib/font-awesome",
-        "lib/jquery-ui",
-        "lib/bootstrap",
-        "lib/knockout"
-    ]
-}

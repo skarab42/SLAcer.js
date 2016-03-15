@@ -1,4 +1,0 @@
-{
-    "require": ["lib/bootstrap"],
-    "scripts": ["bootstrap-notify.min.js"]
-}

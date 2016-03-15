@@ -1,7 +1,0 @@
-{
-    "require": ["lib/jquery"],
-    "relpath": "jquery-ui-1.11.4.custom",
-    "styles" : ["jquery-ui.min.css"],
-    "scripts": ["jquery-ui.min.js"],
-    "assets" : ["images/*"]
-}
