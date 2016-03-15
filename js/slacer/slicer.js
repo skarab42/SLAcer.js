@@ -175,10 +175,61 @@ var SLAcer = SLAcer || {};
         return clippedPolygons;
     }*/
 
+    function makeNodes(polygons) {
+        // nodes collection
+        var nodes = [];
+
+        // variables
+        var i, il, point, y, yl, node;
+
+        // for each polygon extract parents and childs poylgons
+        for (i = 0, il = polygons.length; i < il; i++) {
+            // only check for first point in polygon
+            point = polygons[i][0];
+            // for each poylgons
+            for (y = 0, yl = il; y < yl; y++) {
+                // do not check self intersection
+                if (i == y) continue;
+                // create default node
+                nodes[i] || (nodes[i] = { parents: [], children: [] });
+                nodes[y] || (nodes[y] = { parents: [], children: [] });
+                // check if point in poylgon
+                if (pointInPolygon(point, polygons[y])) {
+                    // push parent and child
+                    nodes[i].parents.push(y);
+                    nodes[y].children.push(i);
+                }
+            }
+        }
+
+        // return nodes collection
+        return nodes;
+    }
+
+    function clipPolygons(polygons) {
+        // clipped polygon collection
+        var clippedPolygons = [];
+
+        // make the nodes collection
+        var nodes = makeNodes(polygons);
+        console.log('nodes:', nodes);
+
+        var limit = 100000;
+        while (nodes.length) {
+            if(limit < 1) break;
+            //filterNodes();
+            limit--;
+        }
+
+        // return clipped poylgons if found
+        console.log('clippedPolygons', clippedPolygons);
+        return clippedPolygons;
+    }
+
     function polygonsToShapes(polygons) {
         // clip polygons (make holes)
         if (polygons.length > 1) {
-            //clipPolygons(polygons);
+            clipPolygons(polygons);
         }
 
         // shapes collection
