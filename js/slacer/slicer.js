@@ -64,6 +64,156 @@ var SLAcer = SLAcer || {};
         return polygons;
     }
 
+    function pointInPolygon(point, polygon) {
+        // ray-casting algorithm based on
+        // https://github.com/substack/point-in-polygon/blob/master/index.js
+        // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+
+        var inside = false;
+
+        var il, j, pi, pj, intersect;
+
+        for (i = 0, il = polygon.length, j = il - 1; i < il; j = i++) {
+            pi = polygon[i];
+            pj = polygon[j];
+
+            (((pi.y > point.y) != (pj.y > point.y))
+            && (point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x))
+            && (inside = !inside);
+        }
+
+        return inside;
+    };
+
+    /*function clipPolygons(polygons) {
+        // clipped polygon collection
+        var clippedPolygons = [];
+        var nodes = [];
+
+        var i, il, point, y, yl, node;
+
+        // first pass: extract parents and childs poylgons
+        for (i = 0, il = polygons.length; i < il; i++) {
+            // only check for first point in polygon
+            point = polygons[i][0];
+            // for each poylgons
+            for (y = 0, yl = il; y < yl; y++) {
+                // do not check self intersection
+                if (i == y) continue;
+                // check if point in poylgon
+                nodes[i] || (nodes[i] = { parents: [], children: [] });
+                nodes[y] || (nodes[y] = { parents: [], children: [] });
+                if (pointInPolygon(point, polygons[y])) {
+                    // push parent and child
+                    nodes[i].parents.push(y);
+                    nodes[y].children.push(i);
+                }
+            }
+        }
+
+        //console.log(nodes);
+
+        // second pass: filter nodes
+        function removeNode(index) {
+            // node to remove
+            var n = nodes[index];
+
+            // variables
+            var i, il, d;
+
+            // remove children node reference in parents node
+            for (i = 0, il = n.parents.length; i < il; i++) {
+                d = nodes[n.parents[i]].children;
+                delete d[d.indexOf(index)];
+            }
+
+            // remove parents node reference in children node
+            for (i = 0, il = n.children.length; i < il; i++) {
+                d = nodes[n.children[i]].parents;
+                delete d[d.indexOf(index)];
+            }
+
+            // remove node from collection
+            delete nodes[index];
+        }
+
+        function filterNodes() {
+            for (i = 0; i < nodes.length; i++) {
+                node = nodes[i];
+                // single node without holes
+                !node && console.log(i, nodes[i]);
+                if (!node.parents.length && !node.children.length) {
+                    clippedPolygons.push({
+                        polygon: polygons[i],
+                        holes  : null
+                    });
+                    delete nodes[i];
+                    break;
+                }
+                // single node with one hole
+                if (!node.parents.length && node.children.length == 1) {
+                    clippedPolygons.push({
+                        polygon: polygons[i],
+                        holes  : polygons[node.children[0]]
+                    });
+                    removeNode(i);
+                    break;
+                }
+            }
+        }
+
+        var limit = 100000;
+        while (nodes.length) {
+            if(limit < 1) break;
+            filterNodes();
+            limit--;
+        }
+
+        console.log(clippedPolygons);
+
+        // return clipped poylgons if found
+        return clippedPolygons;
+    }*/
+
+    function polygonsToShapes(polygons) {
+        // clip polygons (make holes)
+        if (polygons.length > 1) {
+            //clipPolygons(polygons);
+        }
+
+        // shapes collection
+        var shapes = [];
+
+        // for each polygon, create the shape
+        var i, il, points, point, shape, y, yl;
+
+        for (i = 0, il = polygons.length; i < il; i++) {
+            points = polygons[i];
+            point  = points.shift();
+            shape  = new THREE.Shape();
+
+            // move to the first point
+            shape.moveTo(point.x, point.y);
+
+            // for each others trace line
+            for (y = 0, yl = points.length; y < yl; y++) {
+                point = points[y];
+                shape.lineTo(point.x, point.y);
+            }
+
+            // make and push the mesh
+            shapes.push(new THREE.Mesh(
+                new THREE.ShapeGeometry(shape),
+                new THREE.MeshBasicMaterial({
+                    color: 0xffff00, side: THREE.DoubleSide
+                })
+            ));
+        }
+
+        // return shapes collection
+        return shapes;
+    }
+
     // -------------------------------------------------------------------------
 
     // Constructor
@@ -130,7 +280,7 @@ var SLAcer = SLAcer || {};
         zPosition += this.zOffset;
 
         var source = this.slice.geometry;
-        var target = new THREE.Geometry();
+        var geometry = new THREE.Geometry();
         var plane  = new THREE.Plane(new THREE.Vector3(0, 0, 1), -zPosition);
 
         var i, length, minMax, face, vertices, v1, v2, v3, index, normal;
@@ -153,12 +303,12 @@ var SLAcer = SLAcer || {};
                 v2 = vertices[face.b].clone();
                 v3 = vertices[face.c].clone();
 
-                target.vertices.push(v1, v2, v3);
+                geometry.vertices.push(v1, v2, v3);
 
-                index  = target.vertices.length;
+                index  = geometry.vertices.length;
                 normal = face.normal.clone();
 
-                target.faces.push(new THREE.Face3(
+                geometry.faces.push(new THREE.Face3(
                     index-3, index-2, index-1, normal
                 ));
 
@@ -219,10 +369,14 @@ var SLAcer = SLAcer || {};
             }
         }
 
+        var polygons = linesToPolygons(lines);
+        var shapes   = polygonsToShapes(polygons);
+
         return {
-            geometry: target,
-            polygons: linesToPolygons(lines),
-            time    : Date.now() - time
+            time    : Date.now() - time,
+            geometry: geometry,
+            polygons: polygons,
+            shapes  : shapes
         };
     };
 

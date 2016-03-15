@@ -111,89 +111,6 @@ function updateScreenInfo() {
 updateScreenInfo();
 
 // -----------------------------------------------------------------------------
-// Polygons functions
-// -----------------------------------------------------------------------------
-function pointInPolygon(point, polygon) {
-    // ray-casting algorithm based on
-    // https://github.com/substack/point-in-polygon/blob/master/index.js
-    // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
-
-    var inside = false;
-
-    var il, j, pi, pj, intersect;
-
-    for (i = 0, il = polygon.length, j = il - 1; i < il; j = i++) {
-        pi = polygon[i];
-        pj = polygon[j];
-
-        (((pi.y > point.y) != (pj.y > point.y))
-        && (point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x))
-        && (inside = !inside);
-    }
-
-    return inside;
-};
-
-function clipPolygons(polygons) {
-    // do not check if
-    var clippedPolygons = [];
-
-    var i, il, point, y, yl, polygon;
-
-    for (i = 0, il = polygons.length; i < il; i++) {
-        point = polygons[i][0];
-        for (y = 0, yl = il; y < yl; y++) {
-            if (i == y) continue;
-            polygon = polygons[y];
-            if (pointInPolygon(point, polygon)) {
-                console.log('pointInPolygon:', i, 'in', y);
-            }
-        }
-    }
-
-    return clippedPolygons.length ? clippedPolygons : polygons;
-}
-
-function polygonsToShapes(polygons) {
-    // clip polygons (make holes)
-    if (polygons.length > 1) {
-        polygons = clipPolygons(polygons);
-    }
-
-    // shapes collection
-    var shapes = [];
-
-    // for each polygon, create the shape
-    var i, il, points, point, shape, y, yl;
-
-    for (i = 0, il = polygons.length; i < il; i++) {
-        points = polygons[i];
-        point  = points.shift();
-        shape  = new THREE.Shape();
-
-        // move to the first point
-        shape.moveTo(point.x, point.y);
-
-        // for each others trace line
-        for (y = 0, yl = points.length; y < yl; y++) {
-            point = points[y];
-            shape.lineTo(point.x, point.y);
-        }
-
-        // make and push the mesh
-        shapes.push(new THREE.Mesh(
-            new THREE.ShapeGeometry(shape),
-            new THREE.MeshBasicMaterial({
-                color: 0xffff00, side: THREE.DoubleSide
-            })
-        ));
-    }
-
-    // return shapes collection
-    return shapes;
-}
-
-// -----------------------------------------------------------------------------
 // Slicer
 // -----------------------------------------------------------------------------
 var slicer = new SLAcer.Slicer();
@@ -224,7 +141,7 @@ function slice(zPosition) {
             viewer3.removeObject(shapes[i]);
         }
     }
-    shapes = polygonsToShapes(slice.polygons);
+    shapes = slice.shapes;
     for (var i = 0, il = shapes.length; i < il; i++) {
         viewer3.scene.add(shapes[i]);
     }
