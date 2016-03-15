@@ -1,0 +1,42 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.box {
+    margin: 5px;
+}
+
+.fl {
+    float: left;
+}
+
+#mesh ul {
+    margin: 0;
+    padding: 5px;
+    border-radius: 6px;
+    list-style-type: none;
+    background-color: #000000;
+}
+
+#mesh .label,
+#mesh .value {
+    padding: 2px;
+    display: inline-block;
+}
+
+#mesh .label {
+    width: 80px;
+    color: #eeeeee;
+}
+
+#mesh .value {
+    width: 50px;
+    float: right;
+    color: #ff0000;
+    font-size: 0.8em;
+    text-align: right;
+    border-radius: 4px;
+    background-color: #550000;
+}

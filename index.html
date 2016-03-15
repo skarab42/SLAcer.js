@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>SLAcer.js</title>
+        <link rel="stylesheet" type="text/css" href="css/main.css" />
+    </head>
+    <body>
+        <div id="mesh" class="box fl">
+            <ul>
+                <li><span class="label">faces</span><span class="value" id="mesh-faces-value">n/a</span></li>
+                <li><span class="label">volume</span><span class="value" id="mesh-volume-value">n/a</span></li>
+                <li><span class="label">layerHeight</span><span class="value" id="layer-height-value">n/a</span></li>
+                <li><span class="label">layers</span><span class="value"><span id="layer-value">n/a</span> / <span id="layers-value">n/a</span></span></li>
+                <li><span class="label">zPosition</span><span class="value" id="z-position-value">n/a</span></li>
+                <li><input id="z-position-input" type="range" value="0" min="0" max="1" step="1" /></li>
+            </ul>
+        </div>
+        <div id="viewers">
+            <div id="viewer1" class="box fl">loading...</div>
+            <div id="viewer2" class="box fl">loading...</div>
+            <div id="viewer3" class="box fl">loading...</div>
+        </div>
+        <script src="vendor/lodash.min.js" type="text/javascript"></script>
+        <script src="vendor/three.min.js" type="text/javascript"></script>
+        <script src="js/slacer/mesh.js" type="text/javascript"></script>
+        <script src="js/slacer/viewer.js" type="text/javascript"></script>
+        <script src="vendor/OrbitControls.js" type="text/javascript"></script>
+        <script src="js/slacer/viewcontrols.js" type="text/javascript"></script>
+        <script src="js/slacer/viewer3d.js" type="text/javascript"></script>
+        <script src="js/slacer/viewer2d.js" type="text/javascript"></script>
+        <script src="js/slacer/slicer.js" type="text/javascript"></script>
+        <script src="js/loader/stl.js" type="text/javascript"></script>
+        <script src="js/main.js" type="text/javascript"></script>
+    </body>
+</html>
