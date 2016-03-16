@@ -3,6 +3,13 @@ var SLAcer = SLAcer || {};
 
 ;(function() {
 
+    // global settings
+    var globalSettings = {
+        color: 0xffff00
+    };
+
+    // -------------------------------------------------------------------------
+
     function Point(p) {
         this.x = p.x;
         this.y = p.y;
@@ -96,17 +103,21 @@ var SLAcer = SLAcer || {};
         for (i = 0, il = polygons.length; i < il; i++) {
             // only check for first point in polygon
             point = polygons[i][0];
+
             // for each poylgons
             for (y = 0, yl = il; y < yl; y++) {
                 // do not check self intersection
                 if (i == y) continue;
+
                 // create default node
                 nodes[i] || (nodes[i] = { parents: [], isHole: false });
                 nodes[y] || (nodes[y] = { parents: [], isHole: false });
+
                 // check if point in poylgon
                 if (pointInPolygon(point, polygons[y])) {
                     // push parent and child
                     nodes[i].parents.push(y);
+
                     // odd parents number ==> hole
                     nodes[i].isHole = !! (nodes[i].parents.length % 2);
                     nodes[y].isHole = !! (nodes[y].parents.length % 2);
@@ -118,7 +129,14 @@ var SLAcer = SLAcer || {};
         return nodes;
     }
 
-    function filterNodes(polygons, nodes, clippedPolygons) {
+    function polygonsToShapes(polygons) {
+        // shapes collection
+        var shapes = [];
+
+        // make the nodes collection
+        var nodes = makeNodes(polygons);
+        //console.log('nodes:', nodes);
+
         // variables
         var key, node, i, il, parentKey;
 
@@ -126,10 +144,7 @@ var SLAcer = SLAcer || {};
         for (key in nodes) {
             node = nodes[key];
             if (! node.isHole) {
-                clippedPolygons[key] = {
-                    polygon: polygons[key],
-                    holes  : []
-                };
+                shapes[key] = new THREE.Shape(polygons[key]);
             }
         }
 
@@ -140,62 +155,10 @@ var SLAcer = SLAcer || {};
                 for (i = 0, il = node.parents.length; i < il; i++) {
                     parentKey = node.parents[i];
                     if ((il - 1) == nodes[parentKey].parents.length) {
-                        clippedPolygons[parentKey].holes.push(polygons[key]);
+                        shapes[parentKey].holes.push(new THREE.Path(polygons[key]));
                     }
                 }
             }
-        }
-    }
-
-    function clipPolygons(polygons) {
-        // clipped polygon collection
-        var clippedPolygons = {};
-
-        // make the nodes collection
-        var nodes = makeNodes(polygons);
-        console.log('nodes:', nodes);
-
-        // filtered nodes collection
-        filterNodes(polygons, nodes, clippedPolygons);
-
-        // return clipped poylgons if found
-        console.log('clippedPolygons', clippedPolygons);
-        return clippedPolygons;
-    }
-
-    function polygonsToShapes(polygons) {
-        // clip polygons (make holes)
-        if (polygons.length > 1) {
-            clipPolygons(polygons);
-        }
-
-        // shapes collection
-        var shapes = [];
-
-        // for each polygon, create the shape
-        var i, il, points, point, shape, y, yl;
-
-        for (i = 0, il = polygons.length; i < il; i++) {
-            points = polygons[i];
-            point  = points.shift();
-            shape  = new THREE.Shape();
-
-            // move to the first point
-            shape.moveTo(point.x, point.y);
-
-            // for each others trace line
-            for (y = 0, yl = points.length; y < yl; y++) {
-                point = points[y];
-                shape.lineTo(point.x, point.y);
-            }
-
-            // make and push the mesh
-            shapes.push(new THREE.Mesh(
-                new THREE.ShapeGeometry(shape),
-                new THREE.MeshBasicMaterial({
-                    color: ((1<<24)*Math.random()|0), side: THREE.DoubleSide
-                })
-            ));
         }
 
         // return shapes collection
@@ -205,7 +168,10 @@ var SLAcer = SLAcer || {};
     // -------------------------------------------------------------------------
 
     // Constructor
-    function Slicer() {
+    function Slicer(settings) {
+        // settings
+        this.settings = _.defaults({}, settings || {}, Slicer.globalSettings);
+
         // faces collection
         this.faces = [];
 
@@ -257,7 +223,7 @@ var SLAcer = SLAcer || {};
         this.plane = new SLAcer.Mesh(
             new THREE.PlaneGeometry(size.x, size.y, 1),
             new THREE.MeshBasicMaterial({
-                color: 0xffff00, side: THREE.DoubleSide
+                color: this.settings.color, side: THREE.DoubleSide
             })
         );
     };
@@ -360,15 +326,31 @@ var SLAcer = SLAcer || {};
         var polygons = linesToPolygons(lines);
         var shapes   = polygonsToShapes(polygons);
 
+        var meshes = [];
+
+        for (key in shapes) {
+            meshes.push(new THREE.Mesh(
+                new THREE.ShapeGeometry(shapes[key]),
+                new THREE.MeshBasicMaterial({
+                    color: this.settings.color, side: THREE.DoubleSide
+                })
+            ));
+        }
+
         return {
             time    : Date.now() - time,
             geometry: geometry,
             polygons: polygons,
-            shapes  : shapes
+            shapes  : meshes
+            //shapes  : shapes,
+            //meshes  : meshes
         };
     };
 
     // -------------------------------------------------------------------------
+
+    // global settings
+    Slicer.globalSettings = globalSettings;
 
     // export module
     SLAcer.Slicer = Slicer;
