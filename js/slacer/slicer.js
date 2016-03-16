@@ -93,6 +93,11 @@ var SLAcer = SLAcer || {};
     };
 
     function makeNodes(polygons) {
+        // single polygon...
+        if (polygons.length == 1) {
+            return { 0: { parents: [], isHole: false } };
+        }
+
         // nodes collection
         var nodes = {};
 
