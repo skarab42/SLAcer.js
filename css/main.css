@@ -1,42 +1,133 @@
-html, body {
+/* Navbar */
+.navbar {
     margin: 0;
-    padding: 0;
-    overflow: hidden;
 }
 
-.box {
-    margin: 5px;
+/* Sidebar */
+#sidebar {
+    position: fixed;
+    top: 51px;
+    bottom: 0;
+    left: 0;
+    width: 300px;
+    padding: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: #f5f5f5;
+    border-right: 1px solid #eeeeee;
 }
 
-.fl {
+#sidebar .panel-body {
+    padding-bottom: 0;
+}
+
+
+#sidebar .info {
+    margin-bottom: 10px;
+}
+
+#sidebar .info-label {
+    font-weight: bold;
+}
+
+#sidebar .info,
+#sidebar .form-group {
+    min-height: 20px;
+}
+
+#sidebar small {
+    color: #888888;
+    font-weight: normal;
+}
+
+#sidebar label,
+#sidebar .info-label,
+#sidebar .info-value,
+#sidebar .form-control {
+    width: 50%;
     float: left;
 }
 
-#mesh ul {
-    margin: 0;
-    padding: 5px;
-    border-radius: 6px;
-    list-style-type: none;
-    background-color: #000000;
+/* Main */
+#main {
+    position: fixed;
+    left: 300px;
+    top: 51px;
+    bottom: 0;
+    right: 0;
 }
 
-#mesh .label,
-#mesh .value {
-    padding: 2px;
-    display: inline-block;
+/* Button file */
+.btn-file {
+    position: relative;
+    overflow: hidden;
 }
 
-#mesh .label {
-    width: 80px;
-    color: #eeeeee;
-}
-
-#mesh .value {
-    width: 50px;
-    float: right;
-    color: #ff0000;
-    font-size: 0.8em;
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
     text-align: right;
-    border-radius: 4px;
-    background-color: #550000;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
 }
+
+/*input[type="number"].input-sm {
+    width: 60px;
+}*/
+
+/*#screen label {
+    float: left;
+    width: 100px;
+    height: 30px;
+}
+
+#screen .form-control {
+    float: right;
+}*/
+
+/* Main contents */
+/*.main {
+  padding: 10px;
+  margin-top: 51px;
+}*/
+
+/* Sidebar */
+/*#sidebar {
+    width: 300px;
+    position: fixed;
+    top: 51px;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    padding: 10px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #f5f5f5;
+    border-right: 1px solid #eee;
+  }*/
+
+/* Sidebar navigation */
+/*.nav-sidebar {
+    margin-right: -21px;
+    margin-bottom: 20px;
+    margin-left: -20px;
+}
+.nav-sidebar > li > a {
+    padding-right: 20px;
+    padding-left: 20px;
+}
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+    color: #fff;
+    background-color: #428bca;
+}*/

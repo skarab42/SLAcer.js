@@ -33,7 +33,7 @@ var SLAcer = SLAcer || {};
         });
         self.controls.noKeys = true;
 
-        self.light = new THREE.AmbientLight(0xffffff);
+        self.light = new THREE.AmbientLight(0x000000);
         self.scene.add(self.light);
 
         self.setBuildVolume(self.settings.buildVolume);
@@ -44,6 +44,19 @@ var SLAcer = SLAcer || {};
             camera  : self.camera,
             margin  : 10
         });
+
+        var lights = [];
+        lights[0]  = new THREE.PointLight(0xffffff, 1, 0);
+        lights[1]  = new THREE.PointLight(0xffffff, 1, 0);
+        lights[2]  = new THREE.PointLight(0xffffff, 1, 0);
+
+        lights[0].position.set(0, 2000, 0);
+        lights[1].position.set(1000, 2000, 1000);
+        lights[2].position.set(-1000, -2000, -1000);
+
+        self.scene.add( lights[0] );
+        self.scene.add( lights[1] );
+        self.scene.add( lights[2] );
 
         self.setView(this.settings.view);
         self.render();
@@ -63,6 +76,9 @@ var SLAcer = SLAcer || {};
         if (size.x > volume.x || size.y > volume.y || size.z > volume.z) {
             throw new RangeError('Object size exceeds the build volume.');
         }
+
+        // drop object on build plate
+        object.position.z = -((volume.z - size.z) / 2);
 
         // call parent method
         SLAcer.Viewer.prototype.addObject.call(this, object);
