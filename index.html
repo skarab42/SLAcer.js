@@ -5,6 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>SLAcer.js (bêta)</title>
+        <link rel="stylesheet" type="text/css" href="vendor/jquery-ui/jquery-ui.min.css" />
         <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" href="vendor/bootstrap-slider/css/bootstrap-slider.min.css" />
         <link rel="stylesheet" type="text/css" href="css/main.css" />
@@ -24,7 +25,7 @@
                 <div id="navbar" class="navbar-collapse collapse">
                     <ul class="nav navbar-nav navbar-right">
                         <li><a href="#">About</a></li>
-                        <li><a href="#">GitHub</a></li>
+                        <li><a href="https://github.com/lautr3k/SLAcer.js" target="_blank">GitHub</a></li>
                     </ul>
                 </div>
             </div>
@@ -34,7 +35,7 @@
 
                 <div id="file" class="panel panel-default">
                     <div class="panel-heading">
-                        <button class="btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#file-body">
+                        <button class="panel-toggle btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#file-body">
                             <span class="glyphicon glyphicon-menu-down"></span>
                         </button>
                         <h3 class="panel-title">File</h3>
@@ -51,7 +52,7 @@
 
                 <div id="mesh" class="panel panel-default">
                     <div class="panel-heading">
-                        <button class="btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#mesh-body">
+                        <button class="panel-toggle btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#mesh-body">
                             <span class="glyphicon glyphicon-menu-down"></span>
                         </button>
                         <h3 class="panel-title">Mesh</h3>
@@ -74,7 +75,7 @@
 
                 <div id="build-volume" class="panel panel-default">
                     <div class="panel-heading">
-                        <button class="btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#build-volume-body">
+                        <button class="panel-toggle btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#build-volume-body">
                             <span class="glyphicon glyphicon-menu-down"></span>
                         </button>
                         <h3 class="panel-title">Build volume</h3>
@@ -102,7 +103,7 @@
 
                 <div id="resin" class="panel panel-default">
                     <div class="panel-heading">
-                        <button class="btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#resin-body">
+                        <button class="panel-toggle btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#resin-body">
                             <span class="glyphicon glyphicon-menu-down"></span>
                         </button>
                         <h3 class="panel-title">Resin</h3>
@@ -121,7 +122,7 @@
 
                 <div id="screen" class="panel panel-default">
                     <div class="panel-heading">
-                        <button class="btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#screen-body">
+                        <button class="panel-toggle btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#screen-body">
                             <span class="glyphicon glyphicon-menu-down"></span>
                         </button>
                         <h3 class="panel-title">Screen</h3>
@@ -168,6 +169,7 @@
 
         </div><!-- .body -->
         <script src="vendor/jquery-2.1.4.min.js" type="text/javascript"></script>
+        <script src="vendor/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
         <script src="vendor/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
         <script src="vendor/bootstrap-slider/bootstrap-slider.min.js" type="text/javascript"></script>
         <script src="vendor/lodash.min.js" type="text/javascript"></script>

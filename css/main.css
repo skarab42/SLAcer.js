@@ -17,10 +17,16 @@
     border-right: 1px solid #eeeeee;
 }
 
+#sidebar .panel-placeholder {
+    margin-bottom: 20px;
+    border-radius: 4px;
+    background-color: #eeeeee;
+    border: 1px dashed #cccccc;
+}
+
 #sidebar .panel-body {
     padding-bottom: 0;
 }
-
 
 #sidebar .info {
     margin-bottom: 10px;

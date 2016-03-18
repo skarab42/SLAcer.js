@@ -7,28 +7,43 @@ var settings = new SLAcer.Settings({
         unit     : 'mm',                         // mm or in
         color    : 0xcccccc,
         opacity  : 0.1,
-        collapsed: false
+        panel    : {
+            collapsed: false,
+            position : 2
+        }
     },
     resin: {
         density  : 1.1, // g/cm3
         price    : 50,   // $
-        collapsed: false
-    },
-    viewer3d: {
-        color: 0xffffff
+        panel    : {
+            collapsed: false,
+            position : 3
+        }
     },
     mesh: {
-        color    : 0x333333,
-        collapsed: false
+        color: 0x333333,
+        panel: {
+            collapsed: false,
+            position : 1
+        }
     },
     screen: {
         width    : 1680,
         height   : 1050,
         diagonal : { size: 22, unit: 'in' },
-        collapsed: false
+        panel    : {
+            collapsed: false,
+            position : 4
+        }
     },
     file: {
-        collapsed: false
+        panel: {
+            collapsed: false,
+            position : 0
+        }
+    },
+    viewer3d: {
+        color: 0xffffff
     }
 });
 
@@ -67,6 +82,42 @@ $sliderInput.slider({ reversed : true }).on('change', function(e) {
 
 var $sliderElement = $('#slider .slider');
 
+
+// Sidebar
+var $sidebar = $('#sidebar');
+var $panels  = $sidebar.find('.panel');
+
+$sidebar.sortable({
+    axis       : 'y',
+    handle     : '.panel-heading',
+    cancel     : '.panel-toggle',
+    placeholder: 'panel-placeholder', forcePlaceholderSize: true,
+    // update panel position
+    stop: function(e, ui) {
+        $sidebar.find('.panel').each(function(i, element) {
+            settings.set(_.camelCase(element.id) + '.panel.position', i);
+        });
+    }
+});
+
+// Sort panels
+var panels = [];
+var panel;
+
+for (var namespace in settings.settings) {
+    panel = settings.settings[namespace].panel;
+    if (panel) {
+        panels[panel.position] = {
+            name : namespace,
+            panel: panel
+        };
+    }
+}
+
+for (var i in panels) {
+    $sidebar.append($('#' + _.kebabCase(panels[i].name)));
+}
+
 // Init panel
 function initPanel(name) {
     var id    = _.kebabCase(name);
@@ -74,14 +125,14 @@ function initPanel(name) {
     var $body = $('#' + id + '-body');
 
     $body.on('hidden.bs.collapse', function () {
-        settings.set(name + '.collapsed', true);
+        settings.set(name + '.panel.collapsed', true);
     });
 
     $body.on('shown.bs.collapse', function () {
-        settings.set(name + '.collapsed', false);
+        settings.set(name + '.panel.collapsed', false);
     });
 
-    if (settings.get(name + '.collapsed')) {
+    if (settings.get(name + '.panel.collapsed')) {
         $body.collapse('hide');
     }
 
@@ -255,14 +306,17 @@ loader.onError = errorHandler;
 // load example
 // -----------------------------------------------------------------------------
 // example STL file
-var stl = '/stl/Octocat-v2.stl';
-//var stl = '/stl/StressTest.stl';
+var stl = 'stl/Octocat-v2.stl';
+//var stl = 'stl/StressTest.stl';
+
+// File url
+var url = 'http://' + window.location.hostname + window.location.pathname + stl;
 
 // Create http request object
 var xmlhttp = new XMLHttpRequest();
 
 // Get the file contents
-xmlhttp.open("GET", window.location + stl);
+xmlhttp.open("GET", url);
 
 xmlhttp.onreadystatechange = function() {
     if (xmlhttp.readyState == XMLHttpRequest.DONE) {
