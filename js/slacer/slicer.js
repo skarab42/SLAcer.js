@@ -21,6 +21,12 @@ var SLAcer = SLAcer || {};
         this.p2 = new Point(p2);
     }
 
+    function isSamePoint(p1, p2) {
+        var epsilon = Number.EPSILON;
+        return Math.abs(p1.x - p2.x) < epsilon
+            && Math.abs(p1.y - p2.y) < epsilon;
+    }
+
     function linesToPolygons(lines) {
         var polygons = [];
         var polygon  = [];
@@ -31,9 +37,9 @@ var SLAcer = SLAcer || {};
             var found = false;
             for (i = 0; i < lines.length; i++) {
                 line = lines[i];
-                if (lastPoint.s == line.p1.s) {
+                if (isSamePoint(lastPoint, line.p1)) {
                     lines.splice(i, 1);
-                    if (firstLine.p1.s == line.p2.s) {
+                    if (isSamePoint(firstLine.p1, line.p2)) {
                         //console.log('closed loop');
                         break;
                     }
@@ -41,9 +47,9 @@ var SLAcer = SLAcer || {};
                     lastPoint = line.p2;
                     found = true;
                 }
-                else if (lastPoint.s == line.p2.s) {
+                else if (isSamePoint(lastPoint, line.p2)) {
                     lines.splice(i, 1);
-                    if (firstLine.p1.s == line.p1.s) {
+                    if (isSamePoint(firstLine.p1, line.p1)) {
                         //console.log('closed loop');
                         break;
                     }
@@ -334,12 +340,19 @@ var SLAcer = SLAcer || {};
         var meshes = [];
 
         for (key in shapes) {
-            meshes.push(new THREE.Mesh(
-                new THREE.ShapeGeometry(shapes[key]),
-                new THREE.MeshBasicMaterial({
-                    color: this.settings.color, side: THREE.DoubleSide
-                })
-            ));
+            try {
+                var color = this.settings.color;
+                //var color = ((1<<24)*Math.random()|0);
+                meshes.push(new THREE.Mesh(
+                    new THREE.ShapeGeometry(shapes[key]),
+                    new THREE.MeshBasicMaterial({
+                        color: color, side: THREE.DoubleSide
+                    })
+                ));
+            } catch(e) {
+                console.error(e);
+                console.log(shapes[key]);
+            }
         }
 
         return {
