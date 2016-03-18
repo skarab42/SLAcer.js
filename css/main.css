@@ -47,10 +47,14 @@
 }
 
 #sidebar label,
-#sidebar .info-label,
+#sidebar .info-label {
+    width: 60%;
+    float: left;
+}
+
 #sidebar .info-value,
 #sidebar .form-control {
-    width: 50%;
+    width: 40%;
     float: left;
 }
 

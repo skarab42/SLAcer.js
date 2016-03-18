@@ -63,6 +63,18 @@
                             <span class="info-value" id="mesh-faces">0</span>
                         </div>
                         <div class="info">
+                            <span class="info-label">Width <small>(<span class="mesh-size-unit">mm</span>)</small></span>
+                            <span class="info-value" id="mesh-size-x">0</span>
+                        </div>
+                        <div class="info">
+                            <span class="info-label">Depth <small>(<span class="mesh-size-unit">mm</span>)</small></span>
+                            <span class="info-value" id="mesh-size-y">0</span>
+                        </div>
+                        <div class="info">
+                            <span class="info-label">Height <small>(<span class="mesh-size-unit">mm</span>)</small></span>
+                            <span class="info-value" id="mesh-size-z">0</span>
+                        </div>
+                        <div class="info">
                             <span class="info-label">Volume <small>(ml)</small></span>
                             <span class="info-value" id="mesh-volume">0</span>
                         </div>
@@ -73,6 +85,21 @@
                     </div>
                 </div><!-- #mesh -->
 
+                <div id="slicer" class="panel panel-default">
+                    <div class="panel-heading">
+                        <button class="panel-toggle btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#slicer-body">
+                            <span class="glyphicon glyphicon-menu-down"></span>
+                        </button>
+                        <h3 class="panel-title">Slicer</h3>
+                    </div>
+                    <div id="slicer-body" class="panel-body collapse in">
+                        <div class="form-group">
+                            <label for="layers-height">Layers height <small>(μm)</small></label>
+                            <input type="number" id="layers-height" class="form-control input-sm" placeholder="100" min="1" />
+                        </div>
+                    </div>
+                </div><!-- #slicer -->
+
                 <div id="build-volume" class="panel panel-default">
                     <div class="panel-heading">
                         <button class="panel-toggle btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#build-volume-body">
@@ -82,15 +109,15 @@
                     </div>
                     <div id="build-volume-body" class="panel-body collapse in">
                         <div class="form-group">
-                            <label for="build-volume-x">X</label>
+                            <label for="build-volume-x">X <small>(width)</small></label>
                             <input type="number" id="build-volume-x" class="form-control input-sm" placeholder="100" min="0" />
                         </div>
                         <div class="form-group">
-                            <label for="build-volume-y">Y</label>
+                            <label for="build-volume-y">Y <small>(depth)</small></label>
                             <input type="number" id="build-volume-y" class="form-control input-sm" placeholder="100" min="0" />
                         </div>
                         <div class="form-group">
-                            <label for="build-volume-z">Z</label>
+                            <label for="build-volume-z">Z <small>(height)</small></label>
                             <input type="number" id="build-volume-z" class="form-control input-sm" placeholder="100" min="0" />
                         </div>
                         <div class="form-group">

@@ -32,6 +32,10 @@ var SLAcer = SLAcer || {};
 
     // -------------------------------------------------------------------------
 
+    Mesh.prototype.getSize = function() {
+        return this.geometry.boundingBox.size();
+    };
+
     // http://stackoverflow.com/questions/23279521
     Mesh.prototype.getVolume = function(update) {
         if (! update && this.userData.volume !== undefined) {

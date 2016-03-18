@@ -3,22 +3,10 @@
 // -----------------------------------------------------------------------------
 //window.localStorage.clear();
 var settings = new SLAcer.Settings({
-    buildVolume: {
-        size     : { x: 100,  y: 100,  z: 100 }, // mm
-        unit     : 'mm',                         // mm or in
-        color    : 0xcccccc,
-        opacity  : 0.1,
-        panel    : {
+    file: {
+        panel: {
             collapsed: false,
-            position : 2
-        }
-    },
-    resin: {
-        density  : 1.1, // g/cm3
-        price    : 50,   // $
-        panel    : {
-            collapsed: false,
-            position : 3
+            position : 0
         }
     },
     mesh: {
@@ -28,19 +16,40 @@ var settings = new SLAcer.Settings({
             position : 1
         }
     },
+    slicer: {
+        layers: {
+            height: 100 // μm
+        },
+        panel: {
+            collapsed: false,
+            position : 2
+        }
+    },
+    buildVolume: {
+        size     : { x: 100,  y: 100,  z: 100 }, // mm
+        unit     : 'mm',                         // mm or in
+        color    : 0xcccccc,
+        opacity  : 0.1,
+        panel    : {
+            collapsed: false,
+            position : 3
+        }
+    },
+    resin: {
+        density  : 1.1, // g/cm3
+        price    : 50,   // $
+        panel    : {
+            collapsed: false,
+            position : 4
+        }
+    },
     screen: {
         width    : 1680,
         height   : 1050,
         diagonal : { size: 22, unit: 'in' },
         panel    : {
             collapsed: false,
-            position : 4
-        }
-    },
-    file: {
-        panel: {
-            collapsed: false,
-            position : 0
+            position : 5
         }
     },
     viewer3d: {
@@ -60,6 +69,15 @@ function errorHandler(error) {
 // -----------------------------------------------------------------------------
 var slicer = new SLAcer.Slicer();
 
+function slice(layerNumber) {
+    // get slice
+    var layerHeight = settings.get('slicer.layers.height') / 1000;
+    var zPosition   = layerNumber * layerHeight;
+    var slice       = slicer.getFaces(zPosition);
+    console.log('layer number:', layerNumber);
+    console.log('z position  :', zPosition);
+}
+
 // -----------------------------------------------------------------------------
 // UI
 // -----------------------------------------------------------------------------
@@ -78,7 +96,7 @@ var viewer3d  = new SLAcer.Viewer3D({
 var $sliderInput = $('#slider input');
 
 $sliderInput.slider({ reversed : true }).on('change', function(e) {
-    console.log('slice:', e.value.newValue);
+    slice(e.value.newValue);
 });
 
 var $sliderElement = $('#slider .slider');
@@ -145,16 +163,38 @@ function parseUnit(value, unit) {
 var $fileBody = initPanel('file');
 
 // Mesh panel
-var $meshBody   = initPanel('mesh');
-var $meshFaces  = $meshBody.find('#mesh-faces');
-var $meshVolume = $meshBody.find('#mesh-volume');
-var $meshWeight = $meshBody.find('#mesh-weight');
+var $meshBody     = initPanel('mesh');
+var $meshFaces    = $meshBody.find('#mesh-faces');
+var $meshVolume   = $meshBody.find('#mesh-volume');
+var $meshWeight   = $meshBody.find('#mesh-weight');
+var $meshSizeX    = $meshBody.find('#mesh-size-x');
+var $meshSizeY    = $meshBody.find('#mesh-size-y');
+var $meshSizeZ    = $meshBody.find('#mesh-size-z');
+var $meshSizeUnit = $meshBody.find('.mesh-size-unit');
 
 function updateMeshInfoUI(mesh) {
+    var size = mesh.getSize();
+    var unit = settings.get('buildVolume.unit');
+
+    $meshSizeUnit.html(unit);
+
+    if (unit == 'in') {
+        size.x = parseUnit(size.x, 'in');
+        size.y = parseUnit(size.y, 'in');
+        size.z = parseUnit(size.z, 'in');
+    }
+
+    $meshSizeX.html(size.x.toFixed(2));
+    $meshSizeY.html(size.y.toFixed(2));
+    $meshSizeZ.html(size.z.toFixed(2));
+
     $meshFaces.html(mesh.geometry.faces.length);
     $meshVolume.html(parseInt(mesh.getVolume() / 1000)); // cm3/ml
     $meshWeight.html(0);
 }
+
+// Slicer panel
+var $slicerBody = initPanel('slicer');
 
 // Build volume panel
 var $buildVolumeBody = initPanel('buildVolume');
@@ -174,6 +214,7 @@ function updateBuildVolumeSettings() {
 
     if (unit != settings.get('buildVolume.diagonal.unit')) {
         var size = settings.get('buildVolume.size');
+
         $buildVolumeX.val(parseUnit(size.x, unit));
         $buildVolumeY.val(parseUnit(size.y, unit));
         $buildVolumeZ.val(parseUnit(size.z, unit));
@@ -187,6 +228,10 @@ function updateBuildVolumeSettings() {
         },
         unit: unit
     });
+
+    if (size) {
+        updateMeshInfoUI(slicer.mesh);
+    }
 }
 
 $('#build-volume-unit-' + settings.get('buildVolume.unit')).prop('checked', true);
@@ -289,7 +334,7 @@ loader.onGeometry = function(geometry) {
         updateMeshInfoUI(slicer.mesh);
 
         // get first slice
-        //slice(0);
+        //slice(1);
     }
     catch(e) {
         errorHandler(e);
