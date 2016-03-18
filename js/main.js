@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------
 // Variables
 // -----------------------------------------------------------------------------
+//window.localStorage.clear();
 var settings = new SLAcer.Settings({
     buildVolume: {
         size     : { x: 100,  y: 100,  z: 100 }, // mm
@@ -104,18 +105,14 @@ $sidebar.sortable({
 var panels = [];
 var panel;
 
-for (var namespace in settings.settings) {
-    panel = settings.settings[namespace].panel;
-    if (panel) {
-        panels[panel.position] = {
-            name : namespace,
-            panel: panel
-        };
+_.forEach(settings.settings, function(item, namespace) {
+    if (item && item.panel) {
+        panels[item.panel.position] = $('#' + _.kebabCase(namespace));
     }
-}
+});
 
 for (var i in panels) {
-    $sidebar.append($('#' + _.kebabCase(panels[i].name)));
+    $sidebar.append(panels[i]);
 }
 
 // Init panel
