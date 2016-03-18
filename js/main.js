@@ -68,14 +68,46 @@ function errorHandler(error) {
 // Slicer
 // -----------------------------------------------------------------------------
 var slicer = new SLAcer.Slicer();
+var shapes;
+
+function removeShapes() {
+    if (shapes && shapes.length) {
+        for (var i = 0, il = shapes.length; i < il; i++) {
+            viewer3d.removeObject(shapes[i]);
+        }
+    }
+}
 
 function slice(layerNumber) {
+    // remove old shapes
+    removeShapes();
+
+    if (layerNumber < 1) {
+        viewer3d.render();
+        return;
+    }
+
     // get slice
     var layerHeight = settings.get('slicer.layers.height') / 1000;
     var zPosition   = layerNumber * layerHeight;
     var slice       = slicer.getFaces(zPosition);
-    console.log('layer number:', layerNumber);
-    console.log('z position  :', zPosition);
+
+    //console.log('layer number:', layerNumber);
+    //console.log('z position  :', zPosition);
+
+    // get new shapes list
+    shapes = slice.shapes;
+    zPosition -= settings.get('buildVolume.size.z') / 2;
+
+    // add new shapes
+    for (var i = 0, il = shapes.length; i < il; i++) {
+        shapes[i].position.z = zPosition;
+        shapes[i].material.depthTest = false;
+        viewer3d.scene.add(shapes[i]);
+    }
+
+    // render
+    viewer3d.render();
 }
 
 // -----------------------------------------------------------------------------
@@ -92,6 +124,10 @@ var viewer3d  = new SLAcer.Viewer3D({
     target     : $viewer3d[0]
 });
 
+// Triangulation algorithm
+//THREE.Triangulation.setTimer(true);
+THREE.Triangulation.setLibrary('earcut');
+
 // Slider
 var $sliderInput = $('#slider input');
 
@@ -100,6 +136,8 @@ $sliderInput.slider({ reversed : true }).on('change', function(e) {
 });
 
 var $sliderElement = $('#slider .slider');
+var $sliderMinValue = $('#slider .min');
+var $sliderMaxValue = $('#slider .max');
 
 
 // Sidebar
@@ -173,8 +211,13 @@ var $meshSizeZ    = $meshBody.find('#mesh-size-z');
 var $meshSizeUnit = $meshBody.find('.mesh-size-unit');
 
 function updateMeshInfoUI(mesh) {
-    var size = mesh.getSize();
-    var unit = settings.get('buildVolume.unit');
+    var size         = mesh.getSize();
+    var unit         = settings.get('buildVolume.unit');
+    var layersHeight = settings.get('slicer.layers.height') / 1000;
+    var layersNumber = Math.ceil(size.z / layersHeight);
+
+    $sliderInput.slider('setAttribute', 'max', layersNumber);
+    $sliderMaxValue.html(layersNumber);
 
     $meshSizeUnit.html(unit);
 
@@ -320,6 +363,9 @@ loader.onGeometry = function(geometry) {
     try {
         // remove old mesh and plane
         slicer.mesh && viewer3d.removeObject(slicer.mesh);
+
+        // remove old shapes
+        removeShapes();
 
         // load new mesh in slicer
         slicer.loadMesh(new SLAcer.Mesh(geometry, new THREE.MeshPhongMaterial({
