@@ -275,7 +275,10 @@ function updateBuildVolumeSettings() {
         unit: unit
     });
 
+    removeShapes();
+
     viewer3d.setBuildVolume(settings.get('buildVolume'));
+    viewer3d.dropObject(slicer.mesh);
     viewer3d.render();
 
     if (size) {
