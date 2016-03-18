@@ -396,8 +396,8 @@ loader.onError = errorHandler;
 // load example
 // -----------------------------------------------------------------------------
 // example STL file
-var stl = 'stl/Octocat-v2.stl';
-//var stl = 'stl/StressTest.stl';
+//var stl = 'stl/Octocat-v2.stl';
+var stl = 'stl/StressTest.stl';
 
 // File url
 var url = 'http://' + window.location.hostname + window.location.pathname + stl;
