@@ -127,6 +127,8 @@ var viewer3d  = new SLAcer.Viewer3D({
 // Triangulation algorithm
 //THREE.Triangulation.setTimer(true);
 THREE.Triangulation.setLibrary('earcut');
+//THREE.Triangulation.setLibrary('libtess');
+//THREE.Triangulation.setLibrary('poly2tri');
 
 // Slider
 var $sliderInput = $('#slider input');
