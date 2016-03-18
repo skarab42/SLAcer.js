@@ -97,7 +97,7 @@ function slice(layerNumber) {
 
     // get new shapes list
     shapes = slice.shapes;
-    zPosition -= settings.get('buildVolume.size.z') / 2;
+    zPosition -= viewer3d.buildVolume.size.z / 2;
 
     // add new shapes
     for (var i = 0, il = shapes.length; i < il; i++) {
