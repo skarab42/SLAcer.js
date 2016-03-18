@@ -249,6 +249,7 @@ var $buildVolumeZ    = $buildVolumeBody.find('#build-volume-z');
 
 function updateBuildVolumeUI() {
     var buildVolume = settings.get('buildVolume');
+
     $buildVolumeX.val(buildVolume.size.x);
     $buildVolumeY.val(buildVolume.size.y);
     $buildVolumeZ.val(buildVolume.size.z);
@@ -257,7 +258,7 @@ function updateBuildVolumeUI() {
 function updateBuildVolumeSettings() {
     var unit = $('#build-volume input[type=radio]:checked').val();
 
-    if (unit != settings.get('buildVolume.diagonal.unit')) {
+    if (unit != settings.get('buildVolume.unit')) {
         var size = settings.get('buildVolume.size');
 
         $buildVolumeX.val(parseUnit(size.x, unit));
@@ -273,6 +274,9 @@ function updateBuildVolumeSettings() {
         },
         unit: unit
     });
+
+    viewer3d.setBuildVolume(settings.get('buildVolume'));
+    viewer3d.render();
 
     if (size) {
         updateMeshInfoUI(slicer.mesh);
