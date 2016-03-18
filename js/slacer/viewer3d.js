@@ -68,8 +68,14 @@ var SLAcer = SLAcer || {};
 
     // -------------------------------------------------------------------------
 
-    Viewer3D.prototype.addObject = function(object) {
+    Viewer3D.prototype.dropObject = function(object) {
+        var volume = this.buildVolume.size;
         var size   = object.geometry.boundingBox.size();
+        object.position.z = -((volume.z - size.z) / 2);
+    };
+
+    Viewer3D.prototype.addObject = function(object) {
+        /*var size   = object.geometry.boundingBox.size();
         var volume = this.buildVolume.size;
 
         // is in build volume
@@ -78,7 +84,10 @@ var SLAcer = SLAcer || {};
         }
 
         // drop object on build plate
-        object.position.z = -((volume.z - size.z) / 2);
+        object.position.z = -((volume.z - size.z) / 2);*/
+
+        // drop object on build plate
+        this.dropObject(object);
 
         // call parent method
         SLAcer.Viewer.prototype.addObject.call(this, object);
@@ -87,11 +96,18 @@ var SLAcer = SLAcer || {};
     // -------------------------------------------------------------------------
 
     Viewer3D.prototype.setBuildVolume = function(settings) {
-        this.buildVolume = _.defaultsDeep(settings, this.buildVolume);
+        this.buildVolume = _.defaultsDeep({}, settings, this.buildVolume);
 
         var size    = this.buildVolume.size;
+        var unit    = this.buildVolume.unit;
         var color   = this.buildVolume.color;
         var opacity = this.buildVolume.opacity;
+
+        if (unit == 'in') { // -> mm
+            size.x *= 25.4;
+            size.y *= 25.4;
+            size.z *= 25.4;
+        }
 
         var geometry = new THREE.CubeGeometry(size.x, size.y, size.z);
         var material = new THREE.MeshBasicMaterial({
