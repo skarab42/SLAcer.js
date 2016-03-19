@@ -275,8 +275,6 @@ function updateBuildVolumeSettings() {
         unit: unit
     });
 
-    //removeShapes();
-
     viewer3d.setBuildVolume(settings.get('buildVolume'));
     viewer3d.dropObject(slicer.mesh);
     viewer3d.render();
@@ -284,6 +282,9 @@ function updateBuildVolumeSettings() {
     if (size) {
         updateMeshInfoUI(slicer.mesh);
     }
+
+    //removeShapes();
+    slice($sliderInput.slider('getValue'));
 }
 
 $('#build-volume-unit-' + settings.get('buildVolume.unit')).prop('checked', true);
