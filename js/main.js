@@ -142,7 +142,7 @@ var $sliderMaxValue = $('#slider .max');
 
 function updateSliderUI() {
     var layersHeight = settings.get('slicer.layers.height') / 1000;
-    var layersNumber = Math.ceil(slicer.mesh.getSize().z / layersHeight);
+    var layersNumber = Math.floor(slicer.mesh.getSize().z / layersHeight);
 
     $sliderInput.slider('setAttribute', 'max', layersNumber);
     $sliderMaxValue.html(layersNumber);
