@@ -21,10 +21,12 @@ var SLAcer = SLAcer || {};
         this.p2 = new Point(p2);
     }
 
+    function isSameValue(v1, v2) {
+        return Math.abs(v1 - v2) <= Number.EPSILON;
+    }
+
     function isSamePoint(p1, p2) {
-        var epsilon = Number.EPSILON;
-        return Math.abs(p1.x - p2.x) < epsilon
-            && Math.abs(p1.y - p2.y) < epsilon;
+        return isSameValue(p1.x, p2.x) && isSameValue(p1.y, p2.y);
     }
 
     function linesToPolygons(lines) {
@@ -110,12 +112,19 @@ var SLAcer = SLAcer || {};
         // variables
         var i, il, point, y, yl;
 
-        // for each polygon extract parents and childs poylgons
+        // for each polygon extract parents and childs polygons
         for (i = 0, il = polygons.length; i < il; i++) {
             // only check for first point in polygon
             point = polygons[i][0];
 
-            // for each poylgons
+            // not enough faces ( !!! investigation required !!!)
+            if (polygons[i].length < 3) {
+                //console.log('--------------------');
+                //console.log(il, i, polygons[i]);
+                continue;
+            }
+
+            // for each polygons
             for (y = 0, yl = il; y < yl; y++) {
                 // do not check self intersection
                 if (i == y) continue;
@@ -278,10 +287,9 @@ var SLAcer = SLAcer || {};
                 ));
 
                 // slice...
-
-                t1 = v1.z == zPosition;
-                t2 = v2.z == zPosition;
-                t3 = v3.z == zPosition;
+                t1 = isSameValue(v1.z, zPosition);
+                t2 = isSameValue(v2.z, zPosition);
+                t3 = isSameValue(v3.z, zPosition);
 
                 touch = 0;
 
