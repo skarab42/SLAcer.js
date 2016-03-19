@@ -137,10 +137,16 @@ $sliderInput.slider({ reversed : true }).on('change', function(e) {
     slice(e.value.newValue);
 });
 
-var $sliderElement = $('#slider .slider');
-var $sliderMinValue = $('#slider .min');
+var $sliderElement  = $('#slider .slider');
 var $sliderMaxValue = $('#slider .max');
 
+function updateSliderUI() {
+    var layersHeight = settings.get('slicer.layers.height') / 1000;
+    var layersNumber = Math.ceil(slicer.mesh.getSize().z / layersHeight);
+
+    $sliderInput.slider('setAttribute', 'max', layersNumber);
+    $sliderMaxValue.html(layersNumber);
+}
 
 // Sidebar
 var $sidebar = $('#sidebar');
@@ -213,13 +219,10 @@ var $meshSizeZ    = $meshBody.find('#mesh-size-z');
 var $meshSizeUnit = $meshBody.find('.mesh-size-unit');
 
 function updateMeshInfoUI(mesh) {
-    var size         = mesh.getSize();
-    var unit         = settings.get('buildVolume.unit');
-    var layersHeight = settings.get('slicer.layers.height') / 1000;
-    var layersNumber = Math.ceil(size.z / layersHeight);
+    var size = mesh.getSize();
+    var unit = settings.get('buildVolume.unit');
 
-    $sliderInput.slider('setAttribute', 'max', layersNumber);
-    $sliderMaxValue.html(layersNumber);
+    updateSliderUI();
 
     $meshSizeUnit.html(unit);
 
@@ -239,7 +242,21 @@ function updateMeshInfoUI(mesh) {
 }
 
 // Slicer panel
-var $slicerBody = initPanel('slicer');
+var $slicerBody        = initPanel('slicer');
+var $slicerLayerHeight = $slicerBody.find('#slicer-layers-height');
+
+function updateSlicerUI() {
+    var layers = settings.get('slicer.layers');
+    $slicerLayerHeight.val(layers.height);
+}
+
+function updateSlicerSettings() {
+    settings.set('slicer.layers.height', $slicerLayerHeight.val());
+    updateSliderUI();
+}
+
+$('#slicer input').on('input', updateSlicerSettings);
+updateSlicerUI();
 
 // Build volume panel
 var $buildVolumeBody = initPanel('buildVolume');
@@ -253,6 +270,16 @@ function updateBuildVolumeUI() {
     $buildVolumeX.val(buildVolume.size.x);
     $buildVolumeY.val(buildVolume.size.y);
     $buildVolumeZ.val(buildVolume.size.z);
+
+    updateBuildVolumeSizeStep();
+}
+
+function updateBuildVolumeSizeStep() {
+    var step = (settings.get('buildVolume.unit') == 'in') ? 0.01 : 1;
+
+    $buildVolumeX.prop('step', step);
+    $buildVolumeY.prop('step', step);
+    $buildVolumeZ.prop('step', step);
 }
 
 function updateBuildVolumeSettings() {
@@ -283,7 +310,7 @@ function updateBuildVolumeSettings() {
         updateMeshInfoUI(slicer.mesh);
     }
 
-    //removeShapes();
+    updateBuildVolumeSizeStep();
     slice($sliderInput.slider('getValue'));
 }
 
