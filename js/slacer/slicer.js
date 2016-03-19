@@ -313,6 +313,18 @@ var SLAcer = SLAcer || {};
 
                 // one point on plane
                 if (touch == 1) {
+                    // test if faces intersect the plane
+                    if (t1 && ((v2.z > zPosition && v3.z < zPosition) || (v2.z < zPosition && v3.z > zPosition))) {
+                        addLine(v1, plane.intersectLine(new THREE.Line3(v2, v3)));
+                    }
+                    else if (t2 && ((v3.z > zPosition && v1.z < zPosition) || (v3.z < zPosition && v1.z > zPosition))) {
+                        addLine(v2, plane.intersectLine(new THREE.Line3(v3, v1)));
+                    }
+                    else if (t3 && ((v1.z > zPosition && v2.z < zPosition) || (v1.z < zPosition && v2.z > zPosition))) {
+                        addLine(v3, plane.intersectLine(new THREE.Line3(v1, v2)));
+                    }
+
+                    // no intersection!
                     // skip since is shared with two points case
                     continue;
                 }
