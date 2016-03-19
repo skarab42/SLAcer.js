@@ -213,12 +213,14 @@ var $meshBody     = initPanel('mesh');
 var $meshFaces    = $meshBody.find('#mesh-faces');
 var $meshVolume   = $meshBody.find('#mesh-volume');
 var $meshWeight   = $meshBody.find('#mesh-weight');
+var $meshCost     = $meshBody.find('#mesh-cost');
 var $meshSizeX    = $meshBody.find('#mesh-size-x');
 var $meshSizeY    = $meshBody.find('#mesh-size-y');
 var $meshSizeZ    = $meshBody.find('#mesh-size-z');
 var $meshSizeUnit = $meshBody.find('.mesh-size-unit');
 
-function updateMeshInfoUI(mesh) {
+function updateMeshInfoUI() {
+    var mesh = slicer.mesh;
     var size = mesh.getSize();
     var unit = settings.get('buildVolume.unit');
 
@@ -236,9 +238,14 @@ function updateMeshInfoUI(mesh) {
     $meshSizeY.html(size.y.toFixed(2));
     $meshSizeZ.html(size.z.toFixed(2));
 
+    var volume = parseInt(mesh.getVolume() / 1000);                   // cm3/ml
+    var weight = (volume * settings.get('resin.density')).toFixed(2); // g
+    var cost   = volume * settings.get('resin.price') / 1000;
+
     $meshFaces.html(mesh.geometry.faces.length);
-    $meshVolume.html(parseInt(mesh.getVolume() / 1000)); // cm3/ml
-    $meshWeight.html(0);
+    $meshVolume.html(volume);
+    $meshWeight.html(weight);
+    $meshCost.html(cost);
 }
 
 // Slicer panel
@@ -306,9 +313,7 @@ function updateBuildVolumeSettings() {
     viewer3d.dropObject(slicer.mesh);
     viewer3d.render();
 
-    if (size) {
-        updateMeshInfoUI(slicer.mesh);
-    }
+    size && updateMeshInfoUI();
 
     updateBuildVolumeSizeStep();
     slice($sliderInput.slider('getValue'));
@@ -334,6 +339,7 @@ function updateResinUI() {
 function updateResinSettings() {
     settings.set('resin.price'  , $resinPrice.val());
     settings.set('resin.density', $resinDensity.val());
+    updateMeshInfoUI();
 }
 
 $('#resin input').on('input', updateResinSettings);
@@ -414,7 +420,7 @@ loader.onGeometry = function(geometry) {
         viewer3d.render();
 
         // update mesh info
-        updateMeshInfoUI(slicer.mesh);
+        updateMeshInfoUI();
 
         // get first slice
         //slice(1);
