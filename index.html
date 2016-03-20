@@ -40,6 +40,12 @@
                     <button id="slice-button" class="btn btn-success" type="button">
                         <span class="glyphicon glyphicon-align-center"></span> Slice
                     </button>
+                    <button id="abort-button" class="btn btn-danger hidden" type="button">
+                        <span class="glyphicon glyphicon-off"></span> Abort
+                    </button>
+                    <button id="zip-button" class="btn btn-info" type="button" disabled="disabled">
+                        <span class="glyphicon glyphicon-compressed"></span> ZIP
+                    </button>
                 </div>
 
                 <div id="file" class="panel panel-default">
@@ -117,12 +123,26 @@
                             <input type="number" id="slicer-layers-height" class="form-control input-sm" placeholder="100" min="1" />
                         </div>
                         <div class="form-group">
-                            <label for="slicer-light-on">Light on <small>(ms)</small></label>
+                            <label for="slicer-light-on">Light on delay <small>(ms)</small></label>
                             <input type="number" id="slicer-light-on" class="form-control input-sm" placeholder="1000" min="1" />
                         </div>
                         <div class="form-group">
-                            <label for="slicer-light-off">Light off <small>(ms)</small></label>
+                            <label for="slicer-light-off">Light off delay <small>(ms)</small></label>
                             <input type="number" id="slicer-light-off" class="form-control input-sm" placeholder="500" min="1" />
+                        </div>
+                        <div class="form-group">
+                            <label for="slicer-make-zip">Make ZIP file</label>
+                            <input type="radio" name="slicer-make-zip" id="slicer-make-zip-yes" value="yes" /> yes
+                            <input type="radio" name="slicer-make-zip" id="slicer-make-zip-no" value="no" checked="checked" /> no
+                        </div>
+                        <div class="form-group">
+                            <label for="slicer-speed">Speed mode</label>
+                            <input type="radio" name="slicer-speed" id="slicer-speed-yes" value="yes" /> yes
+                            <input type="radio" name="slicer-speed" id="slicer-speed-no" value="no" checked="checked" /> no
+                        </div>
+                        <div class="form-group">
+                            <label for="slicer-speed-delay">Speed mode<br />delay <small>(ms)</small></label>
+                            <input type="number" id="slicer-speed-delay" class="form-control input-sm" placeholder="100" min="1" />
                         </div>
                     </div>
                 </div><!-- #slicer -->
@@ -244,6 +264,8 @@
         <script src="js/slacer/viewer2d.js" type="text/javascript"></script>
         <script src="js/slacer/slicer.js" type="text/javascript"></script>
         <script src="js/loader/stl.js" type="text/javascript"></script>
+        <script src="vendor/FileSaver.min.js" type="text/javascript"></script>
+        <script src="vendor/jszip.min.js" type="text/javascript"></script>
         <script src="js/main.js" type="text/javascript"></script>
     </body>
 </html>
