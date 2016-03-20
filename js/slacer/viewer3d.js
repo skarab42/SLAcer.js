@@ -75,17 +75,6 @@ var SLAcer = SLAcer || {};
     };
 
     Viewer3D.prototype.addObject = function(object) {
-        /*var size   = object.geometry.boundingBox.size();
-        var volume = this.buildVolume.size;
-
-        // is in build volume
-        if (size.x > volume.x || size.y > volume.y || size.z > volume.z) {
-            throw new RangeError('Object size exceeds the build volume.');
-        }
-
-        // drop object on build plate
-        object.position.z = -((volume.z - size.z) / 2);*/
-
         // drop object on build plate
         this.dropObject(object);
 

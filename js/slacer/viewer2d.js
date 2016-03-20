@@ -8,13 +8,14 @@ var SLAcer = SLAcer || {};
         screen: {
             width   : 1680, // px
             height  : 1050, // px
-            diagonal: 22    // in
+            diagonal: { size: 22, unit: 'in' }
         },
         buildPlate: {
             size: {
                 x: 100, // mm
                 y: 100  // mm
             },
+            unit: 'mm',
             color: 0xff0000,
             opacity: 0.1
         }
@@ -30,11 +31,6 @@ var SLAcer = SLAcer || {};
         this.setBuildPlate(this.settings.buildPlate);
         this.setView();
         this.render();
-
-        /*this.screenshot(function(dataURL) {
-            //window.open(dataURL);
-            //console.log(dataURL);
-        });*/
     }
 
     // extends
@@ -44,23 +40,35 @@ var SLAcer = SLAcer || {};
     // -------------------------------------------------------------------------
 
     Viewer2D.prototype.updatePixelDensity = function() {
-        var diagonal = Math.sqrt(Math.pow(this.screen.width, 2) + Math.pow(this.screen.height, 2));
-        var pixelPerCentimeter = diagonal / this.screen.diagonal / 2.54;
+        var diagonalPixels     = Math.sqrt(Math.pow(this.screen.width, 2) + Math.pow(this.screen.height, 2));
+        var pixelPerCentimeter = diagonalPixels / this.screen.diagonal.size * 10;
+
+        if (this.screen.diagonal.unit == 'in') {
+            pixelPerCentimeter = pixelPerCentimeter / 25.4;
+        }
+
         this.dotPitch = 10 / pixelPerCentimeter;
     };
 
     Viewer2D.prototype.setScreenResolution = function(settings) {
-        this.screen = _.defaults(settings, this.screen);
+        this.screen = _.defaultsDeep(settings, this.screen);
         this.updatePixelDensity();
         this.setSize(this.screen);
+        this.setView();
     };
 
     Viewer2D.prototype.setBuildPlate = function(settings) {
         this.buildPlate = _.defaultsDeep(settings, this.buildPlate);
 
         var size    = this.buildPlate.size;
+        var unit    = this.buildPlate.unit;
         var color   = this.buildPlate.color;
         var opacity = this.buildPlate.opacity;
+
+        if (unit == 'in') { // -> mm
+            size.x *= 25.4;
+            size.y *= 25.4;
+        }
 
         var geometry = new THREE.PlaneGeometry(size.x, size.y, 1);
         var material = new THREE.MeshBasicMaterial({

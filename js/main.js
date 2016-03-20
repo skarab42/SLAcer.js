@@ -68,7 +68,7 @@ function errorHandler(error) {
 // Slicer
 // -----------------------------------------------------------------------------
 var slicer = new SLAcer.Slicer();
-var shapes;
+var shapes, slices;
 
 function removeShapes() {
     if (shapes && shapes.length) {
@@ -78,11 +78,24 @@ function removeShapes() {
     }
 }
 
+function removeSlices() {
+    if (slices && slices.length) {
+        for (var i = 0, il = slices.length; i < il; i++) {
+            viewer2d.removeObject(slices[i]);
+        }
+    }
+
+    viewer2dWin && (viewer2dWin.document.body.style.backgroundImage = 'none');
+}
+
+
 function slice(layerNumber) {
     // remove old shapes
+    removeSlices();
     removeShapes();
 
     if (layerNumber < 1) {
+        viewer2d.render();
         viewer3d.render();
         return;
     }
@@ -99,15 +112,31 @@ function slice(layerNumber) {
     shapes = slice.shapes;
     zPosition -= viewer3d.buildVolume.size.z / 2;
 
+    // slices
+    slices = [];
+
     // add new shapes
     for (var i = 0, il = shapes.length; i < il; i++) {
+        slices[i] = shapes[i].clone();
+        slices[i].material = slices[i].material.clone();
+        slices[i].material.color.setHex(0xffffff);
+        viewer2d.addObject(slices[i]);
+
         shapes[i].position.z = zPosition;
         shapes[i].material.depthTest = false;
         viewer3d.scene.add(shapes[i]);
     }
 
-    // render
+    // render 3D view
     viewer3d.render();
+
+    // render 2D view
+    if (viewer2dWin) {
+        var body = viewer2dWin.document.body;
+        viewer2d.screenshot(function(dataURL) {
+            body.style.backgroundImage = 'url(' + dataURL + ')';
+        });
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -131,22 +160,37 @@ THREE.Triangulation.setLibrary('earcut');
 //THREE.Triangulation.setLibrary('poly2tri');
 
 // Viewer 2D
-var viewer2d  = null;
-$openViewer2D = $('#open-viewer-2d');
+var viewer2dWin   = null;
+var $openViewer2D = $('#open-viewer-2d');
+
+var viewer2d = new SLAcer.Viewer2D({
+    target     : null, // off-screen
+    color      : 0x000000,
+    buildPlate : {
+        size   : settings.get('buildVolume.size'),
+        unit   : settings.get('buildVolume.unit'),
+        color  : 0x000000,
+        opacity: 0 // hide build plate
+    },
+    size: settings.get('screen')
+});
 
 $openViewer2D.click(function(e) {
-    if (! viewer2d) {
-        var screen = settings.get('screen');
-        var size   = 'width=' + screen.width + ', height=' + screen.height;
-        var opts   = 'menubar=0, toolbar=0, location=0, directories=0, personalbar=0, status=0, resizable=1, dependent=0'
-        viewer2d   = window.open('viewer2d.html', 'SLAcer.viewer2d', size + ', ' + opts);
+    if (! viewer2dWin) {
+        var screen  = settings.get('screen');
+        var size    = 'width=' + screen.width + ', height=' + screen.height;
+        var opts    = 'menubar=0, toolbar=0, location=0, directories=0, personalbar=0, status=0, resizable=1, dependent=0'
+        viewer2dWin = window.open('viewer2d.html', 'SLAcer.viewer2d', size + ', ' + opts);
 
-        $(viewer2d).on('beforeunload', function(e) {
-            viewer2d = null;
+        $(viewer2dWin).on('beforeunload', function(e) {
+            viewer2dWin = null;
+        })
+        .load(function(e) {
+            slice($sliderInput.slider('getValue'));
         });
     }
 
-    viewer2d.focus();
+    viewer2dWin.focus();
     return false;
 });
 
@@ -370,6 +414,7 @@ var $screenBody         = initPanel('screen');
 var $screenWidth        = $screenBody.find('#screen-width');
 var $screenHeight       = $screenBody.find('#screen-height');
 var $screenDiagonalSize = $screenBody.find('#screen-diagonal-size');
+var $screenDotPitch     = $screenBody.find('#screen-dot-pitch');
 
 function updateScreenUI() {
     var screen = settings.get('screen');
@@ -377,6 +422,9 @@ function updateScreenUI() {
     $screenWidth.val(screen.width);
     $screenHeight.val(screen.height);
     $screenDiagonalSize.val(screen.diagonal.size);
+    $screenDotPitch.html(viewer2d.dotPitch.toFixed(2));
+
+    viewer2d.setScreenResolution(screen);
 }
 
 function updateScreenSettings() {
@@ -396,6 +444,9 @@ function updateScreenSettings() {
             unit: unit
         }
     });
+
+    viewer2d.setScreenResolution(settings.get('screen'));
+    $screenDotPitch.html(viewer2d.dotPitch.toFixed(2));
 }
 
 $('#screen-diagonal-unit-' + settings.get('screen.diagonal.unit')).prop('checked', true);
