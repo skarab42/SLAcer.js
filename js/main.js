@@ -44,8 +44,8 @@ var settings = new SLAcer.Settings({
         }
     },
     screen: {
-        width    : 1680,
-        height   : 1050,
+        width    : window.screen.width,
+        height   : window.screen.height,
         diagonal : { size: 22, unit: 'in' },
         panel    : {
             collapsed: false,
@@ -129,6 +129,26 @@ var viewer3d  = new SLAcer.Viewer3D({
 THREE.Triangulation.setLibrary('earcut');
 //THREE.Triangulation.setLibrary('libtess');
 //THREE.Triangulation.setLibrary('poly2tri');
+
+// Viewer 2D
+var viewer2d  = null;
+$openViewer2D = $('#open-viewer-2d');
+
+$openViewer2D.click(function(e) {
+    if (! viewer2d) {
+        var screen = settings.get('screen');
+        var size   = 'width=' + screen.width + ', height=' + screen.height;
+        var opts   = 'menubar=0, toolbar=0, location=0, directories=0, personalbar=0, status=0, resizable=1, dependent=0'
+        viewer2d   = window.open('viewer2d.html', 'SLAcer.viewer2d', size + ', ' + opts);
+
+        $(viewer2d).on('beforeunload', function(e) {
+            viewer2d = null;
+        });
+    }
+
+    viewer2d.focus();
+    return false;
+});
 
 // Slider
 var $sliderInput = $('#slider input');
