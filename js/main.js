@@ -100,31 +100,35 @@ function slice(layerNumber) {
         return;
     }
 
-    // get slice
+    // get faces
     var layerHeight = settings.get('slicer.layers.height') / 1000;
     var zPosition   = layerNumber * layerHeight;
-    var slice       = slicer.getFaces(zPosition);
+    var faces       = slicer.getFaces(zPosition);
 
     //console.log('layer number:', layerNumber);
     //console.log('z position  :', zPosition);
 
     // get new shapes list
-    shapes = slice.shapes;
+    shapes = faces.shapes;
     zPosition -= viewer3d.buildVolume.size.z / 2;
 
     // slices
     slices = [];
+    var slice, shape;
 
     // add new shapes
     for (var i = 0, il = shapes.length; i < il; i++) {
-        slices[i] = shapes[i].clone();
-        slices[i].material = slices[i].material.clone();
-        slices[i].material.color.setHex(0xffffff);
-        viewer2d.addObject(slices[i]);
+        shape = shapes[i];
+        slice = shape.clone();
 
-        shapes[i].position.z = zPosition;
-        shapes[i].material.depthTest = false;
-        viewer3d.scene.add(shapes[i]);
+        slice.material = slice.material.clone();
+        slice.material.color.setHex(0xffffff);
+        viewer2d.addObject(slice);
+        slices.push(slice);
+
+        shape.position.z = zPosition;
+        shape.material.depthTest = false;
+        viewer3d.scene.add(shape);
     }
 
     // render 3D view
