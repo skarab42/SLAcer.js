@@ -35,7 +35,10 @@
 
                 <div class="form-group">
                     <button id="open-viewer-2d" class="btn btn-primary" type="button">
-                        2D viewer
+                        <span class="glyphicon glyphicon-picture"></span> 2D viewer
+                    </button>
+                    <button id="slice-button" class="btn btn-success" type="button">
+                        <span class="glyphicon glyphicon-align-center"></span> Slice
                     </button>
                 </div>
 
@@ -103,9 +106,23 @@
                         <h3 class="panel-title">Slicer</h3>
                     </div>
                     <div id="slicer-body" class="panel-body collapse in">
+                        <div class="info">
+                            <span class="info-label">Layers <small>(current / total)</small></span>
+                            <span class="info-value">
+                                <span id="slicer-layer-value">0</span> / <span id="slicer-layers-value">0</span>
+                            </span>
+                        </div>
                         <div class="form-group">
                             <label for="slicer-layers-height">Layers height <small>(μm)</small></label>
                             <input type="number" id="slicer-layers-height" class="form-control input-sm" placeholder="100" min="1" />
+                        </div>
+                        <div class="form-group">
+                            <label for="slicer-light-on">Light on <small>(ms)</small></label>
+                            <input type="number" id="slicer-light-on" class="form-control input-sm" placeholder="1000" min="1" />
+                        </div>
+                        <div class="form-group">
+                            <label for="slicer-light-off">Light off <small>(ms)</small></label>
+                            <input type="number" id="slicer-light-off" class="form-control input-sm" placeholder="500" min="1" />
                         </div>
                     </div>
                 </div><!-- #slicer -->

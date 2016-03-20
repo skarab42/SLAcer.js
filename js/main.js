@@ -20,6 +20,10 @@ var settings = new SLAcer.Settings({
         layers: {
             height: 100 // μm
         },
+        light: {
+            on : 1000,
+            off: 500
+        },
         panel: {
             collapsed: false,
             position : 2
@@ -89,10 +93,13 @@ function removeSlices() {
 }
 
 
-function slice(layerNumber) {
+function getSlice(layerNumber) {
     // remove old shapes
     removeSlices();
     removeShapes();
+
+    // ...
+    $slicerLayerValue.html(layerNumber);
 
     if (layerNumber < 1) {
         viewer2d.render();
@@ -190,7 +197,7 @@ $openViewer2D.click(function(e) {
             viewer2dWin = null;
         })
         .load(function(e) {
-            slice($sliderInput.slider('getValue'));
+            getSlice($sliderInput.slider('getValue'));
         });
     }
 
@@ -202,7 +209,7 @@ $openViewer2D.click(function(e) {
 var $sliderInput = $('#slider input');
 
 $sliderInput.slider({ reversed : true }).on('change', function(e) {
-    slice(e.value.newValue);
+    getSlice(e.value.newValue);
 });
 
 var $sliderElement  = $('#slider .slider');
@@ -214,6 +221,7 @@ function updateSliderUI() {
 
     $sliderInput.slider('setAttribute', 'max', layersNumber);
     $sliderMaxValue.html(layersNumber);
+    $slicerLayersValue.html(layersNumber);
 }
 
 // Sidebar
@@ -319,16 +327,75 @@ function updateMeshInfoUI() {
 // Slicer panel
 var $slicerBody        = initPanel('slicer');
 var $slicerLayerHeight = $slicerBody.find('#slicer-layers-height');
+var $slicerLayersValue = $slicerBody.find('#slicer-layers-value');
+var $slicerLayerValue  = $slicerBody.find('#slicer-layer-value');
+var $slicerLightOff    = $slicerBody.find('#slicer-light-off');
+var $slicerLightOn     = $slicerBody.find('#slicer-light-on');
+var $sliceButton       = $sidebar.find('#slice-button');
 
 function updateSlicerUI() {
-    var layers = settings.get('slicer.layers');
-    $slicerLayerHeight.val(layers.height);
+    var slicer = settings.get('slicer');
+    $slicerLayerHeight.val(slicer.layers.height);
+    $slicerLightOff.val(slicer.light.off);
+    $slicerLightOn.val(slicer.light.on);
 }
 
 function updateSlicerSettings() {
     settings.set('slicer.layers.height', $slicerLayerHeight.val());
+    settings.set('slicer.light.off', $slicerLightOff.val());
+    settings.set('slicer.light.on', $slicerLightOn.val());
     updateSliderUI();
 }
+
+var sliceInterval;
+var expectedSliceInterval;
+var currentSliceNumber;
+var slicesNumber;
+
+function slice() {
+    currentSliceNumber++;
+
+    if (currentSliceNumber > slicesNumber) {
+        return endSlicing();
+    }
+
+    getSlice(currentSliceNumber);
+    $sliderInput.slider('setValue', currentSliceNumber);
+
+    var time = Date.now();
+    var diff = time - expectedSliceInterval;
+
+    viewer2dWin && setTimeout(function() {
+        viewer2dWin.document.body.style.backgroundImage = 'none';
+    }, settings.get('slicer.light.on'));
+
+    expectedSliceInterval += sliceInterval;
+    setTimeout(slice, Math.max(0, sliceInterval - diff));
+}
+
+function endSlicing() {
+    viewer2dWin && (viewer2dWin.document.body.style.backgroundImage = 'none');
+    $sidebar.find('input, button').prop('disabled', false);
+    $sliderInput.slider('enable');
+}
+
+function startSlicing() {
+    var times             = settings.get('slicer.light');
+    sliceInterval         = parseInt(times.on) + parseInt(times.off);
+    expectedSliceInterval = Date.now() + sliceInterval;
+    slicesNumber          = parseInt($slicerLayersValue.html());
+    currentSliceNumber    = 0;
+
+    slicesNumber && slice();
+}
+
+$sliceButton.on('click', function(e) {
+    $sidebar.find('input, button').prop('disabled', true);
+    $('.panel-heading button').prop('disabled', false);
+    $openViewer2D.prop('disabled', false);
+    $sliderInput.slider('disable');
+    startSlicing();
+});
 
 $('#slicer input').on('input', updateSlicerSettings);
 updateSlicerUI();
@@ -384,7 +451,7 @@ function updateBuildVolumeSettings() {
     size && updateMeshInfoUI();
 
     updateBuildVolumeSizeStep();
-    slice($sliderInput.slider('getValue'));
+    getSlice($sliderInput.slider('getValue'));
 }
 
 $('#build-volume-unit-' + settings.get('buildVolume.unit')).prop('checked', true);
@@ -498,7 +565,7 @@ loader.onGeometry = function(geometry) {
         updateMeshInfoUI();
 
         // get first slice
-        //slice(1);
+        //getSlice(1);
     }
     catch(e) {
         errorHandler(e);
