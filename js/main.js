@@ -32,6 +32,12 @@ var settings = new SLAcer.Settings({
             position : 2
         }
     },
+    transform: {
+        panel: {
+            collapsed: false,
+            position : 3
+        }
+    },
     buildVolume: {
         size     : { x: 100,  y: 100,  z: 100 }, // mm
         unit     : 'mm',                         // mm or in
@@ -39,7 +45,7 @@ var settings = new SLAcer.Settings({
         opacity  : 0.1,
         panel    : {
             collapsed: false,
-            position : 3
+            position : 4
         }
     },
     resin: {
@@ -47,7 +53,7 @@ var settings = new SLAcer.Settings({
         price    : 50,   // $
         panel    : {
             collapsed: false,
-            position : 4
+            position : 5
         }
     },
     screen: {
@@ -56,7 +62,7 @@ var settings = new SLAcer.Settings({
         diagonal : { size: 22, unit: 'in' },
         panel    : {
             collapsed: false,
-            position : 5
+            position : 6
         }
     },
     colors: {
@@ -64,7 +70,7 @@ var settings = new SLAcer.Settings({
         slice: '#88ee11',
         panel: {
             collapsed: false,
-            position : 6
+            position : 7
         }
     },
     viewer3d: {
@@ -119,6 +125,10 @@ function getSlice(layerNumber) {
         viewer2d.render();
         viewer3d.render();
         return;
+    }
+
+    if (transformations.update) {
+        throw 'transformations not applyed...';
     }
 
     // get faces
@@ -640,6 +650,110 @@ $sliceColor.colorpicker().on('changeColor.colorpicker', function(e) {
     }
 });
 
+// Alert
+var $alertPanel   = $('#alert');
+var $alertMessage = $alertPanel.find('.message');
+
+// Transform
+var $transformBody    = initPanel('transform');
+var $transformAction  = $transformBody.find('#transform-action');
+var $transformX       = $transformBody.find('#transform-x');
+var $transformY       = $transformBody.find('#transform-y');
+var $transformZ       = $transformBody.find('#transform-z');
+var $transformButtons = $transformBody.find('button');
+
+var transformAction = 'scale';
+var transformations = {
+    scale : { x:1, y:1 , z:1 },
+    rotate: { x:0, y:0 , z:0 }
+};
+
+function updateTransformAction() {
+    transformAction = $transformAction.val();
+
+    var axis = transformations[transformAction];
+    var min, max, step;
+
+    if (transformAction == 'scale') {
+        min  = 0.01;
+        max  = 999;
+        step = 0.01;
+    }
+    else {
+        min  = 0;
+        max  = 360;
+        step = 1;
+    }
+
+    $transformX.prop('min', min);
+    $transformY.prop('min', min);
+    $transformZ.prop('min', min);
+    $transformX.prop('max', max);
+    $transformY.prop('max', max);
+    $transformZ.prop('max', max);
+    $transformX.prop('step', step);
+    $transformY.prop('step', step);
+    $transformZ.prop('step', step);
+    $transformX.val(axis.x);
+    $transformY.val(axis.y);
+    $transformZ.val(axis.z);
+}
+
+function updateTransformValues() {
+    var input = {
+        x: parseFloat($transformX.val()),
+        y: parseFloat($transformY.val()),
+        z: parseFloat($transformZ.val())
+    };
+
+    var current = transformations[transformAction];
+
+    var offsets = {
+        x: input.x - current.x,
+        y: input.y - current.y,
+        z: input.z - current.z
+    };
+
+    if (transformAction == 'scale') {
+        //console.log(input.x / current.x);
+        slicer.mesh.geometry.scale(
+            input.x / current.x,
+            input.y / current.y,
+            input.z / current.z
+        );
+    }
+    else {
+        var deg = Math.PI / 180;
+        slicer.mesh.geometry.rotateX(offsets.x * deg);
+        slicer.mesh.geometry.rotateY(offsets.y * deg);
+        slicer.mesh.geometry.rotateZ(offsets.z * deg);
+    }
+
+    current.x = input.x;
+    current.y = input.y;
+    current.z = input.z;
+
+    //var currentLayer = settings.get('');
+    loadGeometry(slicer.mesh.geometry);
+    getSlice($sliderInput.slider('getValue'));
+    //viewer3d.render();
+}
+
+$transformButtons.on('click', function(e) {
+    var $this   = $(this);
+    var axis    = $this.data('axis');
+    var action  = $this.data('action');
+    var value   = transformations[transformAction][axis];
+    var $target = $transformBody.find('#transform-' + axis);
+
+    $target.val(value + (action == '+' ? 1 : -1));
+    updateTransformValues();
+});
+
+$('#transform select').on('change', updateTransformAction);
+$('#transform input').on('input', updateTransformValues);
+updateTransformAction();
+
 // UI resize
 function resizeUI() {
     var width  = $main.width();
@@ -658,8 +772,8 @@ resizeUI();
 // Loader instance
 var loader = new MeshesJS.STLLoader($main[0]); // drop target
 
-// On Geometry loaded
-loader.onGeometry = function(geometry) {
+// Load an geometry
+function loadGeometry(geometry) {
     try {
         // remove old mesh and plane
         slicer.mesh && viewer3d.removeObject(slicer.mesh);
@@ -685,7 +799,10 @@ loader.onGeometry = function(geometry) {
     catch(e) {
         errorHandler(e);
     }
-};
+}
+
+// On Geometry loaded
+loader.onGeometry = loadGeometry;
 
 // On loading error
 loader.onError = errorHandler;
