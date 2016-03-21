@@ -708,14 +708,11 @@ function updateTransformValues() {
 
     var current = transformations[transformAction];
 
-    var offsets = {
-        x: input.x - current.x,
-        y: input.y - current.y,
-        z: input.z - current.z
-    };
-
     if (transformAction == 'scale') {
-        //console.log(input.x / current.x);
+        input.x <= 0 && (input.x = 1);
+        input.y <= 0 && (input.y = 1);
+        input.z <= 0 && (input.z = 1);
+
         slicer.mesh.geometry.scale(
             input.x / current.x,
             input.y / current.y,
@@ -723,7 +720,13 @@ function updateTransformValues() {
         );
     }
     else {
-        var deg = Math.PI / 180;
+        var deg     = Math.PI / 180;
+        var offsets = {
+            x: input.x - current.x,
+            y: input.y - current.y,
+            z: input.z - current.z
+        };
+
         slicer.mesh.geometry.rotateX(offsets.x * deg);
         slicer.mesh.geometry.rotateY(offsets.y * deg);
         slicer.mesh.geometry.rotateZ(offsets.z * deg);
