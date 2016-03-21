@@ -49,6 +49,36 @@
                     </button>
                 </div>
 
+                <div id="transform" class="panel panel-default">
+                    <div class="panel-heading">
+                        <button class="panel-toggle btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#transform-body">
+                            <span class="glyphicon glyphicon-menu-down"></span>
+                        </button>
+                        <h3 class="panel-title">Transformations</h3>
+                    </div>
+                    <div id="transform-body" class="panel-body collapse in">
+                        <div class="form-group">
+                            <label for="transform-action">Action</label>
+                            <select id="transform-action" class="form-control input-sm">
+                                <option>scale</option>
+                                <option>rotate</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="transform-x">X</label>
+                            <input type="number" id="transform-x" class="form-control input-sm" placeholder="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="transform-y">Y</label>
+                            <input type="number" id="transform-y" class="form-control input-sm" placeholder="0" />
+                        </div>
+                        <div class="form-group">
+                            <label for="transform-z">Z</label>
+                            <input type="number" id="transform-z" class="form-control input-sm" placeholder="0" />
+                        </div>
+                    </div>
+                </div><!-- #transform -->
+
                 <div id="file" class="panel panel-default">
                     <div class="panel-heading">
                         <button class="panel-toggle btn btn-default btn-xs pull-right" type="button" data-toggle="collapse" data-target="#file-body">
