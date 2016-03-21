@@ -304,7 +304,12 @@ function parseUnit(value, unit) {
 }
 
 // File panel
-var $fileBody = initPanel('file');
+var $fileBody  = initPanel('file');
+var $fileInput = $fileBody.find('#file-input');
+
+$fileInput.on('change', function(e) {
+    loader.loadFile(e.target.files[0]);
+});
 
 // Mesh panel
 var $meshBody     = initPanel('mesh');
