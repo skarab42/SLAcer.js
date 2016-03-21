@@ -318,6 +318,7 @@ var $fileBody  = initPanel('file');
 var $fileInput = $fileBody.find('#file-input');
 
 $fileInput.on('change', function(e) {
+    resetTransformValues();
     loader.loadFile(e.target.files[0]);
 });
 
@@ -662,11 +663,16 @@ var $transformY       = $transformBody.find('#transform-y');
 var $transformZ       = $transformBody.find('#transform-z');
 var $transformButtons = $transformBody.find('button');
 
-var transformAction = 'scale';
-var transformations = {
-    scale : { x:1, y:1 , z:1 },
-    rotate: { x:0, y:0 , z:0 }
-};
+var transformAction, transformations;
+
+function resetTransformValues() {
+    transformAction = 'scale';
+    transformations = {
+        scale : { x:1, y:1 , z:1 },
+        rotate: { x:0, y:0 , z:0 }
+    };
+    updateTransformAction();
+}
 
 function updateTransformAction() {
     transformAction = $transformAction.val();
@@ -755,7 +761,7 @@ $transformButtons.on('click', function(e) {
 
 $('#transform select').on('change', updateTransformAction);
 $('#transform input').on('input', updateTransformValues);
-updateTransformAction();
+resetTransformValues();
 
 // UI resize
 function resizeUI() {
@@ -805,7 +811,10 @@ function loadGeometry(geometry) {
 }
 
 // On Geometry loaded
-loader.onGeometry = loadGeometry;
+loader.onGeometry = function(geometry) {
+    resetTransformValues();
+    loadGeometry(geometry);
+};
 
 // On loading error
 loader.onError = errorHandler;
