@@ -59,6 +59,14 @@ var settings = new SLAcer.Settings({
             position : 5
         }
     },
+    colors: {
+        mesh : '#555555',
+        slice: '#88ee11',
+        panel: {
+            collapsed: false,
+            position : 6
+        }
+    },
     viewer3d: {
         color: 0xffffff
     }
@@ -95,6 +103,9 @@ function removeSlices() {
     viewer2dWin && (viewer2dWin.document.body.style.backgroundImage = 'none');
 }
 
+function hexToDec(hex) {
+    return parseInt(hex.toString().replace('#', ''), 16);
+}
 
 function getSlice(layerNumber) {
     // remove old shapes
@@ -125,6 +136,7 @@ function getSlice(layerNumber) {
     // slices
     slices = [];
     var slice, shape;
+    var sliceColor = hexToDec(settings.get('colors.slice'));
 
     // add new shapes
     for (var i = 0, il = shapes.length; i < il; i++) {
@@ -136,8 +148,9 @@ function getSlice(layerNumber) {
         viewer2d.addObject(slice);
         slices.push(slice);
 
-        shape.position.z = zPosition;
+        shape.material.color.setHex(sliceColor);
         shape.material.depthTest = false;
+        shape.position.z = zPosition;
         viewer3d.scene.add(shape);
     }
 
@@ -584,6 +597,44 @@ $('#screen input[type=radio]').on('change', updateScreenSettings);
 $('#screen input').on('input', updateScreenSettings);
 updateScreenUI();
 
+// Colors
+var $colorsBody = initPanel('colors');
+var $meshColor  = $colorsBody.find('#mesh-color');
+var $sliceColor = $colorsBody.find('#slice-color');
+
+function updateColorsUI() {
+    var colors = settings.get('colors');
+
+    $meshColor.val(colors.mesh);
+    $sliceColor.val(colors.slice);
+}
+
+updateColorsUI();
+$meshColor.colorpicker({ format: 'hex' });
+$sliceColor.colorpicker({ format: 'hex' });
+
+$meshColor.colorpicker().on('changeColor.colorpicker', function(e) {
+    if (slicer.mesh && slicer.mesh.material) {
+        var hexString  = e.color.toHex();
+        var hexInteger = hexToDec(hexString);
+        settings.set('colors.mesh', hexString);
+        slicer.mesh.material.color.setHex(hexInteger);
+        viewer3d.render();
+    }
+});
+
+$sliceColor.colorpicker().on('changeColor.colorpicker', function(e) {
+    if (shapes && shapes.length) {
+        var hexString  = e.color.toHex();
+        var hexInteger = hexToDec(hexString);
+        settings.set('colors.slice', hexString);
+        for (var i = 0, il = shapes.length; i < il; i++) {
+            shapes[i].material.color.setHex(hexInteger);
+        }
+        viewer3d.render();
+    }
+});
+
 // UI resize
 function resizeUI() {
     var width  = $main.width();
@@ -613,7 +664,7 @@ loader.onGeometry = function(geometry) {
 
         // load new mesh in slicer
         slicer.loadMesh(new SLAcer.Mesh(geometry, new THREE.MeshPhongMaterial({
-            color: settings.get('mesh.color')
+            color: hexToDec(settings.get('colors.mesh'))
         })));
 
         // add new mesh and render view
