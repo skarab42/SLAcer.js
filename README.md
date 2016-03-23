@@ -16,3 +16,7 @@
 - Configure mesh and slice colors in 3D viewer.
 - Persistent settings between session (local storage).
 - Move and collapse sidebar panels.
+
+# To do soon
+- Network connection (SmoothieBoard)
+- Serial connection (Chrome only)
