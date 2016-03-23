@@ -6,7 +6,7 @@
 - Mesh information: size, volume, cost, etc...
 - Mesh transformation: scale, rotate.
 - Live slicing in 2D/3D viewer.
-- Speed mode (slice only, no delay).
+- Speed mode (slicing only, no delay).
 - Open 2D viewer in new window (popup).
 - Configure slice height, speed, delays.
 - Export slices as PNG (zipped folder).
@@ -18,7 +18,7 @@
 - Move and collapse sidebar panels.
 
 # To do soon
-- Network connection (SmoothieBoard).
-- Serial connection (Chrome only).
+- Network communication (SmoothieBoard).
+- Serial communication (Chrome only).
 - Export slices as DXF (zipped folder).
 - Refactoring.
