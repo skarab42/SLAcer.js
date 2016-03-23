@@ -9,7 +9,7 @@
 - Speed mode (slice only, no delay).
 - Open 2D viewer in new window (popup).
 - Configure slice height, speed, delays.
-- Slices export (zipped slice images).
+- Export slices as PNG (zipped folder).
 - Configure build volume size (in or mm).
 - Configure output images size and resolution.
 - Configure resin price and density for cost calculation.
@@ -20,4 +20,5 @@
 # To do soon
 - Network connection (SmoothieBoard).
 - Serial connection (Chrome only).
+- Export slices as DXF (zipped folder).
 - Refactoring.
