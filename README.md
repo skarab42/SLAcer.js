@@ -18,5 +18,6 @@
 - Move and collapse sidebar panels.
 
 # To do soon
-- Network connection (SmoothieBoard)
-- Serial connection (Chrome only)
+- Network connection (SmoothieBoard).
+- Serial connection (Chrome only).
+- Refactoring.
