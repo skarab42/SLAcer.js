@@ -26,7 +26,6 @@ var settings = new SLAcer.Settings({
         }
     },
     mesh: {
-        color: 0x333333,
         panel: {
             collapsed: false,
             position : 2
@@ -66,7 +65,7 @@ var settings = new SLAcer.Settings({
         }
     },
     colors: {
-        mesh : '#555555',
+        mesh : '#eb0984',
         slice: '#88ee11',
         panel: {
             collapsed: false,
