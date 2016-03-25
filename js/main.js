@@ -658,6 +658,7 @@ var $alertMessage = $alertPanel.find('.message');
 // Transform
 var $transformBody    = initPanel('transform');
 var $transformAction  = $transformBody.find('#transform-action');
+var $transformUniform = $transformBody.find('#transform-uniform');
 var $transformX       = $transformBody.find('#transform-x');
 var $transformY       = $transformBody.find('#transform-y');
 var $transformZ       = $transformBody.find('#transform-z');
@@ -678,6 +679,7 @@ function updateTransformAction() {
     transformAction = $transformAction.val();
 
     var axis = transformations[transformAction];
+
     var min, max, step;
 
     if (transformAction == 'scale') {
@@ -690,6 +692,8 @@ function updateTransformAction() {
         max  = 360;
         step = 1;
     }
+
+    $transformUniform.toggleClass('hidden', transformAction == 'rotate');
 
     $transformX.prop('min', min);
     $transformY.prop('min', min);
@@ -713,6 +717,31 @@ function updateTransformValues() {
     };
 
     var current = transformations[transformAction];
+    var uniform = $('#transform input[type=radio]:checked').val() == 'yes';
+
+    if (uniform) {
+        if (input.x != current.x) {
+            var ratio = current.x / input.x;
+            input.y = (current.y / ratio).toFixed(2);
+            input.z = (current.z / ratio).toFixed(2);
+            $transformY.val(input.y);
+            $transformZ.val(input.z);
+        }
+        else if (input.y != current.y) {
+            var ratio = current.y / input.y;
+            input.x = (current.x / ratio).toFixed(2);
+            input.z = (current.z / ratio).toFixed(2);
+            $transformX.val(input.x);
+            $transformZ.val(input.z);
+        }
+        else if (input.z != current.z) {
+            var ratio = current.z / input.z;
+            input.x = (current.x / ratio).toFixed(2);
+            input.y = (current.y / ratio).toFixed(2);
+            $transformX.val(input.x);
+            $transformY.val(input.y);
+        }
+    }
 
     if (transformAction == 'scale') {
         input.x <= 0 && (input.x = 1);
