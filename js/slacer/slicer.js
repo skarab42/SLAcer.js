@@ -364,21 +364,27 @@ var SLAcer = SLAcer || {};
                 var color = this.settings.color;
                 //var color = ((1<<24)*Math.random()|0);
                 var geo = new THREE.ShapeGeometry(shapes[key]);
+
                 if (!geo.faces.length || !geo.vertices.length) {
                     delete shapes[key];
                     continue;
                 }
+
                 meshes.push(new THREE.Mesh(
                     geo,
                     new THREE.MeshBasicMaterial({
                         color: color, side: THREE.DoubleSide
                     })
                 ));
-            } catch(e) {
+            }
+            catch(e) {
                 console.error(e);
                 console.log(shapes[key]);
             }
         }
+
+        // remove empty shapes...
+        shapes = shapes.filter(function(n){ return n != undefined });
 
         return {
             time    : Date.now() - time,
