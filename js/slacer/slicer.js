@@ -379,9 +379,8 @@ var SLAcer = SLAcer || {};
             time    : Date.now() - time,
             geometry: geometry,
             polygons: polygons,
-            shapes  : meshes
-            //shapes  : shapes,
-            //meshes  : meshes
+            shapes  : shapes,
+            meshes  : meshes
         };
     };
 

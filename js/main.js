@@ -139,7 +139,7 @@ function getSlice(layerNumber) {
     //console.log('z position  :', zPosition);
 
     // get new shapes list
-    shapes = faces.shapes;
+    shapes = faces.meshes;
     zPosition -= viewer3d.buildVolume.size.z / 2;
 
     // slices
