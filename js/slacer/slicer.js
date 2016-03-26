@@ -365,7 +365,8 @@ var SLAcer = SLAcer || {};
                 //var color = ((1<<24)*Math.random()|0);
                 var geo = new THREE.ShapeGeometry(shapes[key]);
                 if (!geo.faces.length || !geo.vertices.length) {
-                    continue; // dirty fix, to do: find why?
+                    delete shapes[key];
+                    continue;
                 }
                 meshes.push(new THREE.Mesh(
                     geo,
