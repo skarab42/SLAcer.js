@@ -363,8 +363,12 @@ var SLAcer = SLAcer || {};
             try {
                 var color = this.settings.color;
                 //var color = ((1<<24)*Math.random()|0);
+                var geo = new THREE.ShapeGeometry(shapes[key]);
+                if (!geo.faces.length || !geo.vertices.length) {
+                    continue; // dirty fix, to do: find why?
+                }
                 meshes.push(new THREE.Mesh(
-                    new THREE.ShapeGeometry(shapes[key]),
+                    geo,
                     new THREE.MeshBasicMaterial({
                         color: color, side: THREE.DoubleSide
                     })
