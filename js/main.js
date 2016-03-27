@@ -855,7 +855,7 @@ loader.onError = errorHandler;
 var stl = 'stl/StressTest.stl';
 
 // File url
-var url = 'https://' + window.location.hostname + window.location.pathname + stl;
+var url = 'http://' + window.location.hostname + window.location.pathname + stl;
 
 // Create http request object
 var xmlhttp = new XMLHttpRequest();
