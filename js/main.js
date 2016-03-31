@@ -718,31 +718,31 @@ function updateTransformValues() {
     var current = transformations[transformAction];
     var uniform = $('#transform input[type=radio]:checked').val() == 'yes';
 
-    if (uniform) {
-        if (input.x != current.x) {
-            var ratio = current.x / input.x;
-            input.y = (current.y / ratio).toFixed(2);
-            input.z = (current.z / ratio).toFixed(2);
-            $transformY.val(input.y);
-            $transformZ.val(input.z);
-        }
-        else if (input.y != current.y) {
-            var ratio = current.y / input.y;
-            input.x = (current.x / ratio).toFixed(2);
-            input.z = (current.z / ratio).toFixed(2);
-            $transformX.val(input.x);
-            $transformZ.val(input.z);
-        }
-        else if (input.z != current.z) {
-            var ratio = current.z / input.z;
-            input.x = (current.x / ratio).toFixed(2);
-            input.y = (current.y / ratio).toFixed(2);
-            $transformX.val(input.x);
-            $transformY.val(input.y);
-        }
-    }
-
     if (transformAction == 'scale') {
+        if (uniform) {
+            if (input.x != current.x) {
+                var ratio = current.x / input.x;
+                input.y = (current.y / ratio).toFixed(2);
+                input.z = (current.z / ratio).toFixed(2);
+                $transformY.val(input.y);
+                $transformZ.val(input.z);
+            }
+            else if (input.y != current.y) {
+                var ratio = current.y / input.y;
+                input.x = (current.x / ratio).toFixed(2);
+                input.z = (current.z / ratio).toFixed(2);
+                $transformX.val(input.x);
+                $transformZ.val(input.z);
+            }
+            else if (input.z != current.z) {
+                var ratio = current.z / input.z;
+                input.x = (current.x / ratio).toFixed(2);
+                input.y = (current.y / ratio).toFixed(2);
+                $transformX.val(input.x);
+                $transformY.val(input.y);
+            }
+        }
+
         input.x <= 0 && (input.x = 1);
         input.y <= 0 && (input.y = 1);
         input.z <= 0 && (input.z = 1);
