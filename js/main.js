@@ -709,14 +709,17 @@ function updateTransformAction() {
 }
 
 function updateTransformValues() {
-    var input = {
-        x: parseFloat($transformX.val()),
-        y: parseFloat($transformY.val()),
-        z: parseFloat($transformZ.val())
-    };
-
     var current = transformations[transformAction];
     var uniform = $('#transform input[type=radio]:checked').val() == 'yes';
+    var input   = {
+        x: parseFloat($transformX.val()) || current.x,
+        y: parseFloat($transformY.val()) || current.y,
+        z: parseFloat($transformZ.val()) || current.z
+    };
+
+    $transformX.val(input.x);
+    $transformY.val(input.y);
+    $transformZ.val(input.z);
 
     if (transformAction == 'scale') {
         if (uniform) {
