@@ -838,10 +838,23 @@ function loadGeometry(geometry) {
     }
 }
 
+// Haaaaaaaaaaaaaaaaaa!!!!
+function ultraMegaDirtyFix() {
+    $transformBody.find('#transform-x').val(1.1);
+    $transformBody.find('#transform-y').val(1.1);
+    $transformBody.find('#transform-z').val(1.1);
+    updateTransformValues();
+    $transformBody.find('#transform-x').val(1);
+    $transformBody.find('#transform-y').val(1);
+    $transformBody.find('#transform-z').val(1);
+    updateTransformValues();
+}
+
 // On Geometry loaded
 loader.onGeometry = function(geometry) {
     resetTransformValues();
     loadGeometry(geometry);
+    ultraMegaDirtyFix();
 };
 
 // On loading error
