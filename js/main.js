@@ -712,10 +712,14 @@ function updateTransformValues() {
     var current = transformations[transformAction];
     var uniform = $('#transform input[type=radio]:checked').val() == 'yes';
     var input   = {
-        x: parseFloat($transformX.val()) || current.x,
-        y: parseFloat($transformY.val()) || current.y,
-        z: parseFloat($transformZ.val()) || current.z
+        x: parseFloat($transformX.val()),
+        y: parseFloat($transformY.val()),
+        z: parseFloat($transformZ.val())
     };
+
+    input.x = isNaN(input.x) ? current.x : input.x;
+    input.y = isNaN(input.y) ? current.y : input.y;
+    input.z = isNaN(input.z) ? current.z : input.z;
 
     $transformX.val(input.x);
     $transformY.val(input.y);
