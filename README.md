@@ -20,5 +20,5 @@
 # To do soon
 - Network communication (SmoothieBoard).
 - Serial communication (Chrome only).
-- Export slices as DXF (zipped folder).
+- Export slices as SVG, DXF (zipped folder).
 - Refactoring.

@@ -709,14 +709,21 @@ function updateTransformAction() {
 }
 
 function updateTransformValues() {
-    var input = {
+    var current = transformations[transformAction];
+    var uniform = $('#transform input[type=radio]:checked').val() == 'yes';
+    var input   = {
         x: parseFloat($transformX.val()),
         y: parseFloat($transformY.val()),
         z: parseFloat($transformZ.val())
     };
 
-    var current = transformations[transformAction];
-    var uniform = $('#transform input[type=radio]:checked').val() == 'yes';
+    input.x = isNaN(input.x) ? current.x : input.x;
+    input.y = isNaN(input.y) ? current.y : input.y;
+    input.z = isNaN(input.z) ? current.z : input.z;
+
+    $transformX.val(input.x);
+    $transformY.val(input.y);
+    $transformZ.val(input.z);
 
     if (transformAction == 'scale') {
         if (uniform) {
@@ -838,10 +845,23 @@ function loadGeometry(geometry) {
     }
 }
 
+// Haaaaaaaaaaaaaaaaaa!!!!
+function ultraMegaDirtyFix() {
+    $transformBody.find('#transform-x').val(1.1);
+    $transformBody.find('#transform-y').val(1.1);
+    $transformBody.find('#transform-z').val(1.1);
+    updateTransformValues();
+    $transformBody.find('#transform-x').val(1);
+    $transformBody.find('#transform-y').val(1);
+    $transformBody.find('#transform-z').val(1);
+    updateTransformValues();
+}
+
 // On Geometry loaded
 loader.onGeometry = function(geometry) {
     resetTransformValues();
     loadGeometry(geometry);
+    ultraMegaDirtyFix();
 };
 
 // On loading error
