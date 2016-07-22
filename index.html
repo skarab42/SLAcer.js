@@ -148,24 +148,49 @@
                         <h3 class="panel-title">Slicer</h3>
                     </div>
                     <div id="slicer-body" class="panel-body collapse in">
+
                         <div class="info">
                             <span class="info-label">Layers <small>(current / total)</small></span>
                             <span class="info-value">
                                 <span id="slicer-layer-value">0</span> / <span id="slicer-layers-value">0</span>
                             </span>
                         </div>
+
+                        <hr />
+
                         <div class="form-group">
                             <label for="slicer-layers-height">Layers height <small>(μm)</small></label>
                             <input type="number" id="slicer-layers-height" class="form-control input-sm" placeholder="100" min="1" />
                         </div>
                         <div class="form-group">
-                            <label for="slicer-light-on">Light on delay <small>(ms)</small></label>
+                            <label for="slicer-light-on">Exposure time <small>(ms)</small></label>
                             <input type="number" id="slicer-light-on" class="form-control input-sm" placeholder="1000" min="1" />
                         </div>
+
+                        <div class="form-group clearfix">
+                            <label for="slicer-lifting-height">Lifting height <small>(mm)</small></label>
+                            <input type="number" id="slicer-lifting-height" class="form-control input-sm" placeholder="3" min="1" />
+                        </div>
+                        <div class="form-group clearfix">
+                            <label for="slicer-lifting-speed">Lifting speed <small>(mm/min)</small></label>
+                            <input type="number" id="slicer-lifting-speed" class="form-control input-sm" placeholder="50" min="1" />
+                        </div>
+
+                        <hr />
+
                         <div class="form-group">
+                            <label for="slicer-mirror">Mirror output</label>
+                            <input type="radio" name="slicer-mirror" id="slicer-mirror-yes" value="yes" /> yes
+                            <input type="radio" name="slicer-mirror" id="slicer-mirror-no" value="no" checked="checked" /> no
+                        </div>
+
+                        <hr />
+
+                        <div class="form-group hidden">
                             <label for="slicer-light-off">Light off delay <small>(ms)</small></label>
                             <input type="number" id="slicer-light-off" class="form-control input-sm" placeholder="500" min="1" />
                         </div>
+
                         <div class="form-group">
                             <label for="slicer-make-zip">Make ZIP file</label>
                             <input type="radio" name="slicer-make-zip" id="slicer-make-zip-yes" value="yes" /> yes

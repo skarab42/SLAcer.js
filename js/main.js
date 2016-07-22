@@ -23,6 +23,11 @@ var settings = new SLAcer.Settings({
         panel: {
             collapsed: false,
             position : 1
+        },
+        mirror: false,
+        lifting: {
+            speed : 50, // mm/min
+            height: 3,  // mm
         }
     },
     mesh: {
@@ -105,11 +110,16 @@ function removeSlices() {
         }
     }
 
-    viewer2dWin && (viewer2dWin.document.body.style.backgroundImage = 'none');
+    sliceImage('none');
 }
 
 function hexToDec(hex) {
     return parseInt(hex.toString().replace('#', ''), 16);
+}
+
+function sliceImage(dataURL, mirror) {
+    settings.set('slice.dataURL', dataURL || 'none');
+    settings.set('slice.mirror' , mirror ? 'mirror' : '');
 }
 
 function getSlice(layerNumber) {
@@ -130,10 +140,12 @@ function getSlice(layerNumber) {
         throw 'transformations not applyed...';
     }
 
+    // get position
+    layerHeight = settings.get('slicer.layers.height') / 1000;
+    zPosition   = layerNumber * layerHeight;
+
     // get faces
-    var layerHeight = settings.get('slicer.layers.height') / 1000;
-    var zPosition   = layerNumber * layerHeight;
-    var faces       = slicer.getFaces(zPosition);
+    var faces = slicer.getFaces(zPosition);
 
     //console.log('layer number:', layerNumber);
     //console.log('z position  :', zPosition);
@@ -167,18 +179,15 @@ function getSlice(layerNumber) {
     viewer3d.render();
 
     // render 2D view
-    if (zipFolder || viewer2dWin) {
-        viewer2d.screenshot(function(dataURL) {
-            if (viewer2dWin) {
-                viewer2dWin.document.body.style.backgroundImage = 'url(' + dataURL + ')';
-            }
-            if (zipFolder) {
-                var fileName = layerNumber + '.png';
-                var imgData  = dataURL.substr(dataURL.indexOf(',') + 1);
-                zipFolder.file(fileName, imgData, { base64: true });
-            }
-        });
-    }
+    viewer2d.screenshot(function(dataURL) {
+        sliceImage(dataURL, settings.get('slicer.mirror'));
+
+        if (zipFolder) {
+            var fileName = layerNumber + '.png';
+            var imgData  = dataURL.substr(dataURL.indexOf(',') + 1);
+            zipFolder.file(fileName, imgData, { base64: true });
+        }
+    });
 }
 
 // -----------------------------------------------------------------------------
@@ -218,11 +227,12 @@ var viewer2d = new SLAcer.Viewer2D({
 });
 
 $openViewer2D.click(function(e) {
-    if (! viewer2dWin) {
+    if (viewer2dWin == null || viewer2dWin.closed) {
         var screen  = settings.get('screen');
         var size    = 'width=' + screen.width + ', height=' + screen.height;
         var opts    = 'menubar=0, toolbar=0, location=0, directories=0, personalbar=0, status=0, resizable=1, dependent=0'
-        viewer2dWin = window.open('viewer2d.html', 'SLAcer.viewer2d', size + ', ' + opts);
+
+        viewer2dWin = window.open('viewer2d.html', 'SLAcerViewer2D', size + ', ' + opts);
 
         $(viewer2dWin).on('beforeunload', function(e) {
             viewer2dWin = null;
@@ -231,8 +241,10 @@ $openViewer2D.click(function(e) {
             getSlice($sliderInput.slider('getValue'));
         });
     }
+    else {
+        viewer2dWin.focus();
+    }
 
-    viewer2dWin.focus();
     return false;
 });
 
@@ -368,6 +380,13 @@ var $slicerLayersValue = $slicerBody.find('#slicer-layers-value');
 var $slicerLayerValue  = $slicerBody.find('#slicer-layer-value');
 var $slicerLightOff    = $slicerBody.find('#slicer-light-off');
 var $slicerLightOn     = $slicerBody.find('#slicer-light-on');
+
+var $slicerLiftingSpeed  = $slicerBody.find('#slicer-lifting-speed');
+var $slicerLiftingHeight = $slicerBody.find('#slicer-lifting-height');
+
+var $slicerMirrorYes = $slicerBody.find('#slicer-mirror-yes');
+var $slicerMirrorNo  = $slicerBody.find('#slicer-mirror-no');
+
 var $slicerSpeedYes    = $slicerBody.find('#slicer-speed-yes');
 var $slicerSpeedNo     = $slicerBody.find('#slicer-speed-no');
 var $slicerSpeedDelay  = $slicerBody.find('#slicer-speed-delay');
@@ -379,10 +398,14 @@ var $zipButton         = $sidebar.find('#zip-button');
 
 function updateSlicerUI() {
     var slicer = settings.get('slicer');
+
     $slicerSpeedDelay.val(slicer.speedDelay);
     $slicerLayerHeight.val(slicer.layers.height);
     $slicerLightOff.val(slicer.light.off);
     $slicerLightOn.val(slicer.light.on);
+
+    $slicerLiftingSpeed.val(slicer.lifting.speed);
+    $slicerLiftingHeight.val(slicer.lifting.height);
 }
 
 function updateSlicerSettings() {
@@ -390,9 +413,16 @@ function updateSlicerSettings() {
     settings.set('slicer.light.off', $slicerLightOff.val());
     settings.set('slicer.light.on', $slicerLightOn.val());
 
+    settings.set('slicer.lifting.speed', $slicerLiftingSpeed.val());
+    settings.set('slicer.lifting.height', $slicerLiftingHeight.val());
+
+    settings.set('slicer.mirror', $slicerMirrorYes[0].checked);
+
     settings.set('slicer.zip', $slicerMakeZipYes[0].checked);
     settings.set('slicer.speed', $slicerSpeedYes[0].checked);
     settings.set('slicer.speedDelay', $slicerSpeedDelay.val());
+
+    getSlice($sliderInput.slider('getValue'));
 
     updateSliderUI();
 }
@@ -403,6 +433,15 @@ var currentSliceNumber;
 var slicesNumber;
 var zipFile;
 var zipFolder;
+
+var layerHeight;
+var zPosition;
+
+var exposureTime;
+var liftingSpeed;
+var liftingHeight;
+var liftingTime;
+var estimatedTime;
 
 function slice() {
     currentSliceNumber++;
@@ -418,7 +457,7 @@ function slice() {
     var diff = time - expectedSliceInterval;
 
     !settings.get('slicer.speed') && viewer2dWin && setTimeout(function() {
-        viewer2dWin && (viewer2dWin.document.body.style.backgroundImage = 'none');
+        sliceImage('none');
     }, settings.get('slicer.light.on'));
 
     expectedSliceInterval += sliceInterval;
@@ -426,7 +465,7 @@ function slice() {
 }
 
 function endSlicing() {
-    viewer2dWin && (viewer2dWin.document.body.style.backgroundImage = 'none');
+    sliceImage('none');
     $sidebar.find('input, button').prop('disabled', false);
     $sliderInput.slider('enable');
     $abortButton.addClass('hidden');
@@ -455,6 +494,19 @@ function startSlicing() {
         zipFile   = new JSZip();
         zipFolder = zipFile.folder('slices');
         zipFile.file("README.txt", 'Generated by SLAcer.js\r\nhttp://lautr3k.github.io/SLAcer.js/\r\n');
+        // zipFile.file("slacer.json", JSON.stringify({
+        //     imageExtension: '.png',
+        //     imageDirectory: 'slices',
+        //     screenWidth   : settings.get('screen.width'),
+        //     screenHeight  : settings.get('screen.height'),
+        //     screenSize    : settings.get('screen.diagonal.size'),
+        //     screenUnit    : settings.get('screen.diagonal.unit'),
+        //     layersNumber  : slicesNumber,
+        //     layersHeight  : settings.get('slicer.layers.height') / 1000,     // mm
+        //     exposureTime  : parseInt(settings.get('slicer.light.on')),       // ms
+        //     liftingSpeed  : parseInt(settings.get('slicer.lifting.speed')),  // mm/min
+        //     liftingHeight : parseInt(settings.get('slicer.lifting.height'))  // mm
+        // }, null, 2));
     }
 
     slicesNumber && slice();
@@ -482,6 +534,7 @@ $abortButton.on('click', function(e) {
     endSlicing();
 });
 
+$('#slicer-mirror-' + (settings.get('slicer.mirror') ? 'yes' : 'no')).prop('checked', true);
 $('#slicer-make-zip-' + (settings.get('slicer.zip') ? 'yes' : 'no')).prop('checked', true);
 $('#slicer-speed-' + (settings.get('slicer.speed') ? 'yes' : 'no')).prop('checked', true);
 $('#slicer input').on('input, change', updateSlicerSettings);
@@ -605,6 +658,8 @@ function updateScreenSettings() {
 
     viewer2d.setScreenResolution(settings.get('screen'));
     $screenDotPitch.html(viewer2d.dotPitch.toFixed(2));
+
+    getSlice($sliderInput.slider('getValue'));
 }
 
 $('#screen-diagonal-unit-' + settings.get('screen.diagonal.unit')).prop('checked', true);
@@ -795,7 +850,7 @@ $transformButtons.on('click', function(e) {
 });
 
 $('#transform select').on('change', updateTransformAction);
-$('#transform input').on('input', updateTransformValues);
+$('#transform input').on('change', updateTransformValues);
 resetTransformValues();
 
 // UI resize
@@ -873,6 +928,7 @@ loader.onError = errorHandler;
 // example STL file
 //var stl = 'stl/Octocat-v2.stl';
 var stl = 'stl/StressTest.stl';
+//var stl = 'stl/SLAcer.stl';
 
 // File url
 var url = 'http://' + window.location.hostname + window.location.pathname + stl;
