@@ -103,11 +103,13 @@ var SLAcer = SLAcer || {};
 
     Viewer.prototype.addObject = function(object) {
         this.scene.add(object);
+        return object;
     };
 
     Viewer.prototype.replaceObject = function(oldObject, newObject) {
         oldObject && this.removeObject(oldObject);
         this.addObject(newObject);
+        return newObject;
     };
 
     // -------------------------------------------------------------------------
