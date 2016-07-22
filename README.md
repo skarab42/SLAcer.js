@@ -10,6 +10,8 @@
 - Open 2D viewer in new window (popup).
 - Configure slice height, speed, delays.
 - Export slices as PNG (zipped folder).
+- Export project settings (JSON).
+- Mirror output image.
 - Configure build volume size (in or mm).
 - Configure output images size and resolution.
 - Configure resin price and density for cost calculation.
