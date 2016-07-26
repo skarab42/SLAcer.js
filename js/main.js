@@ -117,9 +117,8 @@ function hexToDec(hex) {
     return parseInt(hex.toString().replace('#', ''), 16);
 }
 
-function sliceImage(dataURL, mirror) {
+function sliceImage(dataURL) {
     settings.set('slice.dataURL', dataURL || 'none');
-    settings.set('slice.mirror' , mirror ? 'mirror' : '');
 }
 
 function getSlice(layerNumber) {
@@ -164,6 +163,10 @@ function getSlice(layerNumber) {
         shape = shapes[i];
         slice = shape.clone();
 
+        if (settings.get('slicer.mirror')) {
+            slice.applyMatrix(new THREE.Matrix4().makeScale(-1, 1, 1));
+        }
+
         slice.material = slice.material.clone();
         slice.material.color.setHex(0xffffff);
         viewer2d.addObject(slice);
@@ -180,7 +183,7 @@ function getSlice(layerNumber) {
 
     // render 2D view
     viewer2d.screenshot(function(dataURL) {
-        sliceImage(dataURL, settings.get('slicer.mirror'));
+        sliceImage(dataURL);
 
         if (zipFolder) {
             var fileName = layerNumber + '.png';
