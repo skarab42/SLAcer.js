@@ -21,14 +21,6 @@
                 background-position: center;
                 background-repeat: no-repeat;
             }
-            .mirror {
-                -moz-transform: scaleX(-1);
-                -o-transform: scaleX(-1);
-                -webkit-transform: scaleX(-1);
-                transform: scaleX(-1);
-                filter: FlipH;
-                -ms-filter: "FlipH";
-            }
         </style>
     </head>
     <body>
@@ -38,13 +30,11 @@
         <script>
                 function storageListener() {
                     var settings = new SLAcer.Settings();
-                    var mirror   = settings.get('slice.mirror', false);
                     var dataURL  = settings.get('slice.dataURL', 'none');
                     var image    = dataURL !== 'none' ? 'url(' + dataURL + ')' : 'none';
                     var slice    =  document.getElementById('slice');
 
                     slice.style.backgroundImage = image;
-                    slice.className = mirror ? 'mirror' : '';
                 }
 
                 window.addEventListener('storage', storageListener, false);
