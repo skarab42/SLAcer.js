@@ -18,6 +18,8 @@ var settings = new SLAcer.Settings({
             off: 500
         },
         zip: true,
+        svg: false,
+        png: true,
         speed: false,
         speedDelay: 10, // ms
         panel: {
@@ -163,10 +165,6 @@ function getSlice(layerNumber) {
         shape = shapes[i];
         slice = shape.clone();
 
-        if (settings.get('slicer.mirror')) {
-            slice.applyMatrix(new THREE.Matrix4().makeScale(-1, 1, 1));
-        }
-
         slice.material = slice.material.clone();
         slice.material.color.setHex(0xffffff);
         viewer2d.addObject(slice);
@@ -185,12 +183,93 @@ function getSlice(layerNumber) {
     viewer2d.screenshot(function(dataURL) {
         sliceImage(dataURL);
 
-        if (zipFolder) {
+        if (PNGExport) {
             var fileName = layerNumber + '.png';
             var imgData  = dataURL.substr(dataURL.indexOf(',') + 1);
             zipFolder.file(fileName, imgData, { base64: true });
         }
     });
+
+    // SVG export
+    if (SVGExport) {
+        // offset for positive coords
+        var xOffset = Math.abs(slicer.mesh.geometry.boundingBox.min.x);
+        var yOffset = Math.abs(slicer.mesh.geometry.boundingBox.min.y);
+
+        function SVGPath(actions, dir) {
+            var path = [];
+            var area = 0;
+            var a, b, c, x, y;
+
+            if (dir != 'ccw') {
+                dir = 'cw';
+            }
+
+            actions.push({ action: 'lineTo', args: actions[0].args });
+
+            for (var i = 0, il = actions.length; i < il; i++) {
+                a = actions[i];
+
+                if (i > 0) {
+                    b = actions[i - 1];
+                    area += a.args[0] * b.args[1];
+                    area -= b.args[0] * a.args[1];
+                }
+
+                c = a.action == 'moveTo' ? 'M' : 'L';
+                x = (a.args[0] + xOffset);
+                y = (a.args[1] + yOffset);
+
+                path.push(c + x + ' ' + y);
+            }
+
+            if (dir == 'cw' && area < 0 || dir == 'ccw' && area > 0) {
+                path = path.reverse();
+                path[0] = path[0].replace(/^L/, 'M');
+                path[actions.length - 1] = path[actions.length - 1].replace(/^M/, 'L');
+            }
+
+            return path.join(' ') + ' Z ';
+        }
+
+        // svg start
+        var size = slicer.mesh.getSize();
+        var svg = '<svg version="1.1" width="' + size.x + '" height="' + size.y + '" baseProfile="full" xmlns="http://www.w3.org/2000/svg">\n';
+
+        // svg background
+        svg += '<rect x="0" y="0" width="100%" height="100%" style="fill:black; stroke:none"/>\n';
+
+        // fix coordinate system (rotate 180°)
+        svg += '<g transform="translate(0, ' + size.y + ') scale(1, -1)">\n';
+
+        // draw main paths
+        var actions;
+        for (var i = 0, il = faces.shapes.length; i < il; i++) {
+            actions = faces.shapes[i].actions;
+
+            // path start
+            svg += '<path d="';
+
+            // main paths
+            svg += SVGPath(actions, 'cw');
+
+            // holes paths
+            var holes = faces.shapes[i].holes;
+            for (var j = 0, jl = holes.length; j < jl; j++) {
+                svg += SVGPath(holes[j].actions, 'ccw');
+            }
+
+            // path end
+            svg += '" style="fill:white; stroke:none" />\n';
+        }
+
+        // svg end
+        svg += '</g>';
+        svg += '</svg>';
+
+        // add svg file to zip
+        zipFolder.file(layerNumber + '.svg', svg);
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -392,6 +471,9 @@ var $slicerLiftingHeight = $slicerBody.find('#slicer-lifting-height');
 var $slicerMirrorYes = $slicerBody.find('#slicer-mirror-yes');
 var $slicerMirrorNo  = $slicerBody.find('#slicer-mirror-no');
 
+var $slicerExportPNG = $slicerBody.find('#slicer-image-extension-png');
+var $slicerExportSVG = $slicerBody.find('#slicer-image-extension-svg');
+
 var $slicerSpeedYes    = $slicerBody.find('#slicer-speed-yes');
 var $slicerSpeedNo     = $slicerBody.find('#slicer-speed-no');
 var $slicerSpeedDelay  = $slicerBody.find('#slicer-speed-delay');
@@ -423,6 +505,9 @@ function updateSlicerSettings() {
 
     settings.set('slicer.mirror', $slicerMirrorYes[0].checked);
 
+    settings.set('slicer.png', $slicerExportPNG[0].checked);
+    settings.set('slicer.svg', $slicerExportSVG[0].checked);
+
     settings.set('slicer.zip', $slicerMakeZipYes[0].checked);
     settings.set('slicer.speed', $slicerSpeedYes[0].checked);
     settings.set('slicer.speedDelay', $slicerSpeedDelay.val());
@@ -432,12 +517,23 @@ function updateSlicerSettings() {
     updateSliderUI();
 }
 
+function flipGeometry() {
+    loadGeometry(slicer.mesh.geometry, true);
+    getSlice($sliderInput.slider('getValue'));
+}
+
+$slicerMirrorYes.on('change', flipGeometry);
+$slicerMirrorNo.on('change', flipGeometry);
+
 var sliceInterval;
 var expectedSliceInterval;
 var currentSliceNumber;
 var slicesNumber;
 var zipFile;
 var zipFolder;
+
+var SVGExport;
+var PNGExport;
 
 var layerHeight;
 var zPosition;
@@ -494,13 +590,15 @@ function startSlicing() {
 
     zipFile   = null;
     zipFolder = null;
+    SVGExport = null;
+    PNGExport = null;
 
     if (settings.get('slicer.zip')) {
         zipFile   = new JSZip();
         zipFolder = zipFile.folder('slices');
         zipFile.file("README.txt", 'Generated by SLAcer.js\r\nhttp://lautr3k.github.io/SLAcer.js/\r\n');
         zipFile.file("slacer.json", JSON.stringify({
-            imageExtension: '.png',
+            imageExtension: settings.get('slicer.png') ? 'png' : 'svg',
             imageDirectory: 'slices',
             screenWidth   : settings.get('screen.width'),
             screenHeight  : settings.get('screen.height'),
@@ -512,6 +610,8 @@ function startSlicing() {
             liftingSpeed  : parseInt(settings.get('slicer.lifting.speed')),  // mm/min
             liftingHeight : parseInt(settings.get('slicer.lifting.height'))  // mm
         }, null, 2));
+        SVGExport = settings.get('slicer.svg');
+        PNGExport = settings.get('slicer.png');
     }
 
     slicesNumber && slice();
@@ -543,6 +643,7 @@ $abortButton.on('click', function(e) {
     endSlicing();
 });
 
+$('#slicer-image-extension-' + (settings.get('slicer.png') ? 'png' : 'svg')).prop('checked', true);
 $('#slicer-mirror-' + (settings.get('slicer.mirror') ? 'yes' : 'no')).prop('checked', true);
 $('#slicer-make-zip-' + (settings.get('slicer.zip') ? 'yes' : 'no')).prop('checked', true);
 $('#slicer-speed-' + (settings.get('slicer.speed') ? 'yes' : 'no')).prop('checked', true);
@@ -881,7 +982,7 @@ resizeUI();
 var loader = new MeshesJS.STLLoader($main[0]); // drop target
 
 // Load an geometry
-function loadGeometry(geometry) {
+function loadGeometry(geometry, mirror) {
     try {
         // remove old mesh and plane
         slicer.mesh && viewer3d.removeObject(slicer.mesh);
@@ -889,9 +990,14 @@ function loadGeometry(geometry) {
         // remove old shapes
         removeShapes();
 
+        // flip geometry
+        if (mirror || settings.get('slicer.mirror')) {
+            geometry.applyMatrix(new THREE.Matrix4().makeScale(-1, 1, 1));
+        }
+
         // load new mesh in slicer
         slicer.loadMesh(new SLAcer.Mesh(geometry, new THREE.MeshPhongMaterial({
-            color: hexToDec(settings.get('colors.mesh'))
+            color: hexToDec(settings.get('colors.mesh')), side: THREE.DoubleSide
         })));
 
         // add new mesh and render view
