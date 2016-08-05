@@ -681,7 +681,7 @@ function updateBuildVolumeSettings() {
     });
 
     viewer3d.setBuildVolume(settings.get('buildVolume'));
-    viewer3d.dropObject(slicer.mesh);
+    slicer.mesh && viewer3d.dropObject(slicer.mesh);
     viewer3d.render();
 
     size && updateMeshInfoUI();
