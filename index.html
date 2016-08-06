@@ -58,6 +58,12 @@
                     </div>
                     <div id="transform-body" class="panel-body collapse in">
                         <div class="form-group">
+                            <label for="transform-mirror">Mirror</label>
+                            <input type="radio" name="transform-mirror" id="transform-mirror-yes" value="yes" /> yes
+                            <input type="radio" name="transform-mirror" id="transform-mirror-no" value="no" checked="checked" /> no
+                        </div>
+                        <hr />
+                        <div class="form-group">
                             <label for="transform-action">Action</label>
                             <select id="transform-action" class="form-control input-sm">
                                 <option>scale</option>
@@ -178,12 +184,6 @@
                         </div>
 
                         <hr />
-
-                        <div class="form-group">
-                            <label for="slicer-mirror">Mirror output</label>
-                            <input type="radio" name="slicer-mirror" id="slicer-mirror-yes" value="yes" /> yes
-                            <input type="radio" name="slicer-mirror" id="slicer-mirror-no" value="no" checked="checked" /> no
-                        </div>
 
                         <div class="form-group">
                             <label for="slicer-image-extension">Output type</label>
