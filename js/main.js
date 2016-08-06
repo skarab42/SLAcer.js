@@ -833,8 +833,9 @@ var transformAction, transformations;
 function resetTransformValues() {
     transformAction = 'scale';
     transformations = {
-        scale : { x:1, y:1 , z:1 },
-        rotate: { x:0, y:0 , z:0 }
+        scale    : { x:1, y:1 , z:1 },
+        rotate   : { x:0, y:0 , z:0 },
+        translate: { x:0, y:0 , z:0 }
     };
     updateTransformAction();
 }
@@ -851,13 +852,19 @@ function updateTransformAction() {
         max  = 999;
         step = 0.01;
     }
-    else {
+    else if (transformAction == 'rotate') {
         min  = 0;
         max  = 360;
         step = 1;
     }
+    else {
+        min  = -9999;
+        max  = 9999;
+        step = 1;
+    }
 
     $transformUniform.toggleClass('hidden', transformAction == 'rotate');
+    $transformZ.parent().toggleClass('hidden', transformAction == 'translate');
 
     $transformX.prop('min', min);
     $transformY.prop('min', min);
@@ -925,7 +932,7 @@ function updateTransformValues() {
             input.z / current.z
         );
     }
-    else {
+    else if (transformAction == 'rotate') {
         var deg     = Math.PI / 180;
         var offsets = {
             x: input.x - current.x,
@@ -937,12 +944,26 @@ function updateTransformValues() {
         slicer.mesh.geometry.rotateY(offsets.y * deg);
         slicer.mesh.geometry.rotateZ(offsets.z * deg);
     }
+    else {
+        var offsets = {
+            x: input.x - current.x,
+            y: input.y - current.y
+        };
+
+        slicer.mesh.geometry.translate(offsets.x, offsets.y, 0);
+    }
 
     current.x = input.x;
     current.y = input.y;
     current.z = input.z;
 
-    loadGeometry(slicer.mesh.geometry, false);
+    if (transformAction != 'translate') {
+        loadGeometry(slicer.mesh.geometry, false);
+        // stay at current position
+        var current = transformations['translate'];
+        slicer.mesh.geometry.translate(current.x, current.y, current.z);
+    }
+
     getSlice($sliderInput.slider('getValue'));
 }
 
