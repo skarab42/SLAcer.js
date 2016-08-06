@@ -942,10 +942,8 @@ function updateTransformValues() {
     current.y = input.y;
     current.z = input.z;
 
-    //var currentLayer = settings.get('');
-    loadGeometry(slicer.mesh.geometry);
+    loadGeometry(slicer.mesh.geometry, false);
     getSlice($sliderInput.slider('getValue'));
-    //viewer3d.render();
 }
 
 $transformButtons.on('click', function(e) {
@@ -991,7 +989,7 @@ function loadGeometry(geometry, mirror) {
         removeShapes();
 
         // flip geometry
-        if (mirror || settings.get('slicer.mirror')) {
+        if (mirror) {
             geometry.applyMatrix(new THREE.Matrix4().makeScale(-1, 1, 1));
         }
 
@@ -1030,7 +1028,7 @@ function ultraMegaDirtyFix() {
 // On Geometry loaded
 loader.onGeometry = function(geometry) {
     resetTransformValues();
-    loadGeometry(geometry);
+    loadGeometry(geometry, settings.get('slicer.mirror'));
     ultraMegaDirtyFix();
 };
 
