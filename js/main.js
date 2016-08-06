@@ -468,9 +468,6 @@ var $slicerLightOn     = $slicerBody.find('#slicer-light-on');
 var $slicerLiftingSpeed  = $slicerBody.find('#slicer-lifting-speed');
 var $slicerLiftingHeight = $slicerBody.find('#slicer-lifting-height');
 
-var $slicerMirrorYes = $slicerBody.find('#slicer-mirror-yes');
-var $slicerMirrorNo  = $slicerBody.find('#slicer-mirror-no');
-
 var $slicerExportPNG = $slicerBody.find('#slicer-image-extension-png');
 var $slicerExportSVG = $slicerBody.find('#slicer-image-extension-svg');
 
@@ -503,8 +500,6 @@ function updateSlicerSettings() {
     settings.set('slicer.lifting.speed', $slicerLiftingSpeed.val());
     settings.set('slicer.lifting.height', $slicerLiftingHeight.val());
 
-    settings.set('slicer.mirror', $slicerMirrorYes[0].checked);
-
     settings.set('slicer.png', $slicerExportPNG[0].checked);
     settings.set('slicer.svg', $slicerExportSVG[0].checked);
 
@@ -516,14 +511,6 @@ function updateSlicerSettings() {
 
     updateSliderUI();
 }
-
-function flipGeometry() {
-    loadGeometry(slicer.mesh.geometry, true);
-    getSlice($sliderInput.slider('getValue'));
-}
-
-$slicerMirrorYes.on('change', flipGeometry);
-$slicerMirrorNo.on('change', flipGeometry);
 
 var sliceInterval;
 var expectedSliceInterval;
@@ -644,7 +631,6 @@ $abortButton.on('click', function(e) {
 });
 
 $('#slicer-image-extension-' + (settings.get('slicer.png') ? 'png' : 'svg')).prop('checked', true);
-$('#slicer-mirror-' + (settings.get('slicer.mirror') ? 'yes' : 'no')).prop('checked', true);
 $('#slicer-make-zip-' + (settings.get('slicer.zip') ? 'yes' : 'no')).prop('checked', true);
 $('#slicer-speed-' + (settings.get('slicer.speed') ? 'yes' : 'no')).prop('checked', true);
 $('#slicer input').on('input, change', updateSlicerSettings);
@@ -828,6 +814,9 @@ var $transformY       = $transformBody.find('#transform-y');
 var $transformZ       = $transformBody.find('#transform-z');
 var $transformButtons = $transformBody.find('button');
 
+var $transformMirrorYes = $transformBody.find('#transform-mirror-yes');
+var $transformMirrorNo  = $transformBody.find('#transform-mirror-no');
+
 var transformAction, transformations;
 
 function resetTransformValues() {
@@ -978,6 +967,17 @@ $transformButtons.on('click', function(e) {
     updateTransformValues();
 });
 
+function flipGeometry() {
+    console.log('plop');
+    settings.set('slicer.mirror', $transformMirrorYes[0].checked);
+    loadGeometry(slicer.mesh.geometry, true);
+    getSlice($sliderInput.slider('getValue'));
+}
+
+$transformMirrorYes.on('change', flipGeometry);
+$transformMirrorNo.on('change', flipGeometry);
+
+$('#slicer-mirror-' + (settings.get('slicer.mirror') ? 'yes' : 'no')).prop('checked', true);
 $('#transform select').on('change', updateTransformAction);
 $('#transform input').on('change', updateTransformValues);
 resetTransformValues();
