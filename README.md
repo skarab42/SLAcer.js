@@ -4,7 +4,7 @@
 # Main features
 - Browse or drag/drop STL file.
 - Mesh information: size, volume, cost, etc...
-- Mesh transformation: scale, rotate, mirror.
+- Mesh transformation: scale, rotate, translate, mirror.
 - Live slicing in 2D/3D viewer.
 - Speed mode (slicing only, no delay).
 - Open 2D viewer in new window (popup).
