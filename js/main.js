@@ -18,11 +18,18 @@ var settings = new SLAcer.Settings({
             off: 500
         },
         zip: true,
+        svg: false,
+        png: true,
         speed: false,
         speedDelay: 10, // ms
         panel: {
             collapsed: false,
             position : 1
+        },
+        mirror: false,
+        lifting: {
+            speed : 50, // mm/min
+            height: 3,  // mm
         }
     },
     mesh: {
@@ -105,11 +112,15 @@ function removeSlices() {
         }
     }
 
-    viewer2dWin && (viewer2dWin.document.body.style.backgroundImage = 'none');
+    sliceImage('none');
 }
 
 function hexToDec(hex) {
     return parseInt(hex.toString().replace('#', ''), 16);
+}
+
+function sliceImage(dataURL) {
+    settings.set('slice.dataURL', dataURL || 'none');
 }
 
 function getSlice(layerNumber) {
@@ -130,10 +141,12 @@ function getSlice(layerNumber) {
         throw 'transformations not applyed...';
     }
 
+    // get position
+    layerHeight = settings.get('slicer.layers.height') / 1000;
+    zPosition   = layerNumber * layerHeight;
+
     // get faces
-    var layerHeight = settings.get('slicer.layers.height') / 1000;
-    var zPosition   = layerNumber * layerHeight;
-    var faces       = slicer.getFaces(zPosition);
+    var faces = slicer.getFaces(zPosition);
 
     //console.log('layer number:', layerNumber);
     //console.log('z position  :', zPosition);
@@ -167,17 +180,95 @@ function getSlice(layerNumber) {
     viewer3d.render();
 
     // render 2D view
-    if (zipFolder || viewer2dWin) {
-        viewer2d.screenshot(function(dataURL) {
-            if (viewer2dWin) {
-                viewer2dWin.document.body.style.backgroundImage = 'url(' + dataURL + ')';
+    viewer2d.screenshot(function(dataURL) {
+        sliceImage(dataURL);
+
+        if (PNGExport) {
+            var fileName = layerNumber + '.png';
+            var imgData  = dataURL.substr(dataURL.indexOf(',') + 1);
+            zipFolder.file(fileName, imgData, { base64: true });
+        }
+    });
+
+    // SVG export
+    if (SVGExport) {
+        // offset for positive coords
+        var xOffset = Math.abs(slicer.mesh.geometry.boundingBox.min.x);
+        var yOffset = Math.abs(slicer.mesh.geometry.boundingBox.min.y);
+
+        function SVGPath(actions, dir) {
+            var path = [];
+            var area = 0;
+            var a, b, c, x, y;
+
+            if (dir != 'ccw') {
+                dir = 'cw';
             }
-            if (zipFolder) {
-                var fileName = layerNumber + '.png';
-                var imgData  = dataURL.substr(dataURL.indexOf(',') + 1);
-                zipFolder.file(fileName, imgData, { base64: true });
+
+            actions.push({ action: 'lineTo', args: actions[0].args });
+
+            for (var i = 0, il = actions.length; i < il; i++) {
+                a = actions[i];
+
+                if (i > 0) {
+                    b = actions[i - 1];
+                    area += a.args[0] * b.args[1];
+                    area -= b.args[0] * a.args[1];
+                }
+
+                c = a.action == 'moveTo' ? 'M' : 'L';
+                x = (a.args[0] + xOffset);
+                y = (a.args[1] + yOffset);
+
+                path.push(c + x + ' ' + y);
             }
-        });
+
+            if (dir == 'cw' && area < 0 || dir == 'ccw' && area > 0) {
+                path = path.reverse();
+                path[0] = path[0].replace(/^L/, 'M');
+                path[actions.length - 1] = path[actions.length - 1].replace(/^M/, 'L');
+            }
+
+            return path.join(' ') + ' Z ';
+        }
+
+        // svg start
+        var size = slicer.mesh.getSize();
+        var svg = '<svg version="1.1" width="' + size.x + '" height="' + size.y + '" baseProfile="full" xmlns="http://www.w3.org/2000/svg">\n';
+
+        // svg background
+        svg += '<rect x="0" y="0" width="100%" height="100%" style="fill:black; stroke:none"/>\n';
+
+        // fix coordinate system (rotate 180°)
+        svg += '<g transform="translate(0, ' + size.y + ') scale(1, -1)">\n';
+
+        // draw main paths
+        var actions;
+        for (var i = 0, il = faces.shapes.length; i < il; i++) {
+            actions = faces.shapes[i].actions;
+
+            // path start
+            svg += '<path d="';
+
+            // main paths
+            svg += SVGPath(actions, 'cw');
+
+            // holes paths
+            var holes = faces.shapes[i].holes;
+            for (var j = 0, jl = holes.length; j < jl; j++) {
+                svg += SVGPath(holes[j].actions, 'ccw');
+            }
+
+            // path end
+            svg += '" style="fill:white; stroke:none" />\n';
+        }
+
+        // svg end
+        svg += '</g>';
+        svg += '</svg>';
+
+        // add svg file to zip
+        zipFolder.file(layerNumber + '.svg', svg);
     }
 }
 
@@ -218,11 +309,12 @@ var viewer2d = new SLAcer.Viewer2D({
 });
 
 $openViewer2D.click(function(e) {
-    if (! viewer2dWin) {
+    if (viewer2dWin == null || viewer2dWin.closed) {
         var screen  = settings.get('screen');
         var size    = 'width=' + screen.width + ', height=' + screen.height;
         var opts    = 'menubar=0, toolbar=0, location=0, directories=0, personalbar=0, status=0, resizable=1, dependent=0'
-        viewer2dWin = window.open('viewer2d.html', 'SLAcer.viewer2d', size + ', ' + opts);
+
+        viewer2dWin = window.open('viewer2d.html', 'SLAcerViewer2D', size + ', ' + opts);
 
         $(viewer2dWin).on('beforeunload', function(e) {
             viewer2dWin = null;
@@ -231,8 +323,10 @@ $openViewer2D.click(function(e) {
             getSlice($sliderInput.slider('getValue'));
         });
     }
+    else {
+        viewer2dWin.focus();
+    }
 
-    viewer2dWin.focus();
     return false;
 });
 
@@ -315,10 +409,12 @@ function parseUnit(value, unit) {
 // File panel
 var $fileBody  = initPanel('file');
 var $fileInput = $fileBody.find('#file-input');
+var loadedFile = null;
 
 $fileInput.on('change', function(e) {
     resetTransformValues();
-    loader.loadFile(e.target.files[0]);
+    loadedFile = e.target.files[0];
+    loader.loadFile(loadedFile);
 });
 
 // Mesh panel
@@ -368,6 +464,16 @@ var $slicerLayersValue = $slicerBody.find('#slicer-layers-value');
 var $slicerLayerValue  = $slicerBody.find('#slicer-layer-value');
 var $slicerLightOff    = $slicerBody.find('#slicer-light-off');
 var $slicerLightOn     = $slicerBody.find('#slicer-light-on');
+
+var $slicerLiftingSpeed  = $slicerBody.find('#slicer-lifting-speed');
+var $slicerLiftingHeight = $slicerBody.find('#slicer-lifting-height');
+
+var $slicerMirrorYes = $slicerBody.find('#slicer-mirror-yes');
+var $slicerMirrorNo  = $slicerBody.find('#slicer-mirror-no');
+
+var $slicerExportPNG = $slicerBody.find('#slicer-image-extension-png');
+var $slicerExportSVG = $slicerBody.find('#slicer-image-extension-svg');
+
 var $slicerSpeedYes    = $slicerBody.find('#slicer-speed-yes');
 var $slicerSpeedNo     = $slicerBody.find('#slicer-speed-no');
 var $slicerSpeedDelay  = $slicerBody.find('#slicer-speed-delay');
@@ -379,10 +485,14 @@ var $zipButton         = $sidebar.find('#zip-button');
 
 function updateSlicerUI() {
     var slicer = settings.get('slicer');
+
     $slicerSpeedDelay.val(slicer.speedDelay);
     $slicerLayerHeight.val(slicer.layers.height);
     $slicerLightOff.val(slicer.light.off);
     $slicerLightOn.val(slicer.light.on);
+
+    $slicerLiftingSpeed.val(slicer.lifting.speed);
+    $slicerLiftingHeight.val(slicer.lifting.height);
 }
 
 function updateSlicerSettings() {
@@ -390,12 +500,30 @@ function updateSlicerSettings() {
     settings.set('slicer.light.off', $slicerLightOff.val());
     settings.set('slicer.light.on', $slicerLightOn.val());
 
+    settings.set('slicer.lifting.speed', $slicerLiftingSpeed.val());
+    settings.set('slicer.lifting.height', $slicerLiftingHeight.val());
+
+    settings.set('slicer.mirror', $slicerMirrorYes[0].checked);
+
+    settings.set('slicer.png', $slicerExportPNG[0].checked);
+    settings.set('slicer.svg', $slicerExportSVG[0].checked);
+
     settings.set('slicer.zip', $slicerMakeZipYes[0].checked);
     settings.set('slicer.speed', $slicerSpeedYes[0].checked);
     settings.set('slicer.speedDelay', $slicerSpeedDelay.val());
 
+    getSlice($sliderInput.slider('getValue'));
+
     updateSliderUI();
 }
+
+function flipGeometry() {
+    loadGeometry(slicer.mesh.geometry, true);
+    getSlice($sliderInput.slider('getValue'));
+}
+
+$slicerMirrorYes.on('change', flipGeometry);
+$slicerMirrorNo.on('change', flipGeometry);
 
 var sliceInterval;
 var expectedSliceInterval;
@@ -403,6 +531,18 @@ var currentSliceNumber;
 var slicesNumber;
 var zipFile;
 var zipFolder;
+
+var SVGExport;
+var PNGExport;
+
+var layerHeight;
+var zPosition;
+
+var exposureTime;
+var liftingSpeed;
+var liftingHeight;
+var liftingTime;
+var estimatedTime;
 
 function slice() {
     currentSliceNumber++;
@@ -418,7 +558,7 @@ function slice() {
     var diff = time - expectedSliceInterval;
 
     !settings.get('slicer.speed') && viewer2dWin && setTimeout(function() {
-        viewer2dWin && (viewer2dWin.document.body.style.backgroundImage = 'none');
+        sliceImage('none');
     }, settings.get('slicer.light.on'));
 
     expectedSliceInterval += sliceInterval;
@@ -426,7 +566,7 @@ function slice() {
 }
 
 function endSlicing() {
-    viewer2dWin && (viewer2dWin.document.body.style.backgroundImage = 'none');
+    sliceImage('none');
     $sidebar.find('input, button').prop('disabled', false);
     $sliderInput.slider('enable');
     $abortButton.addClass('hidden');
@@ -450,11 +590,28 @@ function startSlicing() {
 
     zipFile   = null;
     zipFolder = null;
+    SVGExport = null;
+    PNGExport = null;
 
     if (settings.get('slicer.zip')) {
         zipFile   = new JSZip();
         zipFolder = zipFile.folder('slices');
         zipFile.file("README.txt", 'Generated by SLAcer.js\r\nhttp://lautr3k.github.io/SLAcer.js/\r\n');
+        zipFile.file("slacer.json", JSON.stringify({
+            imageExtension: settings.get('slicer.png') ? 'png' : 'svg',
+            imageDirectory: 'slices',
+            screenWidth   : settings.get('screen.width'),
+            screenHeight  : settings.get('screen.height'),
+            screenSize    : settings.get('screen.diagonal.size'),
+            screenUnit    : settings.get('screen.diagonal.unit'),
+            layersNumber  : slicesNumber,
+            layersHeight  : settings.get('slicer.layers.height') / 1000,     // mm
+            exposureTime  : parseInt(settings.get('slicer.light.on')),       // ms
+            liftingSpeed  : parseInt(settings.get('slicer.lifting.speed')),  // mm/min
+            liftingHeight : parseInt(settings.get('slicer.lifting.height'))  // mm
+        }, null, 2));
+        SVGExport = settings.get('slicer.svg');
+        PNGExport = settings.get('slicer.png');
     }
 
     slicesNumber && slice();
@@ -462,7 +619,11 @@ function startSlicing() {
 
 $zipButton.on('click', function(e) {
     if (zipFile) {
-        saveAs(zipFile.generate({type: 'blob'}), 'SLAcer.zip');
+        var name = 'SLAcer';
+        if (loadedFile && loadedFile.name) {
+            name = loadedFile.name;
+        }
+        saveAs(zipFile.generate({type: 'blob'}), name + '.zip');
     }
 });
 
@@ -482,6 +643,8 @@ $abortButton.on('click', function(e) {
     endSlicing();
 });
 
+$('#slicer-image-extension-' + (settings.get('slicer.png') ? 'png' : 'svg')).prop('checked', true);
+$('#slicer-mirror-' + (settings.get('slicer.mirror') ? 'yes' : 'no')).prop('checked', true);
 $('#slicer-make-zip-' + (settings.get('slicer.zip') ? 'yes' : 'no')).prop('checked', true);
 $('#slicer-speed-' + (settings.get('slicer.speed') ? 'yes' : 'no')).prop('checked', true);
 $('#slicer input').on('input, change', updateSlicerSettings);
@@ -605,6 +768,8 @@ function updateScreenSettings() {
 
     viewer2d.setScreenResolution(settings.get('screen'));
     $screenDotPitch.html(viewer2d.dotPitch.toFixed(2));
+
+    getSlice($sliderInput.slider('getValue'));
 }
 
 $('#screen-diagonal-unit-' + settings.get('screen.diagonal.unit')).prop('checked', true);
@@ -795,7 +960,7 @@ $transformButtons.on('click', function(e) {
 });
 
 $('#transform select').on('change', updateTransformAction);
-$('#transform input').on('input', updateTransformValues);
+$('#transform input').on('change', updateTransformValues);
 resetTransformValues();
 
 // UI resize
@@ -817,7 +982,7 @@ resizeUI();
 var loader = new MeshesJS.STLLoader($main[0]); // drop target
 
 // Load an geometry
-function loadGeometry(geometry) {
+function loadGeometry(geometry, mirror) {
     try {
         // remove old mesh and plane
         slicer.mesh && viewer3d.removeObject(slicer.mesh);
@@ -825,9 +990,14 @@ function loadGeometry(geometry) {
         // remove old shapes
         removeShapes();
 
+        // flip geometry
+        if (mirror || settings.get('slicer.mirror')) {
+            geometry.applyMatrix(new THREE.Matrix4().makeScale(-1, 1, 1));
+        }
+
         // load new mesh in slicer
         slicer.loadMesh(new SLAcer.Mesh(geometry, new THREE.MeshPhongMaterial({
-            color: hexToDec(settings.get('colors.mesh'))
+            color: hexToDec(settings.get('colors.mesh')), side: THREE.DoubleSide
         })));
 
         // add new mesh and render view
@@ -873,6 +1043,7 @@ loader.onError = errorHandler;
 // example STL file
 //var stl = 'stl/Octocat-v2.stl';
 var stl = 'stl/StressTest.stl';
+//var stl = 'stl/SLAcer.stl';
 
 // File url
 var url = 'http://' + window.location.hostname + window.location.pathname + stl;
