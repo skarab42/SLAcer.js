@@ -863,7 +863,7 @@ function updateTransformAction() {
         step = 1;
     }
 
-    $transformUniform.toggleClass('hidden', transformAction == 'rotate');
+    $transformUniform.toggleClass('hidden', transformAction != 'scale');
     $transformZ.parent().toggleClass('hidden', transformAction == 'translate');
 
     $transformX.prop('min', min);
