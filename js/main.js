@@ -26,7 +26,6 @@ var settings = new SLAcer.Settings({
             collapsed: false,
             position : 1
         },
-        mirror: false,
         lifting: {
             speed : 50, // mm/min
             height: 3,  // mm
@@ -42,7 +41,8 @@ var settings = new SLAcer.Settings({
         panel: {
             collapsed: false,
             position : 3
-        }
+        },
+        mirror: false
     },
     buildVolume: {
         size     : { x: 100,  y: 100,  z: 100 }, // mm
@@ -878,8 +878,6 @@ function updateTransformValues() {
         z: parseFloat($transformZ.val())
     };
 
-    console.log(uniform)
-
     input.x = isNaN(input.x) ? current.x : input.x;
     input.y = isNaN(input.y) ? current.y : input.y;
     input.z = isNaN(input.z) ? current.z : input.z;
@@ -970,8 +968,7 @@ $transformButtons.on('click', function(e) {
 });
 
 function flipGeometry() {
-    console.log('plop');
-    settings.set('slicer.mirror', $transformMirrorYes[0].checked);
+    settings.set('transform.mirror', $transformMirrorYes[0].checked);
     loadGeometry(slicer.mesh.geometry, true);
     getSlice($sliderInput.slider('getValue'));
 }
@@ -979,7 +976,7 @@ function flipGeometry() {
 $transformMirrorYes.on('change', flipGeometry);
 $transformMirrorNo.on('change', flipGeometry);
 
-$('#slicer-mirror-' + (settings.get('slicer.mirror') ? 'yes' : 'no')).prop('checked', true);
+$('#transform-mirror-' + (settings.get('transform.mirror') ? 'yes' : 'no')).prop('checked', true);
 $('#transform select').on('change', updateTransformAction);
 $('#transform input').on('change', updateTransformValues);
 resetTransformValues();
@@ -1051,7 +1048,7 @@ function ultraMegaDirtyFix() {
 // On Geometry loaded
 loader.onGeometry = function(geometry) {
     resetTransformValues();
-    loadGeometry(geometry, settings.get('slicer.mirror'));
+    loadGeometry(geometry, settings.get('transform.mirror'));
     ultraMegaDirtyFix();
 };
 
