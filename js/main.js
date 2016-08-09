@@ -681,7 +681,7 @@ function updateBuildVolumeSettings() {
     });
 
     viewer3d.setBuildVolume(settings.get('buildVolume'));
-    viewer3d.dropObject(slicer.mesh);
+    slicer.mesh && viewer3d.dropObject(slicer.mesh);
     viewer3d.render();
 
     size && updateMeshInfoUI();
@@ -1064,8 +1064,8 @@ var stl = 'stl/StressTest.stl';
 //var stl = 'stl/SLAcer.stl';
 
 // File url
-var url = 'http://' + window.location.hostname + window.location.pathname + stl;
-
+// var url = 'http://' + window.location.hostname + window.location.pathname + stl;
+var url = window.location.href + stl;
 // Create http request object
 var xmlhttp = new XMLHttpRequest();
 
