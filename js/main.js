@@ -14,7 +14,7 @@ var settings = new SLAcer.Settings({
             height: 100 // μm
         },
         light: {
-            on : 1000,
+            on : 12000,
             off: 500
         },
         zip: true,
@@ -27,8 +27,8 @@ var settings = new SLAcer.Settings({
             position : 1
         },
         lifting: {
-            speed : 50, // mm/min
-            height: 3,  // mm
+            speed : 30, // mm/min
+            height: 5,  // mm
         }
     },
     mesh: {
@@ -45,7 +45,7 @@ var settings = new SLAcer.Settings({
         mirror: false
     },
     buildVolume: {
-        size     : { x: 100,  y: 100,  z: 100 }, // mm
+        size     : { x: 102,  y: 56,  z: 125 }, // mm
         unit     : 'mm',                         // mm or in
         color    : 0xcccccc,
         opacity  : 0.1,
@@ -56,7 +56,7 @@ var settings = new SLAcer.Settings({
     },
     resin: {
         density  : 1.1, // g/cm3
-        price    : 50,   // $
+        price    : 60,   // $
         panel    : {
             collapsed: false,
             position : 5
@@ -65,7 +65,7 @@ var settings = new SLAcer.Settings({
     screen: {
         width    : window.screen.width,
         height   : window.screen.height,
-        diagonal : { size: 22, unit: 'in' },
+        diagonal : { size: 4.6, unit: 'in' },
         panel    : {
             collapsed: false,
             position : 6
