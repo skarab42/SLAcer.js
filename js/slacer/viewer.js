@@ -123,12 +123,6 @@ var SLAcer = SLAcer || {};
         callback(this.canvas.toDataURL());
     };
 
-    Viewer.prototype.screenshot_canvas = function(callback) {
-        this.render();
-        console.log('canvas.getContext(2d) :', this.canvas.getContext('2d'));
-        callback(this.canvas);
-    };
-
     // -------------------------------------------------------------------------
 
     // global settings

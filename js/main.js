@@ -189,16 +189,8 @@ function getSlice(layerNumber) {
             var imgData  = dataURL.substr(dataURL.indexOf(',') + 1);
             zipFolder.file(fileName, imgData, { base64: true });
         }else if (WOWExport) {
-            console.log('layer number:', layerNumber);
-            console.log('z position :', zPosition);
-            // console.log('faces', faces);
-            //var imgData  = dataURL.substr(dataURL.indexOf(',') + 1);
-            //var data = imgData.data;
-            //console.log('canvas :', canvas);
-            //console.log('canvas.getContext(2d) :', canvas.getContext('2d'));
-            //var imgData = canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height);
-            //var ctx = canvas.getContext('2d');
-            //var data = imgData.data;
+            //console.log('layer number:', layerNumber);
+            //console.log('z position :', zPosition);
 
             convertURIToImageData(dataURL).then(function(imageData) {
                 // Here you can use imageData
@@ -215,28 +207,35 @@ function getSlice(layerNumber) {
                 var width = settings.get('screen.width');
                 var height = settings.get('screen.height');
 
-                var result = "";
-                var tmp_byte = "";
                 var pixel = 0;
+
+                var array = new Uint8Array(width*height/8);
 
                 var data = imageData.data;
 
                 for(var w=0; w<data.length/height*4; w+=4) {
                     for(var h=w; h<width*height*4; h+=(4*width)) {
-                        if(data[h]===0){
-                            tmp_byte = "0" + tmp_byte;
-                        }else{
-                            tmp_byte = "1" + tmp_byte;
+                        if(data[h]!=0){
+                            array[(pixel/8) | 0] += Math.pow(2,(pixel%8))
                         }
-                        if((pixel+1)%8===0){
-                            result += tmp_byte +";";
-                            tmp_byte = "";
-                        }
-                        pixel+=1;
+                        pixel++;
                     }
                 }
-                var fileName = layerNumber + '.txt';
-                zipFolder.file(fileName, result);
+                //console.log('array :', array);
+                //var fileName = layerNumber + '.txt';
+                //zipFolder.file(fileName, array, {type: 'text/plain'});
+
+
+                // GCode logic
+
+                wowFile += ";L:"+layerNumber+";\nM106 S0;\nG1 Z"+settings.get('slicer.lifting.height')+
+                    " F"+settings.get('slicer.lifting.speed')+
+                    ";\nG1 Z-"+(settings.get('slicer.lifting.height')-settings.get('slicer.layers.height')/1000)+
+                    " F"+settings.get('slicer.lifting.speed')+";\n{{\n"
+                wowFile += (new TextDecoder("utf-8")).decode(array)+"\n"
+                zipFolder.file(layerNumber+".txt", array);
+                // GCode logic
+                wowFile += "}}\nM106 S255;\nG4 S"+settings.get('slicer.light.on')/1000+";\n"
             });
 
         }
@@ -339,6 +338,52 @@ function convertURIToImageData(URI) {
         }, false);
         image.src = URI;
     });
+}
+
+function bin2string(array){
+    var result = "";
+    for(var i = 0; i < array.length; ++i){
+        //result+= (String.fromCharCode(array[i]));
+        result+= convertHexToString(array[i]);
+    }
+    console.log(result);
+    return result;
+}
+
+function BinToText(input) {
+    return parseInt(input,2).toString(10);
+}
+
+function uintToString(buffer) {
+    var encodedString = String.fromCharCode.apply(null, buffer),
+        decodedString = decodeURIComponent(escape(encodedString));
+    return decodedString;
+}
+
+function convertHexToString(input) {
+
+    // split input into groups of two
+    var hex = input.match(/[\s\S]{2}/g) || [];
+    var output = '';
+
+    // build a hex-encoded representation of your string
+    for (var i = 0, j = hex.length; i < j; i++) {
+        output += '%' + ('0' + hex[i]).slice(-2);
+    }
+
+    // decode it using this trick
+    output = decodeURIComponent(output);
+
+    return output;
+}
+
+function arrayToHEXString(input) {
+
+    var result = "";
+    for(var i = 0; i < input.length; ++i){
+        result+= "\X"+input[i].toString(16);
+    }
+    return result;
 }
 
 // -----------------------------------------------------------------------------
@@ -589,6 +634,7 @@ var currentSliceNumber;
 var slicesNumber;
 var zipFile;
 var zipFolder;
+var wowFile;
 
 var WOWExport;
 var SVGExport;
@@ -610,7 +656,9 @@ function slice() {
         return endSlicing();
     }
 
+
     getSlice(currentSliceNumber);
+
     $sliderInput.slider('setValue', currentSliceNumber);
 
     var time = Date.now();
@@ -625,6 +673,29 @@ function slice() {
 }
 
 function endSlicing() {
+
+    // GCode logic
+    wowFile += "M106 S0;\nG1 Z20.0;\nG4 S300;\nM18;"
+    wowFile += "\n"
+    var array = new Uint8Array(5);
+    array[0] = 255;
+    array[1] = 0;
+    array[2] = 255;
+    array[3] = 0;
+    array[4] = 255;
+    wowFile += (new TextDecoder("ASCII")).decode(array)+"\n"
+    wowFile += (new TextDecoder("utf-8")).decode(array)+"\n"
+    wowFile += (new TextDecoder("utf-16")).decode(array)+"\n"
+    //wowFile += (new TextDecoder("ISO 8859-15")).decode(array)+"\n"
+   //wowFile += (new TextDecoder("ISO 8859-1")).decode(array)+"\n"
+    wowFile += (new TextDecoder("Cp1252")).decode(array)+"\n"
+    //wowFile += (new TextDecoder("utf8.bin")).decode(array)+"\n"
+    //wowFile += (new TextDecoder("utf16le.bin")).decode(array)+"\n"
+    //wowFile += (new TextDecoder("utf-16le")).decode(array)+"\n"
+
+
+    zipFile.file("print.wow", wowFile);
+
     sliceImage('none');
     $sidebar.find('input, button').prop('disabled', false);
     $sliderInput.slider('enable');
@@ -649,6 +720,7 @@ function startSlicing() {
 
     zipFile   = null;
     zipFolder = null;
+    wowFile   = null;
     WOWExport = null;
     SVGExport = null;
     PNGExport = null;
@@ -674,6 +746,10 @@ function startSlicing() {
         SVGExport = settings.get('slicer.svg');
         PNGExport = settings.get('slicer.png');
     }
+
+    // GCode logic
+    wowFile = "";
+    wowFile += "G21;\nG91;\nM17;\nM106 S0;\nG28 Z0;\n;W:480;\n;H:854;\n"
 
     slicesNumber && slice();
 }
