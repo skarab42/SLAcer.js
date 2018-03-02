@@ -192,12 +192,53 @@ function getSlice(layerNumber) {
             console.log('layer number:', layerNumber);
             console.log('z position :', zPosition);
             // console.log('faces', faces);
-            var imgData  = dataURL.substr(dataURL.indexOf(',') + 1);
-            var data = imgData.data;
-            myLogger(data);
-            // TODO: remove (just to have a result)
-            var fileName = layerNumber + '.png';
-            zipFolder.file(fileName, imgData, { base64: true });
+            //var imgData  = dataURL.substr(dataURL.indexOf(',') + 1);
+            //var data = imgData.data;
+            //console.log('canvas :', canvas);
+            //console.log('canvas.getContext(2d) :', canvas.getContext('2d'));
+            //var imgData = canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height);
+            //var ctx = canvas.getContext('2d');
+            //var data = imgData.data;
+
+            convertURIToImageData(dataURL).then(function(imageData) {
+                // Here you can use imageData
+                // console.log(imageData);
+                /*
+                 var red = data[i];
+                 var green = data[i+1];
+                 var blue = data[i+2];
+                 var alpha = data[i+3];
+                 2 Options:
+                 Black red=0, green=0, blue=0, alpha=255;
+                 White red=255, green=255, blue=255, alpha=255;
+                 */
+                var width = settings.get('screen.width');
+                var height = settings.get('screen.height');
+
+                var result = "";
+                var tmp_byte = "";
+                var pixel = 0;
+
+                var data = imageData.data;
+
+                for(var w=0; w<data.length/height*4; w+=4) {
+                    for(var h=w; h<width*height*4; h+=(4*width)) {
+                        if(data[h]===0){
+                            tmp_byte = "0" + tmp_byte;
+                        }else{
+                            tmp_byte = "1" + tmp_byte;
+                        }
+                        if((pixel+1)%8===0){
+                            result += tmp_byte +";";
+                            tmp_byte = "";
+                        }
+                        pixel+=1;
+                    }
+                }
+                var fileName = layerNumber + '.txt';
+                zipFolder.file(fileName, result);
+            });
+
         }
     });
 
@@ -283,10 +324,21 @@ function getSlice(layerNumber) {
     }
 
 }
-function myLogger(message){
-    return function(){
-        console.log(message);
-    }
+
+function convertURIToImageData(URI) {
+    return new Promise(function(resolve, reject) {
+        if (URI == null) return reject();
+        var canvas = document.createElement('canvas'),
+            context = canvas.getContext('2d'),
+            image = new Image();
+        image.addEventListener('load', function() {
+            canvas.width = image.width;
+            canvas.height = image.height;
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            resolve(context.getImageData(0, 0, canvas.width, canvas.height));
+        }, false);
+        image.src = URI;
+    });
 }
 
 // -----------------------------------------------------------------------------
