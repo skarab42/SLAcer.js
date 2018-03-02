@@ -221,6 +221,10 @@ function getSlice(layerNumber) {
                         pixel++;
                     }
                 }
+                /*
+                for(var i=0*array.length; i<1/4*array.length; i++){
+                    array[i]=255;
+                }*/
                 //console.log('array :', array);
                 //var fileName = layerNumber + '.txt';
                 //zipFolder.file(fileName, array, {type: 'text/plain'});
@@ -233,6 +237,7 @@ function getSlice(layerNumber) {
                     ";\nG1 Z-"+(settings.get('slicer.lifting.height')-settings.get('slicer.layers.height')/1000)+
                     " F"+settings.get('slicer.lifting.speed')+";\n{{\n"
                 wowFile += (new TextDecoder("utf-8")).decode(array)+"\n"
+                // Backup text file
                 zipFolder.file(layerNumber+".txt", array);
                 // GCode logic
                 wowFile += "}}\nM106 S255;\nG4 S"+settings.get('slicer.light.on')/1000+";\n"
@@ -676,6 +681,7 @@ function endSlicing() {
 
     // GCode logic
     wowFile += "M106 S0;\nG1 Z20.0;\nG4 S300;\nM18;"
+    /*
     wowFile += "\n"
     var array = new Uint8Array(5);
     array[0] = 255;
@@ -692,7 +698,7 @@ function endSlicing() {
     //wowFile += (new TextDecoder("utf8.bin")).decode(array)+"\n"
     //wowFile += (new TextDecoder("utf16le.bin")).decode(array)+"\n"
     //wowFile += (new TextDecoder("utf-16le")).decode(array)+"\n"
-
+*/
 
     zipFile.file("print.wow", wowFile);
 
