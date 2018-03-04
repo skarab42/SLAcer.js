@@ -126,8 +126,6 @@ function hexToDec(hex) {
 }
 
 function sliceImage(dataURL) {
-
-    console.log("dataURL", dataURL);
     settings.set('slice.dataURL', dataURL || 'none');
 }
 
