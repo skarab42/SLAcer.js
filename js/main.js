@@ -1284,8 +1284,10 @@ loader.onError = errorHandler;
 // -----------------------------------------------------------------------------
 // example STL file
 //var stl = 'stl/Octocat-v2.stl';
-var stl = 'stl/StressTest.stl';
+//var stl = 'stl/StressTest.stl';
 //var stl = 'stl/SLAcer.stl';
+var stl = 'stl/SparkMaker.stl';
+
 
 // File url
 // var url = 'http://' + window.location.hostname + window.location.pathname + stl;
