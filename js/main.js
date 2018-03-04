@@ -608,9 +608,11 @@ function updateMeshInfoUI() {
     var cost   = volume * settings.get('resin.price') / 1000;
 
     $meshFaces.html(mesh.geometry.faces.length);
-    $meshVolume.html(volume);
-    $meshWeight.html(weight);
-    $meshCost.html(cost);
+
+    // mirror bugfix
+    $meshVolume.html(Math.abs(volume));
+    $meshWeight.html(Math.abs(weight));
+    $meshCost.html(Math.abs(weight));
 }
 
 // Slicer panel
