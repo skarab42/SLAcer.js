@@ -232,12 +232,12 @@ function getSlice(layerNumber) {
                         " F" + settings.get('slicer.lifting.decline') + ";\n{{\n"
 
                     //var binary_layer = (new TextDecoder("utf-8")).decode(array)
-                    wowFile += bin2string(array.reverse());
+                    wowFile += bin2string(array);
                     wowFile += "\n";
 
                     if (settings.get('slicer.folder')) {
                         // Backup text file
-                        zipFolder.file(layerNumber + ".txt", array.reverse());
+                        zipFolder.file(layerNumber + ".txt", array);
                     }
 
                     //bottom layer
@@ -747,6 +747,9 @@ function endSlicing() {
         wowFile += "M106 S0;\nG1 Z20.0;\nG4 S300;\nM18;"
 
         zipFile.file("print.wow", wowFile, {binary: true});
+
+        // hotfix for mirror bug
+        flipGeometry();
     }
 
     sliceImage('none');
@@ -807,6 +810,10 @@ function startSlicing() {
     }
 
     if(WOWExport){// GCode logic
+
+        // hotfix for mirror bug
+        flipGeometry();
+
         wowFile = "";
 
         // Tests
