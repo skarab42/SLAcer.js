@@ -11,17 +11,21 @@ var settings = new SLAcer.Settings({
     },
     slicer: {
         layers: {
-            height: 100 // μm
+            height: 100, // μm
+            bottom: 3
         },
         light: {
             on : 12000,
-            off: 500
+            bottom: 60000,
+            off: 500,
+            strength: 225
         },
         zip: true,
+        folder: false,
         wow: true,
         svg: false,
         png: false,
-        speed: false,
+        speed: true,
         speedDelay: 10, // ms
         panel: {
             collapsed: false,
@@ -29,6 +33,7 @@ var settings = new SLAcer.Settings({
         },
         lifting: {
             speed : 30, // mm/min
+            decline: 100, // mm/min
             height: 5,  // mm
         }
     },
@@ -121,6 +126,8 @@ function hexToDec(hex) {
 }
 
 function sliceImage(dataURL) {
+
+    console.log("dataURL", dataURL);
     settings.set('slice.dataURL', dataURL || 'none');
 }
 
@@ -187,14 +194,15 @@ function getSlice(layerNumber) {
         if (PNGExport) {
             var fileName = layerNumber + '.png';
             var imgData  = dataURL.substr(dataURL.indexOf(',') + 1);
-            zipFolder.file(fileName, imgData, { base64: true });
+            if (settings.get('slicer.folder')) {
+                zipFolder.file(fileName, imgData, {base64: true});
+            }
         }else if (WOWExport) {
             //console.log('layer number:', layerNumber);
             //console.log('z position :', zPosition);
 
             convertURIToImageData(dataURL).then(function(imageData) {
                 // Here you can use imageData
-                // console.log(imageData);
                 /*
                  var red = data[i];
                  var green = data[i+1];
@@ -206,11 +214,8 @@ function getSlice(layerNumber) {
                  */
                 var width = settings.get('screen.width');
                 var height = settings.get('screen.height');
-
                 var pixel = 0;
-
                 var array = new Uint8Array(width*height/8);
-
                 var data = imageData.data;
 
                 for(var w=0; w<data.length/height*4; w+=4) {
@@ -222,48 +227,30 @@ function getSlice(layerNumber) {
                     }
                 }
 
-                /*
-                for(var i=0*array.length; i<1/4*array.length; i++){
-                    array[i]=255;
-                }*/
-                //console.log('array :', array);
-                //var fileName = layerNumber + '.txt';
-                //zipFolder.file(fileName, array, {type: 'text/plain'});
+                if(WOWExport) {// GCode logic
+                    wowFile += ";L:" + layerNumber + ";\nM106 S0;\nG1 Z" + settings.get('slicer.lifting.height') +
+                        " F" + settings.get('slicer.lifting.speed') +
+                        ";\nG1 Z-" + (settings.get('slicer.lifting.height') - settings.get('slicer.layers.height') / 1000) +
+                        " F" + settings.get('slicer.lifting.decline') + ";\n{{\n"
 
+                    //var binary_layer = (new TextDecoder("utf-8")).decode(array)
+                    wowFile += bin2string(array.reverse());
+                    wowFile += "\n";
 
-                // GCode logic
+                    if (settings.get('slicer.folder')) {
+                        // Backup text file
+                        zipFolder.file(layerNumber + ".txt", array.reverse());
+                    }
 
-                wowFile += ";L:"+layerNumber+";\nM106 S0;\nG1 Z"+settings.get('slicer.lifting.height')+
-                    " F"+settings.get('slicer.lifting.speed')+
-                    ";\nG1 Z-"+(settings.get('slicer.lifting.height')-settings.get('slicer.layers.height')/1000)+
-                    " F"+settings.get('slicer.lifting.speed')+";\n{{\n"
-                wowBuffer.push(";L:"+layerNumber+";\n");
-                wowBuffer.push("M106 S0;\n");
-                wowBuffer.push("G1 Z"+settings.get('slicer.lifting.height')+
-                    " F"+settings.get('slicer.lifting.speed')+
-                    ";\n");
-                wowBuffer.push("G1 Z-"+(settings.get('slicer.lifting.height')-settings.get('slicer.layers.height')/1000)+
-                    " F"+settings.get('slicer.lifting.speed')+";\n");
-                wowBuffer.push("{{\n");
-
-
-                //var binary_layer = (new TextDecoder("utf-8")).decode(array)
-                //console.log(binary_layer);
-                //wowFile += binary_layer;
-                wowFile += bin2string(array);
-                wowFile += "\n";
-
-                wowBuffer.push(array);
-
-                // Backup text file
-                zipFolder.file(layerNumber+".txt", array);
-                // GCode logic
-                wowFile += "}}\nM106 S255;\nG4 S"+settings.get('slicer.light.on')/1000+";\n"
-
-                wowBuffer.push("\n");
-                wowBuffer.push("}}\n");
-                wowBuffer.push("M106 S255;\n");
-                wowBuffer.push("G4 S"+settings.get('slicer.light.on')/1000+";\n");
+                    //bottom layer
+                    var exposure_time;
+                    if(layerNumber<=settings.get('slicer.layers.bottom')){
+                        exposure_time = settings.get('slicer.light.bottom');
+                    }else{
+                        exposure_time = settings.get('slicer.light.on');
+                    }
+                    wowFile += "}}\nM106 S"+settings.get('slicer.light.strength')+";\nG4 S" + exposure_time / 1000 + ";\n"
+                }
             });
 
         }
@@ -346,8 +333,10 @@ function getSlice(layerNumber) {
         svg += '</g>';
         svg += '</svg>';
 
-        // add svg file to zip
-        zipFolder.file(layerNumber + '.svg', svg);
+        if (settings.get('slicer.folder')) {
+            // add svg file to zip
+            zipFolder.file(layerNumber + '.svg', svg);
+        }
     }
 
 }
@@ -374,7 +363,6 @@ function bin2string(array){
         result+= (String.fromCharCode(array[i]));
         //result+= convertHexToString(array[i]);
     }
-    console.log(result);
     return result;
 }
 
@@ -486,9 +474,37 @@ function updateSliderUI() {
     var layersHeight = settings.get('slicer.layers.height') / 1000;
     var layersNumber = Math.floor(slicer.mesh.getSize().z / layersHeight);
 
+    console.log("layersHeight", layersHeight);
+    console.log("layersNumber", layersNumber);
+
     $sliderInput.slider('setAttribute', 'max', layersNumber);
     $sliderMaxValue.html(layersNumber);
     $slicerLayersValue.html(layersNumber);
+
+    $printTimeValue.html(msToTime(calcPrintTime(layersHeight, layersNumber)));
+}
+function calcPrintTime(layersHeight, layersNumber){
+    // ([object height]/[layer height])([exposure time]+[uplift time]+[downlift time])+3([ground exposure time]-[exposure time])
+    var result = 0;
+    var uplift_time = settings.get('slicer.lifting.height')/settings.get('slicer.lifting.speed')*60*1000
+    var downlift_time = (settings.get('slicer.lifting.height')-layersHeight)/settings.get('slicer.lifting.decline')*60*1000
+    result += layersNumber*(settings.get('slicer.light.on')+uplift_time+downlift_time)+settings.get('slicer.layers.bottom')*(settings.get('slicer.light.bottom')-settings.get('slicer.light.on'))
+    console.log("downlift_time (ms)", downlift_time);
+    console.log("uplift_time (ms)", uplift_time);
+
+    return result;
+}
+function msToTime(duration) {
+    var milliseconds = parseInt((duration%1000)/100)
+        , seconds = parseInt((duration/1000)%60)
+        , minutes = parseInt((duration/(1000*60))%60)
+        , hours = parseInt((duration/(1000*60*60))%24);
+
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+    return hours + ":" + minutes + ":" + seconds + "." + milliseconds;
 }
 
 // Sidebar
@@ -607,6 +623,13 @@ var $slicerLayerValue  = $slicerBody.find('#slicer-layer-value');
 var $slicerLightOff    = $slicerBody.find('#slicer-light-off');
 var $slicerLightOn     = $slicerBody.find('#slicer-light-on');
 
+//new
+var $slicerLightStrength     = $slicerBody.find('#slicer-light-strength');
+var $slicerLightBottum     = $slicerBody.find('#slicer-light-bottom');
+var $slicerDeclineSpeed     = $slicerBody.find('#slicer-decline-speed');
+var $slicerBottomLayers = settings.get('slicer.layers.bottom');
+var $printTimeValue  = $slicerBody.find('#print-time');
+
 var $slicerLiftingSpeed  = $slicerBody.find('#slicer-lifting-speed');
 var $slicerLiftingHeight = $slicerBody.find('#slicer-lifting-height');
 
@@ -619,6 +642,11 @@ var $slicerSpeedNo     = $slicerBody.find('#slicer-speed-no');
 var $slicerSpeedDelay  = $slicerBody.find('#slicer-speed-delay');
 var $slicerMakeZipYes  = $slicerBody.find('#slicer-make-zip-yes');
 var $slicerMakeZipNo   = $slicerBody.find('#slicer-make-zip-no');
+
+//new
+var $slicerMakeFolderYes  = $slicerBody.find('#slicer-make-folder-yes');
+var $slicerMakeFolderNo  = $slicerBody.find('#slicer-make-folder-no');
+
 var $sliceButton       = $sidebar.find('#slice-button');
 var $abortButton       = $sidebar.find('#abort-button');
 var $zipButton         = $sidebar.find('#zip-button');
@@ -630,6 +658,11 @@ function updateSlicerUI() {
     $slicerLayerHeight.val(slicer.layers.height);
     $slicerLightOff.val(slicer.light.off);
     $slicerLightOn.val(slicer.light.on);
+    //new
+    $slicerLightStrength.val(slicer.light.strength);
+    $slicerLightBottum.val(slicer.light.bottom);
+    $slicerDeclineSpeed.val(slicer.lifting.decline);
+    //$slicerBottomLayers.val(slicer.layers.bottom);
 
     $slicerLiftingSpeed.val(slicer.lifting.speed);
     $slicerLiftingHeight.val(slicer.lifting.height);
@@ -640,6 +673,12 @@ function updateSlicerSettings() {
     settings.set('slicer.light.off', $slicerLightOff.val());
     settings.set('slicer.light.on', $slicerLightOn.val());
 
+    //new
+    settings.set('slicer.light.strength', $slicerLightStrength.val());
+    settings.set('slicer.light.bottom', $slicerLightBottum.val());
+    settings.set('slicer.lifting.decline', $slicerDeclineSpeed.val());
+    settings.set('slicer.layers.bottom', $slicerBottomLayers.val());
+
     settings.set('slicer.lifting.speed', $slicerLiftingSpeed.val());
     settings.set('slicer.lifting.height', $slicerLiftingHeight.val());
 
@@ -648,6 +687,10 @@ function updateSlicerSettings() {
     settings.set('slicer.wow', $slicerExportWOW[0].checked);
 
     settings.set('slicer.zip', $slicerMakeZipYes[0].checked);
+
+    //new
+    settings.set('slicer.folder', $slicerMakeFolderYes[0].checked);
+
     settings.set('slicer.speed', $slicerSpeedYes[0].checked);
     settings.set('slicer.speedDelay', $slicerSpeedDelay.val());
 
@@ -663,7 +706,6 @@ var slicesNumber;
 var zipFile;
 var zipFolder;
 var wowFile;
-var wowBuffer;
 
 var WOWExport;
 var SVGExport;
@@ -703,36 +745,11 @@ function slice() {
 
 function endSlicing() {
 
-    // GCode logic
-    wowFile += "M106 S0;\nG1 Z20.0;\nG4 S300;\nM18;"
+    if(WOWExport) {// GCode & export logic
+        wowFile += "M106 S0;\nG1 Z20.0;\nG4 S300;\nM18;"
 
-
-    wowBuffer.push("M106 S0;\n ");
-    wowBuffer.push("G1 Z20.0;\n ");
-    wowBuffer.push("G4 S300;\n ");
-    wowBuffer.push("M18;");
-
-    /*
-    wowFile += "\n"
-    var array = new Uint8Array(5);
-    array[0] = 255;
-    array[1] = 0;
-    array[2] = 255;
-    array[3] = 0;
-    array[4] = 255;
-    wowFile += (new TextDecoder("ASCII")).decode(array)+"\n"
-    wowFile += (new TextDecoder("utf-8")).decode(array)+"\n"
-    wowFile += (new TextDecoder("utf-16")).decode(array)+"\n"
-    //wowFile += (new TextDecoder("ISO 8859-15")).decode(array)+"\n"
-   //wowFile += (new TextDecoder("ISO 8859-1")).decode(array)+"\n"
-    wowFile += (new TextDecoder("Cp1252")).decode(array)+"\n"
-    //wowFile += (new TextDecoder("utf8.bin")).decode(array)+"\n"
-    //wowFile += (new TextDecoder("utf16le.bin")).decode(array)+"\n"
-    //wowFile += (new TextDecoder("utf-16le")).decode(array)+"\n"
-*/
-
-    zipFile.file("print.wow", wowFile, {binary: true});
-    zipFile.file("print2.wow", wowBuffer);
+        zipFile.file("print.wow", wowFile, {binary: true});
+    }
 
     sliceImage('none');
     $sidebar.find('input, button').prop('disabled', false);
@@ -759,18 +776,20 @@ function startSlicing() {
     zipFile   = null;
     zipFolder = null;
     wowFile   = null;
-    wowBuffer = null;
     WOWExport = null;
     SVGExport = null;
     PNGExport = null;
 
     if (settings.get('slicer.zip')) {
         zipFile   = new JSZip();
-        zipFolder = zipFile.folder('slices');
-        zipFile.file("README.txt", 'Generated by SLAcer.js\r\nhttp://lautr3k.github.io/SLAcer.js/\r\n');
+        if (settings.get('slicer.folder')) {
+            zipFolder = zipFile.folder('slices');
+        }
+        zipFile.file("README.txt", 'Generated by SLAcer.js for SparkMaker\r\nhttps://n0sr3v.github.io/SLAcer.js/\r\n\r\nProject based on: \r\nhttps://github.com/lautr3k/SLAcer.js\r\nAppreciate this work!\r\n');
         zipFile.file("slacer.json", JSON.stringify({
             imageExtension: settings.get('slicer.png') ? 'png' : settings.get('slicer.svg') ? 'svg' : 'wow',
-            imageDirectory: 'slices',
+            imageDirectoryCreated: settings.get('slicer.folder') ? 'false' : 'true',
+            imageDirectory: !settings.get('slicer.folder') ? '' : 'slices',
             screenWidth   : settings.get('screen.width'),
             screenHeight  : settings.get('screen.height'),
             screenSize    : settings.get('screen.diagonal.size'),
@@ -778,7 +797,10 @@ function startSlicing() {
             layersNumber  : slicesNumber,
             layersHeight  : settings.get('slicer.layers.height') / 1000,     // mm
             exposureTime  : parseInt(settings.get('slicer.light.on')),       // ms
+            exposureStrength  : parseInt(settings.get('slicer.light.strength')),       // ms
+            bottomExposureTime  : parseInt(settings.get('slicer.light.bottom')),       // ms
             liftingSpeed  : parseInt(settings.get('slicer.lifting.speed')),  // mm/min
+            declineSpeed  : parseInt(settings.get('slicer.lifting.decline')),  // mm/min
             liftingHeight : parseInt(settings.get('slicer.lifting.height'))  // mm
         }, null, 2));
         WOWExport = settings.get('slicer.wow')
@@ -786,27 +808,20 @@ function startSlicing() {
         PNGExport = settings.get('slicer.png');
     }
 
-    // GCode logic
-    wowFile = "";
+    if(WOWExport){// GCode logic
+        wowFile = "";
 
-    var array = new Uint8Array(2);
-    array[1]=255;
-    console.log(array);
-    var textDecoder = new TextDecoder("utf-8");
-    var binary_layer = textDecoder.decode(array);
-    console.log(binary_layer);
-    //console.log(textDecoder.encode(binary_layer));
+        // Tests
+        var array = new Uint8Array(2);
+        array[1]=255;
+        console.log(array);
+        var textDecoder = new TextDecoder("utf-8");
+        var binary_layer = textDecoder.decode(array);
+        console.log(binary_layer);
+        //console.log(textDecoder.encode(binary_layer));
 
-    wowFile += "G21;\nG91;\nM17;\nM106 S0;\nG28 Z0;\n;W:480;\n;H:854;\n"
-
-    wowBuffer = [];
-    wowBuffer.push("G21;\n");
-    wowBuffer.push("G91;\n");
-    wowBuffer.push("M17;\n");
-    wowBuffer.push("M106 S0;\n");
-    wowBuffer.push("G28 Z0;\n");
-    wowBuffer.push(";W:480;\n");
-    wowBuffer.push(";H:854;\n");
+        wowFile += "G21;\nG91;\nM17;\nM106 S0;\nG28 Z0;\n;W:480;\n;H:854;\n"
+    }
 
     slicesNumber && slice();
 }
@@ -839,6 +854,10 @@ $abortButton.on('click', function(e) {
 
 $('#slicer-image-extension-' + (settings.get('slicer.png') ? 'png' : settings.get('slicer.svg') ? 'svg' : 'wow')).prop('checked', true);
 $('#slicer-make-zip-' + (settings.get('slicer.zip') ? 'yes' : 'no')).prop('checked', true);
+
+//new
+$('#slicer-make-folder-' + (settings.get('slicer.folder') ? 'yes' : 'no')).prop('checked', true);
+
 $('#slicer-speed-' + (settings.get('slicer.speed') ? 'yes' : 'no')).prop('checked', true);
 $('#slicer input').on('input, change', updateSlicerSettings);
 updateSlicerUI();
