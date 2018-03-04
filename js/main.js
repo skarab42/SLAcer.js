@@ -221,6 +221,7 @@ function getSlice(layerNumber) {
                         pixel++;
                     }
                 }
+
                 /*
                 for(var i=0*array.length; i<1/4*array.length; i++){
                     array[i]=255;
@@ -236,11 +237,33 @@ function getSlice(layerNumber) {
                     " F"+settings.get('slicer.lifting.speed')+
                     ";\nG1 Z-"+(settings.get('slicer.lifting.height')-settings.get('slicer.layers.height')/1000)+
                     " F"+settings.get('slicer.lifting.speed')+";\n{{\n"
-                wowFile += (new TextDecoder("utf-8")).decode(array)+"\n"
+                wowBuffer.push(";L:"+layerNumber+";\n");
+                wowBuffer.push("M106 S0;\n");
+                wowBuffer.push("G1 Z"+settings.get('slicer.lifting.height')+
+                    " F"+settings.get('slicer.lifting.speed')+
+                    ";\n");
+                wowBuffer.push("G1 Z-"+(settings.get('slicer.lifting.height')-settings.get('slicer.layers.height')/1000)+
+                    " F"+settings.get('slicer.lifting.speed')+";\n");
+                wowBuffer.push("{{\n");
+
+
+                //var binary_layer = (new TextDecoder("utf-8")).decode(array)
+                //console.log(binary_layer);
+                //wowFile += binary_layer;
+                wowFile += bin2string(array);
+                wowFile += "\n";
+
+                wowBuffer.push(array);
+
                 // Backup text file
                 zipFolder.file(layerNumber+".txt", array);
                 // GCode logic
                 wowFile += "}}\nM106 S255;\nG4 S"+settings.get('slicer.light.on')/1000+";\n"
+
+                wowBuffer.push("\n");
+                wowBuffer.push("}}\n");
+                wowBuffer.push("M106 S255;\n");
+                wowBuffer.push("G4 S"+settings.get('slicer.light.on')/1000+";\n");
             });
 
         }
@@ -348,8 +371,8 @@ function convertURIToImageData(URI) {
 function bin2string(array){
     var result = "";
     for(var i = 0; i < array.length; ++i){
-        //result+= (String.fromCharCode(array[i]));
-        result+= convertHexToString(array[i]);
+        result+= (String.fromCharCode(array[i]));
+        //result+= convertHexToString(array[i]);
     }
     console.log(result);
     return result;
@@ -640,6 +663,7 @@ var slicesNumber;
 var zipFile;
 var zipFolder;
 var wowFile;
+var wowBuffer;
 
 var WOWExport;
 var SVGExport;
@@ -681,6 +705,13 @@ function endSlicing() {
 
     // GCode logic
     wowFile += "M106 S0;\nG1 Z20.0;\nG4 S300;\nM18;"
+
+
+    wowBuffer.push("M106 S0;\n ");
+    wowBuffer.push("G1 Z20.0;\n ");
+    wowBuffer.push("G4 S300;\n ");
+    wowBuffer.push("M18;");
+
     /*
     wowFile += "\n"
     var array = new Uint8Array(5);
@@ -700,7 +731,8 @@ function endSlicing() {
     //wowFile += (new TextDecoder("utf-16le")).decode(array)+"\n"
 */
 
-    zipFile.file("print.wow", wowFile);
+    zipFile.file("print.wow", wowFile, {binary: true});
+    zipFile.file("print2.wow", wowBuffer);
 
     sliceImage('none');
     $sidebar.find('input, button').prop('disabled', false);
@@ -727,6 +759,7 @@ function startSlicing() {
     zipFile   = null;
     zipFolder = null;
     wowFile   = null;
+    wowBuffer = null;
     WOWExport = null;
     SVGExport = null;
     PNGExport = null;
@@ -755,7 +788,25 @@ function startSlicing() {
 
     // GCode logic
     wowFile = "";
+
+    var array = new Uint8Array(2);
+    array[1]=255;
+    console.log(array);
+    var textDecoder = new TextDecoder("utf-8");
+    var binary_layer = textDecoder.decode(array);
+    console.log(binary_layer);
+    //console.log(textDecoder.encode(binary_layer));
+
     wowFile += "G21;\nG91;\nM17;\nM106 S0;\nG28 Z0;\n;W:480;\n;H:854;\n"
+
+    wowBuffer = [];
+    wowBuffer.push("G21;\n");
+    wowBuffer.push("G91;\n");
+    wowBuffer.push("M17;\n");
+    wowBuffer.push("M106 S0;\n");
+    wowBuffer.push("G28 Z0;\n");
+    wowBuffer.push(";W:480;\n");
+    wowBuffer.push(";H:854;\n");
 
     slicesNumber && slice();
 }
