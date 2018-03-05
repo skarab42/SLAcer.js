@@ -493,9 +493,17 @@ function calcPrintTime(layersHeight, layersNumber){
     var result = 0;
     var uplift_time = settings.get('slicer.lifting.height')/settings.get('slicer.lifting.speed')*60*1000
     var downlift_time = (settings.get('slicer.lifting.height')-layersHeight)/settings.get('slicer.lifting.decline')*60*1000
-    result += layersNumber*(settings.get('slicer.light.on')+uplift_time+downlift_time)+settings.get('slicer.layers.bottom')*(settings.get('slicer.light.bottom')-settings.get('slicer.light.on'))
+    result = layersNumber*(parseInt(settings.get('slicer.light.on'))+uplift_time+downlift_time)+
+        settings.get('slicer.layers.bottom')*(settings.get('slicer.light.bottom')-settings.get('slicer.light.on'))
+    console.log("slicer.light.on (ms)", settings.get('slicer.light.on'));
+    console.log("slicer.layers.bottom)", settings.get('slicer.layers.bottom'));
+    console.log("slicer.light.bottom)", settings.get('slicer.light.bottom'));
     console.log("downlift_time (ms)", downlift_time);
     console.log("uplift_time (ms)", uplift_time);
+    console.log("tmp 0 (ms)", parseInt(settings.get('slicer.light.on')) + uplift_time );
+    console.log("tmp 1 (ms)", layersNumber*(parseInt(settings.get('slicer.light.on'))+uplift_time+downlift_time));
+    console.log("tmp 2 (ms)", settings.get('slicer.layers.bottom')*(settings.get('slicer.light.bottom')-settings.get('slicer.light.on')));
+    console.log("result (ms)", result);
 
     return result;
 }
@@ -684,7 +692,7 @@ function updateSlicerSettings() {
     settings.set('slicer.light.strength', $slicerLightStrength.val());
     settings.set('slicer.light.bottom', $slicerLightBottum.val());
     settings.set('slicer.lifting.decline', $slicerDeclineSpeed.val());
-    settings.set('slicer.layers.bottom', $slicerBottomLayers.val());
+    //settings.set('slicer.layers.bottom', $slicerBottomLayers.val());
 
     settings.set('slicer.lifting.speed', $slicerLiftingSpeed.val());
     settings.set('slicer.lifting.height', $slicerLiftingHeight.val());
