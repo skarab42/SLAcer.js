@@ -134,14 +134,19 @@ function getSlice(layerNumber) {
     removeSlices();
     removeShapes();
 
+    // debug
+    // console.log("layerNumber", layerNumber)
+
     // ...
     $slicerLayerValue.html(layerNumber);
+
 
     if (layerNumber < 1) {
         viewer2d.render();
         viewer3d.render();
         return;
     }
+
 
     if (transformations.update) {
         throw 'transformations not applyed...';
@@ -479,8 +484,8 @@ function updateSliderUI() {
     var layersHeight = settings.get('slicer.layers.height') / 1000;
     var layersNumber = Math.floor(slicer.mesh.getSize().z / layersHeight);
 
-    console.log("layersHeight", layersHeight);
-    console.log("layersNumber", layersNumber);
+    // console.log("layersHeight", layersHeight);
+    // console.log("layersNumber", layersNumber);
 
     $sliderInput.slider('setAttribute', 'max', layersNumber);
     $sliderMaxValue.html(layersNumber);
@@ -495,6 +500,7 @@ function calcPrintTime(layersHeight, layersNumber){
     var downlift_time = (settings.get('slicer.lifting.height')-layersHeight)/settings.get('slicer.lifting.decline')*60*1000
     result = layersNumber*(parseInt(settings.get('slicer.light.on'))+uplift_time+downlift_time)+
         settings.get('slicer.layers.bottom')*(settings.get('slicer.light.bottom')-settings.get('slicer.light.on'))
+    /*
     console.log("slicer.light.on (ms)", settings.get('slicer.light.on'));
     console.log("slicer.layers.bottom)", settings.get('slicer.layers.bottom'));
     console.log("slicer.light.bottom)", settings.get('slicer.light.bottom'));
@@ -504,6 +510,7 @@ function calcPrintTime(layersHeight, layersNumber){
     console.log("tmp 1 (ms)", layersNumber*(parseInt(settings.get('slicer.light.on'))+uplift_time+downlift_time));
     console.log("tmp 2 (ms)", settings.get('slicer.layers.bottom')*(settings.get('slicer.light.bottom')-settings.get('slicer.light.on')));
     console.log("result (ms)", result);
+    */
 
     return result;
 }
@@ -742,6 +749,8 @@ function slice() {
         return endSlicing();
     }
 
+    // debug
+    // console.log("currentSliceNumber", currentSliceNumber)
 
     getSlice(currentSliceNumber);
 
@@ -828,24 +837,38 @@ function startSlicing() {
 
     if(WOWExport){// GCode logic
 
+        // hotfix for first layer bug - before flip geometry!
+        $sliderInput.slider('setValue', currentSliceNumber);
+
         // hotfix for mirror bug
         flipGeometry();
 
         wowFile = "";
 
         // Tests
+        /*
         var array = new Uint8Array(2);
         array[1]=255;
         console.log(array);
         var textDecoder = new TextDecoder("utf-8");
         var binary_layer = textDecoder.decode(array);
         console.log(binary_layer);
+        */
         //console.log(textDecoder.encode(binary_layer));
 
         wowFile += "G21;\nG91;\nM17;\nM106 S0;\nG28 Z0;\n;W:480;\n;H:854;\n"
     }
 
     slicesNumber && slice();
+}
+
+function waitForZeroLayer(callback){
+    if(currentSliceNumber === 0){
+        callback();
+    }
+    else{
+        setTimeout(waitForZeroLayer(callback), 250);
+    }
 }
 
 $zipButton.on('click', function(e) {
