@@ -1,7 +1,10 @@
-# SLAcer.js ([demo](http://lautr3k.github.io/SLAcer.js/))
+# SLAcer.js for SparkMaker ([demo](https://n0sr3v.github.io/SLAcer.js/))
 ![Screenshot](/screenshot.png?raw=true)
 
-# Main features
+# Work in Progress
+- currently working on an option to slice .wow files
+
+# Default main features
 - Browse or drag/drop STL file.
 - Mesh information: size, volume, cost, etc...
 - Mesh transformation: scale, rotate, translate, mirror.

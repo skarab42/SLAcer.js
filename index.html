@@ -4,7 +4,8 @@
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>SLAcer.js (bêta)</title>
+        <title>SLAcer.js for SparkMaker (bêta)</title>
+        <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
         <link rel="stylesheet" type="text/css" href="vendor/jquery-ui/jquery-ui.min.css" />
         <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" href="vendor/bootstrap-slider/css/bootstrap-slider.min.css" />
@@ -21,12 +22,14 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#">SLAcer.js (bêta)</a>
+                    <a class="navbar-brand" href="#">SLAcer.js for SparkMaker (beta)</a>
                 </div>
                 <div id="navbar" class="navbar-collapse collapse">
                     <ul class="nav navbar-nav navbar-right">
                         <li><a href="#">About</a></li>
-                        <li><a href="https://github.com/lautr3k/SLAcer.js">GitHub</a></li>
+                        <li><a href="https://www.thingiverse.com/groups/sparkmaker/forums/gadgets/topic:28168">Thingiverse</a></li>
+                        <li><a href="https://github.com/n0sr3v/SLAcer.js">GitHub (Fork)</a></li>
+                        <li><a href="https://github.com/lautr3k/SLAcer.js">GitHub (↪thank you to lautr3k)</a></li>
                     </ul>
                 </div>
             </div>
@@ -103,7 +106,7 @@
                             <span class="btn btn-default btn-file btn-xs">
                                 Browse <input type="file" name="file" id="file-input" accept=".stl" />
                             </span>
-                            <small>Or drop an STL file anywhere.</small>
+                            <small>Or drop an STL file anywhere.<br>In case of error check your model <a href="https://service.netfabb.com/service.php">here</a>!</small>
                         </div>
                     </div>
                 </div><!-- #file -->
@@ -162,6 +165,10 @@
                                 <span id="slicer-layer-value">0</span> / <span id="slicer-layers-value">0</span>
                             </span>
                         </div>
+                        <div class="info">
+                            <span class="info-label">Print Time <small>(h:m:s.ms)</small></span>
+                            <span class="info-value" id="print-time">0</span>
+                        </div>
 
                         <hr />
 
@@ -171,24 +178,40 @@
                         </div>
                         <div class="form-group">
                             <label for="slicer-light-on">Exposure time <small>(ms)</small></label>
-                            <input type="number" id="slicer-light-on" class="form-control input-sm" placeholder="1000" min="1" />
+                            <input type="number" id="slicer-light-on" class="form-control input-sm" placeholder="10000" min="1" />
+                        </div>
+                        <!-- new -->
+                        <div class="form-group">
+                            <label for="slicer-light-strength">Exposure Strength Grade <small>(bit)</small></label>
+                            <input type="number" id="slicer-light-strength" class="form-control input-sm" placeholder="225" min="1" max="255" />
+                        </div>
+                        <!-- new -->
+                        <div class="form-group">
+                            <label for="slicer-light-bottom">Bottom Layers Exposure Time <small>(ms)</small></label>
+                            <input type="number" id="slicer-light-bottom" class="form-control input-sm" placeholder="60000" min="1" />
                         </div>
 
                         <div class="form-group clearfix">
                             <label for="slicer-lifting-height">Lifting height <small>(mm)</small></label>
-                            <input type="number" id="slicer-lifting-height" class="form-control input-sm" placeholder="3" min="1" />
+                            <input type="number" id="slicer-lifting-height" class="form-control input-sm" placeholder="5" min="1" />
                         </div>
                         <div class="form-group clearfix">
                             <label for="slicer-lifting-speed">Lifting speed <small>(mm/min)</small></label>
-                            <input type="number" id="slicer-lifting-speed" class="form-control input-sm" placeholder="50" min="1" />
+                            <input type="number" id="slicer-lifting-speed" class="form-control input-sm" placeholder="30" min="1" />
+                        </div>
+                        <!-- new -->
+                        <div class="form-group clearfix">
+                            <label for="slicer-decline-speed">Decline speed <small>(mm/min)</small></label>
+                            <input type="number" id="slicer-decline-speed" class="form-control input-sm" placeholder="100" min="1" />
                         </div>
 
                         <hr />
 
                         <div class="form-group">
                             <label for="slicer-image-extension">Output type</label>
-                            <input type="radio" name="slicer-image-extension" id="slicer-image-extension-png" value="png" checked="checked" /> png
+                            <input type="radio" name="slicer-image-extension" id="slicer-image-extension-png" value="png" /> png
                             <input type="radio" name="slicer-image-extension" id="slicer-image-extension-svg" value="svg" /> svg
+                            <input type="radio" name="slicer-image-extension" id="slicer-image-extension-wow" value="wow" checked="checked" /> wow
                         </div>
 
                         <hr />
@@ -200,17 +223,22 @@
 
                         <div class="form-group">
                             <label for="slicer-make-zip">Make ZIP file</label>
-                            <input type="radio" name="slicer-make-zip" id="slicer-make-zip-yes" value="yes" /> yes
-                            <input type="radio" name="slicer-make-zip" id="slicer-make-zip-no" value="no" checked="checked" /> no
+                            <input type="radio" name="slicer-make-zip" id="slicer-make-zip-yes" value="yes" checked="checked" /> yes
+                            <input type="radio" name="slicer-make-zip" id="slicer-make-zip-no" value="no"  /> no
                         </div>
                         <div class="form-group">
-                            <label for="slicer-speed">Speed mode</label>
-                            <input type="radio" name="slicer-speed" id="slicer-speed-yes" value="yes" /> yes
-                            <input type="radio" name="slicer-speed" id="slicer-speed-no" value="no" checked="checked" /> no
+                            <label for="slicer-make-folder">Make layer-folder</label>
+                            <input type="radio" name="slicer-make-folder" id="slicer-make-folder-yes" value="yes" /> yes
+                            <input type="radio" name="slicer-make-folder" id="slicer-make-folder-no" value="no"  checked="checked" /> no
                         </div>
                         <div class="form-group">
-                            <label for="slicer-speed-delay">Speed mode<br />delay <small>(ms)</small></label>
-                            <input type="number" id="slicer-speed-delay" class="form-control input-sm" placeholder="100" min="1" />
+                            <label for="slicer-speed">Slicing mode</label>
+                            <input type="radio" name="slicer-speed" id="slicer-speed-yes" value="yes" checked="checked" /> yes
+                            <input type="radio" name="slicer-speed" id="slicer-speed-no" value="no"  /> no
+                        </div>
+                        <div class="form-group">
+                            <label for="slicer-speed-delay">Slicing delay<br />delay <small>(ms)</small></label>
+                            <input type="number" id="slicer-speed-delay" class="form-control input-sm" placeholder="10" min="1" />
                         </div>
                     </div>
                 </div><!-- #slicer -->
@@ -225,15 +253,15 @@
                     <div id="build-volume-body" class="panel-body collapse in">
                         <div class="form-group">
                             <label for="build-volume-x">X <small>(width)</small></label>
-                            <input type="number" id="build-volume-x" class="form-control input-sm" placeholder="100" min="0" />
+                            <input type="number" id="build-volume-x" class="form-control input-sm" placeholder="102" min="0" />
                         </div>
                         <div class="form-group">
                             <label for="build-volume-y">Y <small>(depth)</small></label>
-                            <input type="number" id="build-volume-y" class="form-control input-sm" placeholder="100" min="0" />
+                            <input type="number" id="build-volume-y" class="form-control input-sm" placeholder="56" min="0" />
                         </div>
                         <div class="form-group">
                             <label for="build-volume-z">Z <small>(height)</small></label>
-                            <input type="number" id="build-volume-z" class="form-control input-sm" placeholder="100" min="0" />
+                            <input type="number" id="build-volume-z" class="form-control input-sm" placeholder="125" min="0" />
                         </div>
                         <div class="form-group">
                             <label for="build-volume-unit">unit</label>
@@ -257,7 +285,7 @@
                         </div>
                         <div class="form-group">
                             <label for="resin-price">Price <small>($ / l)</small></label>
-                            <input type="number" id="resin-price" class="form-control input-sm" placeholder="50" min="0" />
+                            <input type="number" id="resin-price" class="form-control input-sm" placeholder="60" min="0" />
                         </div>
                     </div>
                 </div><!-- #resin -->
@@ -276,15 +304,15 @@
                         </div>
                         <div class="form-group">
                             <label for="screen-width">Width <small>(px)</small></label>
-                            <input type="number" id="screen-width" class="form-control input-sm" placeholder="1680" min="0" />
+                            <input type="number" id="screen-width" class="form-control input-sm" placeholder="854" min="0" />
                         </div>
                         <div class="form-group">
                             <label for="screen-height">Height <small>(px)</small></label>
-                            <input type="number" id="screen-height" class="form-control input-sm" placeholder="1050" min="0" />
+                            <input type="number" id="screen-height" class="form-control input-sm" placeholder="480" min="0" />
                         </div>
                         <div class="form-group">
                             <label for="screen-diagonal-size">Diagonal size</label>
-                            <input type="number" id="screen-diagonal-size" class="form-control input-sm" placeholder="22" min="0" />
+                            <input type="number" id="screen-diagonal-size" class="form-control input-sm" placeholder="4.6" min="0" />
                         </div>
                         <div class="form-group">
                             <label for="screen-diagonal-unit">Diagonal unit</label>
@@ -359,6 +387,6 @@
         <script src="js/loader/stl.js" type="text/javascript"></script>
         <script src="vendor/FileSaver.min.js" type="text/javascript"></script>
         <script src="vendor/jszip.min.js" type="text/javascript"></script>
-        <script src="js/main.js" type="text/javascript"></script>
+        <script src="js/main.js" type="text/javascript" charset="utf-8"></script>
     </body>
 </html>
