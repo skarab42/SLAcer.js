@@ -1,4 +1,4 @@
-# SLAcer.js ([demo](http://lautr3k.github.io/SLAcer.js/))
+# SLAcer.js ([demo](https://skarab42.github.io/SLAcer.js/))
 ![Screenshot](/screenshot.png?raw=true)
 
 # Main features
