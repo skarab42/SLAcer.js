@@ -184,7 +184,7 @@ function getSlice(layerNumber) {
         sliceImage(dataURL);
 
         if (PNGExport) {
-            var fileName = layerNumber + '.png';
+            var fileName = layerNumber.toString().padStart(4, '0') + '.png';
             var imgData  = dataURL.substr(dataURL.indexOf(',') + 1);
             zipFolder.file(fileName, imgData, { base64: true });
         }
